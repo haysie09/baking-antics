@@ -4,19 +4,10 @@ import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged }
 import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
-const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.REACT_APP_FIREBASE_APP_ID
-};
-
+// This version is compatible with the execution environment and fixes the "process is not defined" error.
+const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {};
 const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'baking-antics-v1';
 const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
-
-
 
 
 // --- Initialize Firebase ---
@@ -24,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Master Bake Idea List (Expanded as per PRD v1.2) ---
+// --- Master Bake Idea List (as per PRD v1.2) ---
 const masterIdeaList = [
     { ideaName: "Simple Chocolate Chip Cookies", difficulty: "simple" },
     { ideaName: "Easy Banana Bread", difficulty: "simple" },
@@ -527,33 +518,6 @@ export default function App() {
 
     return (
         <div className="bg-app-white text-app-grey">
-            <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" /><link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Montserrat:wght@400;600&display=swap" rel="stylesheet" />
-            <style>{`:root { 
-                --color-app-white: #FFFFFF; 
-                --color-info-box: #fff7f5; 
-                --color-app-grey: #333333; 
-                --color-burnt-orange: #ec967a; 
-                --color-light-peach: #ffe9dd; 
-                --color-star-gold: #ffca00; 
-                --color-confirm-bg: #c7ebff;
-                --color-confirm-text: #1072a8;
-                --color-add-idea: #e67753;
-            } 
-            .font-patrick-hand { font-family: 'Patrick Hand', cursive; } 
-            .font-montserrat { font-family: 'Montserrat', sans-serif; }
-            .bg-app-white { background-color: var(--color-app-white); } 
-            .bg-info-box { background-color: var(--color-info-box); } 
-            .bg-burnt-orange { background-color: var(--color-burnt-orange); } 
-            .bg-confirm-bg { background-color: var(--color-confirm-bg); }
-            .bg-add-idea { background-color: var(--color-add-idea); }
-            .text-app-grey { color: var(--color-app-grey); } 
-            .text-burnt-orange { color: var(--color-burnt-orange); } 
-            .text-light-peach { color: var(--color-light-peach); } 
-            .text-star-gold { color: var(--color-star-gold); }
-            .text-confirm-text { color: var(--color-confirm-text); }
-            .border-burnt-orange { border-color: var(--color-burnt-orange); }
-            .border-confirm-text { border-color: var(--color-confirm-text); }
-            `}</style>
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow">
                     <header className="bg-app-white shadow-md sticky top-0 z-40 font-patrick-hand">
