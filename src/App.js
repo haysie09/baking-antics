@@ -1,19 +1,28 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
+import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
-// This version is compatible with the execution environment and fixes the "process is not defined" error.
-const firebaseConfig = typeof window.__firebase_config !== 'undefined' ? JSON.parse(window.__firebase_config) : {};
-const appId = typeof window.__app_id !== 'undefined' ? window.__app_id : 'baking-antics-v1';
-const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
+// This is the correct way to load environment variables for a live Netlify site.
+const firebaseConfig = {
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID
+};
 
+// This variable is used for the database path.
+const appId = 'baking-antics-v1';
 
 // --- Initialize Firebase ---
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// We add a check to ensure the config is valid before initializing.
+// This prevents the blank screen error.
+const app = firebaseConfig.projectId ? initializeApp(firebaseConfig) : null;
+const auth = app ? getAuth(app) : null;
+const db = app ? getFirestore(app) : null;
 
 // --- Master Bake Idea List (Expanded) ---
 const masterIdeaList = [
