@@ -20,7 +20,6 @@ const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? wi
 
 // --- Initialize Firebase ---
 // We add a check to ensure the config is valid before initializing.
-// This prevents the blank screen error.
 const app = firebaseConfig.projectId ? initializeApp(firebaseConfig) : null;
 const auth = app ? getAuth(app) : null;
 const db = app ? getFirestore(app) : null;
