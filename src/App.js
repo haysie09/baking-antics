@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
@@ -16,6 +16,7 @@ const firebaseConfig = {
 
 // This variable is used for the database path.
 const appId = 'baking-antics-v1';
+const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
 
 // --- Initialize Firebase ---
 // We add a check to ensure the config is valid before initializing.
