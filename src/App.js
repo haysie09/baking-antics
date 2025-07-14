@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from 'firebase/auth';
+import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
@@ -15,7 +15,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// --- Master Bake Idea List (as per PRD v1.2) ---
+// --- Master Bake Idea List (Expanded) ---
 const masterIdeaList = [
     { ideaName: "Simple Chocolate Chip Cookies", difficulty: "simple" },
     { ideaName: "Easy Banana Bread", difficulty: "simple" },
@@ -23,12 +23,41 @@ const masterIdeaList = [
     { ideaName: "Classic Victoria Sponge", difficulty: "simple" },
     { ideaName: "No-Bake Cheesecake", difficulty: "simple" },
     { ideaName: "Fudgy Brownies", difficulty: "simple" },
+    { ideaName: "Classic Apple Pie", difficulty: "simple" },
+    { ideaName: "Peanut Butter Cookies", difficulty: "simple" },
+    { ideaName: "Lemon Loaf Cake", difficulty: "simple" },
+    { ideaName: "Oatmeal Raisin Cookies", difficulty: "simple" },
+    { ideaName: "Rice Krispie Treats", difficulty: "simple" },
+    { ideaName: "Vanilla Cupcakes", difficulty: "simple" },
+    { ideaName: "Simple Shortbread", difficulty: "simple" },
+    { ideaName: "Chocolate Avocado Mousse", difficulty: "simple" },
+    { ideaName: "Anzac Biscuits", difficulty: "simple" },
     { ideaName: "Complex Sourdough Loaf", difficulty: "challenging" },
     { ideaName: "Multi-layer Opera Cake", difficulty: "challenging" },
     { ideaName: "French Macarons", difficulty: "challenging" },
     { ideaName: "Handmade Croissants", difficulty: "challenging" },
     { ideaName: "Elaborate Pavlova Tower", difficulty: "challenging" },
     { ideaName: "Artisan Baguettes", difficulty: "challenging" },
+    { ideaName: "Japanese Cotton Cheesecake", difficulty: "challenging" },
+    { ideaName: "Baklava", difficulty: "challenging" },
+    { ideaName: "Cronuts (Croissant-Doughnut Hybrid)", difficulty: "challenging" },
+    { ideaName: "Kouign-amann", difficulty: "challenging" },
+    { ideaName: "Prinsesstårta (Princess Cake)", difficulty: "challenging" },
+    { ideaName: "Dobos Torte", difficulty: "challenging" },
+    { ideaName: "Canele", difficulty: "challenging" },
+    { ideaName: "Ginger Crunch Slice", difficulty: "simple" },
+    { ideaName: "Caramel Slice", difficulty: "simple" },
+    { ideaName: "Lamingtons", difficulty: "simple" },
+    { ideaName: "Red Velvet Cake", difficulty: "challenging" },
+    { ideaName: "Carrot Cake", difficulty: "simple" },
+    { ideaName: "Sticky Toffee Pudding", difficulty: "simple" },
+    { ideaName: "Cinnamon Rolls", difficulty: "challenging" },
+    { ideaName: "Profiteroles with Chocolate Sauce", difficulty: "challenging" },
+    { ideaName: "Banana Bread", difficulty: "simple" },
+    { ideaName: "Marshmellow Slice", difficulty: "challenging" },
+    { ideaName: "Madeleines", difficulty: "challenging" },
+    { ideaName: "Churros with Chocolate Dip", difficulty: "simple" },
+    { ideaName: "Cheesecake", difficulty: "challenging" },
 ];
 
 // --- Predefined Categories & Measurements ---
@@ -476,9 +505,24 @@ export default function App() {
     // Auth
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, async (user) => {
-            if (user) setUserId(user.uid);
-            else if (initialAuthToken) try { await signInWithCustomToken(auth, initialAuthToken); } catch (e) { await signInAnonymously(auth); }
-            else await signInAnonymously(auth);
+            if (user) {
+                setUserId(user.uid);
+            } else {
+                try {
+                    if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                    } else {
+                        await signInAnonymously(auth);
+                    }
+                } catch (error) {
+                    console.error("Authentication failed, trying anonymous.", error);
+                    try {
+                        await signInAnonymously(auth);
+                    } catch (anonError) {
+                        console.error("Anonymous sign-in also failed", anonError);
+                    }
+                }
+            }
             setIsAuthReady(true);
         });
         return () => unsub();
