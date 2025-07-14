@@ -53,11 +53,11 @@ const masterIdeaList = [
     { ideaName: "Sticky Toffee Pudding", difficulty: "simple" },
     { ideaName: "Cinnamon Rolls", difficulty: "challenging" },
     { ideaName: "Profiteroles with Chocolate Sauce", difficulty: "challenging" },
-    { ideaName: "Banana Bread", difficulty: "simple" },
-    { ideaName: "Marshmellow Slice", difficulty: "challenging" },
+    { ideaName: "Key Lime Pie", difficulty: "simple" },
+    { ideaName: "Tiramisu", difficulty: "simple" },
     { ideaName: "Madeleines", difficulty: "challenging" },
     { ideaName: "Churros with Chocolate Dip", difficulty: "simple" },
-    { ideaName: "Cheesecake", difficulty: "challenging" },
+    { ideaName: "Boston Cream Pie", difficulty: "challenging" },
 ];
 
 // --- Predefined Categories & Measurements ---
@@ -504,6 +504,10 @@ export default function App() {
     
     // Auth
     useEffect(() => {
+        if (!auth) {
+            setIsAuthReady(true);
+            return;
+        }
         const unsub = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setUserId(user.uid);
@@ -529,9 +533,9 @@ export default function App() {
     }, []);
 
     // Firestore Collections
-    const ideaPadCol = useMemo(() => userId ? collection(db, 'artifacts', appId, 'users', userId, 'ideapad') : null, [userId]);
-    const journalCol = useMemo(() => userId ? collection(db, 'artifacts', appId, 'users', userId, 'journal') : null, [userId]);
-    const cookbookCol = useMemo(() => userId ? collection(db, 'artifacts', appId, 'users', userId, 'cookbook') : null, [userId]);
+    const ideaPadCol = useMemo(() => userId && db ? collection(db, 'artifacts', appId, 'users', userId, 'ideapad') : null, [userId]);
+    const journalCol = useMemo(() => userId && db ? collection(db, 'artifacts', appId, 'users', userId, 'journal') : null, [userId]);
+    const cookbookCol = useMemo(() => userId && db ? collection(db, 'artifacts', appId, 'users', userId, 'cookbook') : null, [userId]);
 
     // Data Fetching
     useEffect(() => { if (isAuthReady && ideaPadCol) return onSnapshot(ideaPadCol, s => setIdeaPad(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [isAuthReady, ideaPadCol]);
@@ -549,6 +553,9 @@ export default function App() {
     const deleteRecipe = useCallback(async (id) => { if (cookbookCol) await deleteDoc(doc(cookbookCol, id)); }, [cookbookCol]);
 
     const renderView = () => {
+        if (!app || !auth || !db) {
+            return <div className="p-4 text-red-500">Firebase is not configured correctly. Please check your setup.</div>;
+        }
         switch (view) {
             case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
             case 'ideapad': return <BakeListIdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
