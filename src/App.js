@@ -514,44 +514,111 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
 
 // --- Main App Component ---
 export default function App() {
-    const [view, setView] = useState('dashboard');
-    const [userId, setUserId] = useState(null);
+    const [user, setUser] = useState(null);
     const [isAuthReady, setIsAuthReady] = useState(false);
+    
+    useEffect(() => {
+        if (!auth) {
+            setIsAuthReady(true);
+            return;
+        }
+        const unsub = onAuthStateChanged(auth, (user) => {
+            setUser(user);
+            setIsAuthReady(true);
+        });
+        return () => unsub();
+    }, []);
+
+    if (!isAuthReady || !app) {
+        return <LoadingSpinner />;
+    }
+
+    if (!user) {
+        return <AuthPage />;
+    }
+
+    return <MainApp user={user} />;
+}
+
+const AuthPage = () => {
+    const [isLogin, setIsLogin] = useState(true);
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [nickname, setNickname] = useState('');
+    const [error, setError] = useState('');
+
+    const handleAuthAction = async () => {
+        setError('');
+        if (isLogin) {
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+            } catch (err) {
+                setError(err.message);
+            }
+        } else {
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                if (nickname) {
+                    await updateProfile(userCredential.user, { displayName: nickname });
+                }
+            } catch (err) {
+                setError(err.message);
+            }
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-app-white flex items-center justify-center p-4 font-patrick-hand">
+            <div className="w-full max-w-sm mx-auto">
+                <h1 className="text-5xl font-bold text-add-idea text-center mb-8">Baking Antics</h1>
+                <div className="bg-info-box p-8 rounded-2xl border border-burnt-orange space-y-6">
+                    <h2 className="text-3xl text-burnt-orange text-center">{isLogin ? 'Log In' : 'Sign Up'}</h2>
+                    {!isLogin && (
+                         <input 
+                            type="text" 
+                            value={nickname} 
+                            onChange={(e) => setNickname(e.target.value)} 
+                            placeholder="Name / Nickname (Optional)" 
+                            className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat"
+                        />
+                    )}
+                    <input 
+                        type="email" 
+                        value={email} 
+                        onChange={(e) => setEmail(e.target.value)} 
+                        placeholder="Email" 
+                        className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat"
+                    />
+                    <input 
+                        type="password" 
+                        value={password} 
+                        onChange={(e) => setPassword(e.target.value)} 
+                        placeholder="Password" 
+                        className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat"
+                    />
+                    {error && <p className="text-red-500 text-sm text-center font-montserrat">{error}</p>}
+                    <button onClick={handleAuthAction} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-xl hover:opacity-90 transition-opacity font-montserrat">
+                        {isLogin ? 'Log In' : 'Sign Up'}
+                    </button>
+                    <button onClick={() => setIsLogin(!isLogin)} className="w-full text-center text-app-grey hover:text-burnt-orange text-lg">
+                        {isLogin ? 'Need an account? Sign Up' : 'Have an account? Log In'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const MainApp = ({ user }) => {
+    const [view, setView] = useState('dashboard');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     
     // Data states
     const [ideaPad, setIdeaPad] = useState([]);
     const [journal, setJournal] = useState([]);
     const [cookbook, setCookbook] = useState([]);
     
-    // Auth
-    useEffect(() => {
-        if (!auth) {
-            setIsAuthReady(true);
-            return;
-        }
-        const unsub = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setUserId(user.uid);
-            } else {
-                try {
-                    if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                    } else {
-                        await signInAnonymously(auth);
-                    }
-                } catch (error) {
-                    console.error("Authentication failed, trying anonymous.", error);
-                    try {
-                        await signInAnonymously(auth);
-                    } catch (anonError) {
-                        console.error("Anonymous sign-in also failed", anonError);
-                    }
-                }
-            }
-            setIsAuthReady(true);
-        });
-        return () => unsub();
-    }, []);
+    const userId = user.uid;
 
     // Firestore Collections
     const ideaPadCol = useMemo(() => userId && db ? collection(db, 'artifacts', appId, 'users', userId, 'ideapad') : null, [userId]);
@@ -559,9 +626,9 @@ export default function App() {
     const cookbookCol = useMemo(() => userId && db ? collection(db, 'artifacts', appId, 'users', userId, 'cookbook') : null, [userId]);
 
     // Data Fetching
-    useEffect(() => { if (isAuthReady && ideaPadCol) return onSnapshot(ideaPadCol, s => setIdeaPad(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [isAuthReady, ideaPadCol]);
-    useEffect(() => { if (isAuthReady && journalCol) return onSnapshot(journalCol, s => setJournal(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [isAuthReady, journalCol]);
-    useEffect(() => { if (isAuthReady && cookbookCol) return onSnapshot(cookbookCol, s => setCookbook(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [isAuthReady, cookbookCol]);
+    useEffect(() => { if (userId && ideaPadCol) return onSnapshot(ideaPadCol, s => setIdeaPad(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [userId, ideaPadCol]);
+    useEffect(() => { if (userId && journalCol) return onSnapshot(journalCol, s => setJournal(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [userId, journalCol]);
+    useEffect(() => { if (userId && cookbookCol) return onSnapshot(cookbookCol, s => setCookbook(s.docs.map(d => ({ id: d.id, ...d.data() })))); }, [userId, cookbookCol]);
 
     // Data Manipulation Functions
     const addIdea = useCallback(async (idea) => { if (ideaPadCol) await addDoc(ideaPadCol, idea); }, [ideaPadCol]);
@@ -574,9 +641,6 @@ export default function App() {
     const deleteRecipe = useCallback(async (id) => { if (cookbookCol) await deleteDoc(doc(cookbookCol, id)); }, [cookbookCol]);
 
     const renderView = () => {
-        if (!app || !auth || !db) {
-            return <div className="p-4 text-red-500">Firebase is not configured correctly. Please check your setup.</div>;
-        }
         switch (view) {
             case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
             case 'ideapad': return <BakeListIdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
@@ -585,22 +649,47 @@ export default function App() {
             default: return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
         }
     };
-
-    if (!isAuthReady) return <div className="flex items-center justify-center h-screen bg-app-white font-patrick-hand"><p className="text-app-grey text-3xl">Loading your baking corner...</p></div>;
+    
+    const handleSignOut = async () => {
+        await signOut(auth);
+    };
+    
+    const navigate = (newView) => {
+        setView(newView);
+        setIsSidebarOpen(false);
+    };
 
     return (
         <div className="bg-app-white text-app-grey">
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
-                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow">
-                    <header className="bg-app-white shadow-md sticky top-0 z-40 font-patrick-hand">
-                        <nav className="container mx-auto px-2 py-3 flex justify-between items-center">
-                            <div className="text-2xl sm:text-3xl font-bold text-burnt-orange">Baking Antics</div>
-                            <div className="flex space-x-1 font-montserrat">
-                                <button onClick={() => setView('dashboard')} className={`px-2 py-1 rounded-xl font-semibold transition-colors text-base ${view === 'dashboard' ? 'bg-burnt-orange text-light-peach' : 'text-app-grey hover:bg-info-box'}`}>Dash</button>
-                                <button onClick={() => setView('ideapad')} className={`px-2 py-1 rounded-xl font-semibold transition-colors text-base ${view === 'ideapad' ? 'bg-burnt-orange text-light-peach' : 'text-app-grey hover:bg-info-box'}`}>Ideas</button>
-                                <button onClick={() => setView('journal')} className={`px-2 py-1 rounded-xl font-semibold transition-colors text-base ${view === 'journal' ? 'bg-burnt-orange text-light-peach' : 'text-app-grey hover:bg-info-box'}`}>Journal</button>
-                                <button onClick={() => setView('cookbook')} className={`px-2 py-1 rounded-xl font-semibold transition-colors text-base ${view === 'cookbook' ? 'bg-burnt-orange text-light-peach' : 'text-app-grey hover:bg-info-box'}`}>Cookbook</button>
-                            </div>
+                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
+                    {/* Sidebar */}
+                    <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg`}>
+                        <div className="p-4 font-patrick-hand">
+                           <h2 className="text-2xl font-bold text-add-idea">My Baking Hub</h2>
+                           <div className="text-sm text-app-grey mt-1 mb-4 truncate">{user.displayName || user.email}</div>
+                           <nav className="flex flex-col space-y-2 font-montserrat">
+                                <button onClick={() => navigate('dashboard')} className="text-left p-2 rounded-lg hover:bg-light-peach">Dashboard</button>
+                                <button onClick={() => navigate('ideapad')} className="text-left p-2 rounded-lg hover:bg-light-peach">Idea Pad</button>
+                                <button onClick={() => navigate('journal')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Journal</button>
+                                <button onClick={() => navigate('cookbook')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Cookbook</button>
+                           </nav>
+                           <div className="absolute bottom-0 left-0 w-full p-4">
+                               <button onClick={handleSignOut} className="w-full text-left p-2 rounded-lg hover:bg-light-peach font-montserrat">Sign Out</button>
+                           </div>
+                        </div>
+                    </div>
+                    {/* Overlay */}
+                    {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>}
+
+                    <header className="bg-app-white shadow-md sticky top-0 z-30 font-patrick-hand">
+                        <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
+                            <button onClick={() => setIsSidebarOpen(true)} className="text-add-idea">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                            </button>
+                            <div className="text-2xl font-bold text-add-idea">Baking Antics</div>
+                             {/* Placeholder for alignment */}
+                            <div className="w-8"></div>
                         </nav>
                     </header>
                     <main className="flex-grow overflow-y-auto bg-app-white">{renderView()}</main>
