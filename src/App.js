@@ -352,7 +352,6 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
 };
 
 const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
-    // ... This component's code remains the same ...
     const [formData, setFormData] = useState(entry || { entryTitle: '', bakingDate: new Date().toISOString().split('T')[0], tasteRating: 0, difficultyRating: 0, personalNotes: '', photoURLs: [], categories: [], sourceURL: '' });
 
     const handleCategoryToggle = (cat) => {
@@ -381,7 +380,6 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
 };
 
 const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry }) => {
-    // ... This component's code remains the same ...
     const [editingEntry, setEditingEntry] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
