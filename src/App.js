@@ -125,16 +125,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState('');
 
-    const handleGeneratorChange = (event) => {
-        const value = event.target.value;
-        if (value === 'inspireMe') {
-            inspireMe();
-        } else if (value === 'myIdeas') {
-            generateFromMyIdeas();
-        }
-        event.target.value = ""; // Reset dropdown after selection
-    };
-
     const inspireMe = useCallback(() => {
         const randomIndex = Math.floor(Math.random() * masterIdeaList.length);
         setIdea({name: masterIdeaList[randomIndex].ideaName, id: null});
@@ -170,6 +160,16 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setShowConfirmation({journal: false, idea: false});
         setInspiredBy('ideaPad');
     }, [ideaPad, idea]);
+
+    const handleGeneratorChange = (event) => {
+        const value = event.target.value;
+        if (value === 'inspireMe') {
+            inspireMe();
+        } else if (value === 'myIdeas') {
+            generateFromMyIdeas();
+        }
+        event.target.value = ""; // Reset dropdown after selection
+    };
 
     const handleLetsBake = async () => {
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up")) return;
@@ -266,7 +266,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
             bakingDate: new Date().toISOString().split('T')[0],
             tasteRating: 0, difficultyRating: 0,
             personalNotes: idea.notes || '',
-            photoURLs: [], categories: [],
+            photoURLs: [], categories: idea.categories || [],
             sourceURL: idea.sourceURL || '',
             createdAt: new Date(),
         };
@@ -305,7 +305,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
                             <label className="block text-app-grey font-semibold mb-2 text-xl">Categories</label>
                             <div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${newIdea.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
                         </div>
-                        <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Add Idea</button>
+                        <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Add to List</button>
                     </div>
                 )}
                 {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base" role="alert"><span className="font-montserrat">New idea added!</span></div>}
@@ -350,9 +350,6 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
         </div>
     );
 };
-
-// ... (The rest of the components: JournalEntryForm, BakingJournal, CookbookForm, MyCookbook, App, AuthPage, MainApp remain the same) ...
-// NOTE: To keep the response concise, the unchanged components are omitted here, but they are included in the full file update.
 
 const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
     // ... This component's code remains the same ...
