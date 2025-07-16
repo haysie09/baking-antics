@@ -8,7 +8,7 @@ import {
     signOut, 
     updateProfile 
 } from 'firebase/auth';
-import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
+import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
 const firebaseConfig = {
