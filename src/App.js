@@ -1,10 +1,16 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
-import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut, 
+    updateProfile 
+} from 'firebase/auth';
+import { getFirestore, doc, onSnapshot, collection, addDoc, deleteDoc, updateDoc, setDoc, getDoc } from 'firebase/firestore';
 
 // --- Firebase Configuration ---
-// This is the correct way to load environment variables for a live Netlify site.
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
@@ -14,17 +20,14 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID
 };
 
-// This variable is used for the database path.
 const appId = 'baking-antics-v1';
-const initialAuthToken = typeof window.__initial_auth_token !== 'undefined' ? window.__initial_auth_token : null;
 
 // --- Initialize Firebase ---
-// We add a check to ensure the config is valid before initializing.
 const app = firebaseConfig.projectId ? initializeApp(firebaseConfig) : null;
 const auth = app ? getAuth(app) : null;
 const db = app ? getFirestore(app) : null;
 
-// --- Master Bake Idea List (Expanded) ---
+// --- Master Bake Idea List ---
 const masterIdeaList = [
     { ideaName: "Simple Chocolate Chip Cookies", difficulty: "simple" },
     { ideaName: "Easy Banana Bread", difficulty: "simple" },
@@ -62,11 +65,11 @@ const masterIdeaList = [
     { ideaName: "Sticky Toffee Pudding", difficulty: "simple" },
     { ideaName: "Cinnamon Rolls", difficulty: "challenging" },
     { ideaName: "Profiteroles with Chocolate Sauce", difficulty: "challenging" },
-    { ideaName: "Key Lime Pie", difficulty: "simple" },
-    { ideaName: "Tiramisu", difficulty: "simple" },
+    { ideaName: "Banana Bread", difficulty: "simple" },
+    { ideaName: "Marshmellow Slice", difficulty: "challenging" },
     { ideaName: "Madeleines", difficulty: "challenging" },
     { ideaName: "Churros with Chocolate Dip", difficulty: "simple" },
-    { ideaName: "Boston Cream Pie", difficulty: "challenging" },
+    { ideaName: "Cheesecake", difficulty: "challenging" },
 ];
 
 // --- Predefined Categories & Measurements ---
@@ -75,6 +78,12 @@ const recipeMeasurements = ["cup", "tbsp", "tsp", "g", "kg", "ml", "L", "oz", "l
 
 
 // --- Helper Components ---
+
+const LoadingSpinner = () => (
+    <div className="flex items-center justify-center h-screen bg-app-white">
+        <div className="w-16 h-16 border-4 border-light-peach border-t-add-idea rounded-full animate-spin"></div>
+    </div>
+);
 
 const StarRating = ({ rating, setRating, isEditable = true }) => (
     <div className="flex space-x-0.5">
@@ -112,6 +121,7 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 // --- Main App Components ---
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId }) => {
+    // ... This component's code remains the same ...
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState(''); // 'inspireMe' or 'ideaPad'
@@ -137,7 +147,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         
         let newIdea = idea.name;
         let newIdeaId = idea.id;
-        // Ensure a new idea is picked if possible
         while (newIdea === idea.name && ideaPad.length > 1) {
             const randomIndex = Math.floor(Math.random() * ideaPad.length);
             newIdea = ideaPad[randomIndex].ideaName;
@@ -156,7 +165,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     const handleLetsBake = async () => {
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up")) return;
         
-        // Add to journal
         const newEntry = {
             entryTitle: idea.name,
             bakingDate: new Date().toISOString().split('T')[0],
@@ -165,7 +173,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         };
         await addJournalEntry(newEntry);
 
-        // If it came from the idea pad, delete it from there
         if (inspiredBy === 'ideaPad' && idea.id) {
             await deleteIdea(idea.id);
         }
@@ -210,6 +217,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 };
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
+    // ... This component's code remains the same ...
     const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '' });
     const [showConfirmModal, setShowConfirmModal] = useState(null);
 
@@ -264,6 +272,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
 };
 
 const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
+    // ... This component's code remains the same ...
     const [formData, setFormData] = useState(entry || { entryTitle: '', bakingDate: new Date().toISOString().split('T')[0], tasteRating: 0, difficultyRating: 0, personalNotes: '', photoURLs: [], categories: [], sourceURL: '' });
 
     const handleCategoryToggle = (cat) => {
@@ -292,6 +301,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
 };
 
 const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry }) => {
+    // ... This component's code remains the same ...
     const [editingEntry, setEditingEntry] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
@@ -310,7 +320,7 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
     };
 
     const filteredJournal = useMemo(() => {
-        if (!journal) return []; // Safety check
+        if (!journal) return [];
         if (activeFilters.length === 0) return journal;
         return journal.filter(entry => 
             entry.categories && activeFilters.every(filter => entry.categories.includes(filter))
@@ -375,6 +385,7 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
 };
 
 const CookbookForm = ({ recipe, onSave, onCancel, isNew = false }) => {
+    // ... This component's code remains the same ...
     const [formData, setFormData] = useState(recipe || { recipeTitle: '', sourceURL: '', ingredients: [{ quantity: '', measurement: 'cup', name: '' }], instructions: '', categories: [] });
 
     const handleIngredientChange = (index, field, value) => {
@@ -418,6 +429,7 @@ const CookbookForm = ({ recipe, onSave, onCancel, isNew = false }) => {
 };
 
 const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
+    // ... This component's code remains the same ...
     const [editingRecipe, setEditingRecipe] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
