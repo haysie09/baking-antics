@@ -120,7 +120,7 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 
 // --- Main App Components ---
 
-const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId }) => {
+const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter }) => {
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState('');
@@ -230,11 +230,15 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 {showConfirmation.journal && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">Added to your Journal!</span></div>}
                 {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">New idea added!</span></div>}
             </div>
+            
+            <DashboardStats journal={journal} />
+            <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} />
         </div>
     );
 };
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
+    // ... This component's code remains the same ...
     const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '', categories: [] });
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
