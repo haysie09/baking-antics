@@ -121,6 +121,7 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 // --- Main App Components ---
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId }) => {
+    // ... This component will be updated in Part 2 ...
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState('');
@@ -235,6 +236,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 };
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
+    // ... This component is unchanged in this step ...
     const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '', categories: [] });
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
@@ -351,8 +353,8 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
     );
 };
 
-const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
-    const [formData, setFormData] = useState(entry || { entryTitle: '', bakingDate: new Date().toISOString().split('T')[0], tasteRating: 0, difficultyRating: 0, personalNotes: '', photoURLs: [], categories: [], sourceURL: '' });
+const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) => {
+    const [formData, setFormData] = useState(entry || { entryTitle: '', bakingDate: new Date().toISOString().split('T')[0], tasteRating: 0, difficultyRating: 0, personalNotes: '', photoURLs: [], categories: [], sourceURL: '', timeHours: 0, timeMinutes: 0 });
 
     const handleCategoryToggle = (cat) => {
         const categories = formData.categories.includes(cat)
@@ -361,13 +363,57 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
         setFormData(p => ({ ...p, categories }));
     };
 
+    const handleCookbookSelect = (e) => {
+        const recipeId = e.target.value;
+        if (!recipeId) {
+            setFormData(p => ({...p, entryTitle: '', sourceURL: ''}));
+            return;
+        };
+        const selectedRecipe = cookbook.find(r => r.id === recipeId);
+        if (selectedRecipe) {
+            setFormData(p => ({
+                ...p,
+                entryTitle: selectedRecipe.recipeTitle,
+                sourceURL: selectedRecipe.sourceURL,
+                categories: selectedRecipe.categories || []
+            }));
+        }
+    };
+
     return (
         <Modal onClose={onCancel} size="md">
             <div className="space-y-4 text-xl">
                 <h2 className="text-4xl font-bold text-burnt-orange">{isNew ? 'Add a Past Bake' : 'Edit Journal Entry'}</h2>
+                
+                {isNew && (
+                    <div className="relative">
+                         <select 
+                            onChange={handleCookbookSelect} 
+                            className="w-full bg-gray-100 text-app-grey py-3 px-4 rounded-xl text-lg font-montserrat appearance-none text-center"
+                        >
+                            <option value="">Or Choose from My Cookbook</option>
+                            {cookbook.map(recipe => (
+                                <option key={recipe.id} value={recipe.id}>{recipe.recipeTitle}</option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-app-grey">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                )}
+
                 <div><label className="block text-app-grey font-semibold mb-1">Bake Name</label><input type="text" name="entryTitle" value={formData.entryTitle} onChange={(e) => setFormData(p=>({...p, entryTitle: e.target.value}))} className="w-full p-3 border border-gray-300 rounded-xl text-xl font-montserrat"/></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Baking Date</label><input type="date" name="bakingDate" value={formData.bakingDate} onChange={(e) => setFormData(p=>({...p, bakingDate: e.target.value}))} className="w-full p-3 border border-gray-300 rounded-xl text-xl font-montserrat"/></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Recipe Source URL</label><input type="text" name="sourceURL" value={formData.sourceURL} onChange={(e) => setFormData(p=>({...p, sourceURL: e.target.value}))} className="w-full p-3 border border-gray-300 rounded-xl text-xl font-montserrat"/></div>
+                
+                <div>
+                    <label className="block text-app-grey font-semibold mb-1">Time Spent</label>
+                    <div className="flex gap-4">
+                        <input type="number" min="0" placeholder="Hours" value={formData.timeHours} onChange={e => setFormData(p => ({...p, timeHours: Number(e.target.value)}))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
+                        <input type="number" min="0" max="59" placeholder="Minutes" value={formData.timeMinutes} onChange={e => setFormData(p => ({...p, timeMinutes: Number(e.target.value)}))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
+                    </div>
+                </div>
+
                 <div className="flex justify-between items-center py-2"><label className="text-app-grey font-semibold">Taste</label><StarRating rating={formData.tasteRating} setRating={(r) => setFormData(p => ({...p, tasteRating: r}))} /></div>
                 <div className="flex justify-between items-center py-2"><label className="text-app-grey font-semibold">Difficulty</label><StarRating rating={formData.difficultyRating} setRating={(r) => setFormData(p => ({...p, difficultyRating: r}))} /></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Categories</label><div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${formData.categories && formData.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div></div>
@@ -379,7 +425,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false }) => {
     );
 };
 
-const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry }) => {
+const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry, cookbook }) => {
     const [editingEntry, setEditingEntry] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
@@ -456,7 +502,7 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                     </div>
                 ))}
             </div>
-            {(editingEntry || isCreatingNew) && <JournalEntryForm entry={editingEntry} isNew={isCreatingNew} onSave={handleSave} onCancel={() => { setEditingEntry(null); setIsCreatingNew(false); }} />}
+            {(editingEntry || isCreatingNew) && <JournalEntryForm entry={editingEntry} cookbook={cookbook} isNew={isCreatingNew} onSave={handleSave} onCancel={() => { setEditingEntry(null); setIsCreatingNew(false); }} />}
             {showConfirmModal && <ConfirmationModal message="Delete this entry?" onConfirm={() => {deleteJournalEntry(showConfirmModal); setShowConfirmModal(null);}} onCancel={() => setShowConfirmModal(null)} />}
         </div>
     );
@@ -722,7 +768,7 @@ const MainApp = ({ user }) => {
         switch (view) {
             case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
             case 'ideapad': return <BakeListIdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
-            case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} />;
+            case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} />;
             case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
             default: return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
         }
