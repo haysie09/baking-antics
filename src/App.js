@@ -305,7 +305,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
                             <label className="block text-app-grey font-semibold mb-2 text-xl">Categories</label>
                             <div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${newIdea.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
                         </div>
-                        <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Confirm Add Idea</button>
+                        <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Add Idea</button>
                     </div>
                 )}
                 {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base" role="alert"><span className="font-montserrat">New idea added!</span></div>}
