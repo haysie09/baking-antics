@@ -125,16 +125,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState('');
 
-    const handleGeneratorChange = (event) => {
-        const value = event.target.value;
-        if (value === 'inspireMe') {
-            inspireMe();
-        } else if (value === 'myIdeas') {
-            useMyIdea();
-        }
-        event.target.value = ""; // Reset dropdown after selection
-    };
-
     const inspireMe = useCallback(() => {
         const randomIndex = Math.floor(Math.random() * masterIdeaList.length);
         setIdea({name: masterIdeaList[randomIndex].ideaName, id: null});
@@ -142,7 +132,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setInspiredBy('inspireMe');
     }, []);
 
-    const useMyIdea = useCallback(() => {
+    const generateFromMyIdeas = useCallback(() => {
         if (!ideaPad || ideaPad.length === 0) {
             setIdea({name: "Your Idea Pad is empty!", id: null});
             setInspiredBy('ideaPad');
@@ -170,6 +160,16 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setShowConfirmation({journal: false, idea: false});
         setInspiredBy('ideaPad');
     }, [ideaPad, idea]);
+
+    const handleGeneratorChange = (event) => {
+        const value = event.target.value;
+        if (value === 'inspireMe') {
+            inspireMe();
+        } else if (value === 'myIdeas') {
+            generateFromMyIdeas();
+        }
+        event.target.value = ""; // Reset dropdown after selection
+    };
 
     const handleLetsBake = async () => {
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up")) return;
@@ -222,7 +222,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                             <div className="flex flex-col justify-center items-center gap-3">
                                 <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Add to my idea pad</button>}
-                                <button onClick={inspiredBy === 'inspireMe' ? inspireMe : useMyIdea} className="w-full sm:w-auto bg-gray-100 text-app-grey py-2 px-5 rounded-xl font-semibold hover:bg-gray-200 transition text-base font-montserrat">Something Else</button>
+                                <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="w-full sm:w-auto bg-gray-100 text-app-grey py-2 px-5 rounded-xl font-semibold hover:bg-gray-200 transition text-base font-montserrat">Something Else</button>
                             </div>
                         )}
                     </div>
