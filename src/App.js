@@ -121,7 +121,6 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 // --- Main App Components ---
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId }) => {
-    // ... This component will be updated in Part 2 ...
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState('');
@@ -204,14 +203,14 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 <div className="relative">
                     <select 
                         onChange={handleGeneratorChange} 
-                        className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg hover:opacity-90 transition-opacity shadow-sm font-montserrat appearance-none text-center"
+                        className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                         value=""
                     >
-                        <option value="" disabled>What should I bake?</option>
-                        <option value="inspireMe">Generate from Inspire Me!</option>
-                        <option value="myIdeas">Generate from My Ideas</option>
+                        <option value="" disabled className="font-patrick-hand text-app-grey">What should I bake?</option>
+                        <option value="inspireMe" className="font-montserrat text-app-grey">Generate from Inspire Me!</option>
+                        <option value="myIdeas" className="font-montserrat text-app-grey">Generate from My Ideas</option>
                     </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-light-peach">
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-add-idea">
                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                     </div>
                 </div>
@@ -236,7 +235,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 };
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
-    // ... This component is unchanged in this step ...
     const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '', categories: [] });
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
@@ -389,14 +387,15 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
                     <div className="relative">
                          <select 
                             onChange={handleCookbookSelect} 
-                            className="w-full bg-gray-100 text-app-grey py-3 px-4 rounded-xl text-lg font-montserrat appearance-none text-center"
+                            className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
+                            defaultValue=""
                         >
-                            <option value="">Or Choose from My Cookbook</option>
+                            <option value="" disabled className="font-patrick-hand text-app-grey">Choose from My Cookbook</option>
                             {cookbook.map(recipe => (
-                                <option key={recipe.id} value={recipe.id}>{recipe.recipeTitle}</option>
+                                <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">{recipe.recipeTitle}</option>
                             ))}
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-app-grey">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-add-idea">
                             <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                         </div>
                     </div>
@@ -409,8 +408,8 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
                 <div>
                     <label className="block text-app-grey font-semibold mb-1">Time Spent</label>
                     <div className="flex gap-4">
-                        <input type="number" min="0" placeholder="Hours" value={formData.timeHours} onChange={e => setFormData(p => ({...p, timeHours: Number(e.target.value)}))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
-                        <input type="number" min="0" max="59" placeholder="Minutes" value={formData.timeMinutes} onChange={e => setFormData(p => ({...p, timeMinutes: Number(e.target.value)}))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
+                        <input type="number" min="0" placeholder="Hour(s)" value={formData.timeHours} onChange={e => setFormData(p => ({...p, timeHours: Number(e.target.value)}))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
+                        <input type="number" min="0" max="59" placeholder="Minute(s)" value={formData.timeMinutes} onChange={e => setFormData(p => ({...p, timeMinutes: Number(e.target.value)}))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
                     </div>
                 </div>
 
@@ -426,6 +425,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
 };
 
 const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry, cookbook }) => {
+    // ... This component's code remains the same ...
     const [editingEntry, setEditingEntry] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
