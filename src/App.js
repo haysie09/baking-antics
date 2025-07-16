@@ -206,7 +206,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                         value=""
                     >
-                        <option value="" disabled className="font-patrick-hand text-app-grey">What should I bake?</option>
+                        <option value="" disabled>What should I bake?</option>
                         <option value="inspireMe" className="font-montserrat text-app-grey">Generate from Inspire Me!</option>
                         <option value="myIdeas" className="font-montserrat text-app-grey">Generate from My Ideas</option>
                     </select>
@@ -352,7 +352,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
 };
 
 const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) => {
-    const [formData, setFormData] = useState(entry || { entryTitle: '', bakingDate: new Date().toISOString().split('T')[0], tasteRating: 0, difficultyRating: 0, personalNotes: '', photoURLs: [], categories: [], sourceURL: '', timeHours: 0, timeMinutes: 0 });
+    const [formData, setFormData] = useState(entry || { entryTitle: '', bakingDate: new Date().toISOString().split('T')[0], tasteRating: 0, difficultyRating: 0, personalNotes: '', photoURLs: [], categories: [], sourceURL: '', timeHours: '', timeMinutes: '' });
 
     const handleCategoryToggle = (cat) => {
         const categories = formData.categories.includes(cat)
@@ -390,7 +390,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
                             className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                             defaultValue=""
                         >
-                            <option value="" disabled className="font-patrick-hand text-app-grey">Choose from My Cookbook</option>
+                            <option value="" disabled>Or Choose from My Cookbook</option>
                             {cookbook.map(recipe => (
                                 <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">{recipe.recipeTitle}</option>
                             ))}
