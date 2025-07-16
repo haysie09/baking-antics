@@ -168,7 +168,7 @@ const DashboardStats = ({ journal }) => {
 };
 
 const BakingCalendar = ({ journal, setView, setDateFilter }) => {
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate] = useState(new Date()); // Removed unused setCurrentDate
 
     const bakedDays = useMemo(() => {
         const dates = new Set();
@@ -343,7 +343,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 };
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
-    // ... This component's code remains the same ...
     const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '', categories: [] });
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
