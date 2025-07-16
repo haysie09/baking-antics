@@ -120,6 +120,111 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 
 // --- Main App Components ---
 
+const DashboardStats = ({ journal }) => {
+    const stats = useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const monthlyEntries = journal.filter(entry => {
+            const entryDate = new Date(entry.bakingDate);
+            return entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear;
+        });
+
+        const totalBakes = monthlyEntries.length;
+        const totalMinutes = monthlyEntries.reduce((acc, entry) => {
+            const hours = entry.timeHours || 0;
+            const minutes = entry.timeMinutes || 0;
+            return acc + (hours * 60) + minutes;
+        }, 0);
+
+        const totalHours = Math.floor(totalMinutes / 60);
+
+        return { totalBakes, totalHours };
+    }, [journal]);
+
+    return (
+        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
+            <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                    <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-light-peach"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-add-idea" style={{ clipPath: 'inset(0 50% 0 0)' }}></div>
+                        <span className="text-4xl font-bold text-burnt-orange font-montserrat">{stats.totalBakes}</span>
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-app-grey font-montserrat">bakes this month</p>
+                </div>
+                <div>
+                     <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-light-peach"></div>
+                         <div className="absolute inset-0 rounded-full border-4 border-add-idea" style={{ clipPath: 'inset(0 0 50% 0)' }}></div>
+                        <span className="text-4xl font-bold text-burnt-orange font-montserrat">{stats.totalHours}</span>
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-app-grey font-montserrat">hours spent baking</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BakingCalendar = ({ journal, setView, setDateFilter }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
+
+    const bakedDays = useMemo(() => {
+        const dates = new Set();
+        journal.forEach(entry => {
+            dates.add(new Date(entry.bakingDate).toDateString());
+        });
+        return dates;
+    }, [journal]);
+
+    const handleDayClick = (day) => {
+        const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        if (bakedDays.has(fullDate.toDateString())) {
+            setDateFilter(fullDate.toISOString().split('T')[0]);
+            setView('journal');
+        } else {
+            alert("No baking activity on this day.");
+        }
+    };
+
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+
+    const calendarDays = [];
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        calendarDays.push(<div key={`empty-${i}`}></div>);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+        const isBaked = bakedDays.has(dayDate.toDateString());
+        calendarDays.push(
+            <div key={i} onClick={() => handleDayClick(i)} className="text-center p-1 cursor-pointer relative">
+                {i}
+                {isBaked && <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-burnt-orange rounded-full"></div>}
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
+            <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-bold text-burnt-orange">My Baking Streak</h3>
+                <button onClick={() => setView('journal')} className="text-burnt-orange" title="Add New Bake">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-sm text-center text-app-grey font-montserrat">
+                <div>Su</div><div>Mo</div><div>Tu</div><div>We</div><div>Th</div><div>Fr</div><div>Sa</div>
+            </div>
+            <div className="grid grid-cols-7 gap-1 mt-2 font-montserrat text-app-grey">
+                {calendarDays}
+            </div>
+        </div>
+    );
+};
+
+
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter }) => {
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
@@ -428,8 +533,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
     );
 };
 
-const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry, cookbook }) => {
-    // ... This component's code remains the same ...
+const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJournalEntry, cookbook, dateFilter, setDateFilter }) => {
     const [editingEntry, setEditingEntry] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
@@ -448,12 +552,22 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
     };
 
     const filteredJournal = useMemo(() => {
-        if (!journal) return [];
-        if (activeFilters.length === 0) return journal;
-        return journal.filter(entry => 
+        let entries = journal || [];
+        if (dateFilter) {
+            entries = entries.filter(entry => entry.bakingDate === dateFilter);
+        }
+        if (activeFilters.length === 0) return entries;
+        return entries.filter(entry => 
             entry.categories && activeFilters.every(filter => entry.categories.includes(filter))
         );
-    }, [journal, activeFilters]);
+    }, [journal, activeFilters, dateFilter]);
+    
+    useEffect(() => {
+        // Clear date filter when navigating away
+        return () => {
+            setDateFilter(null);
+        }
+    }, [setDateFilter]);
 
     return (
         <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
@@ -740,6 +854,7 @@ const AuthPage = () => {
 const MainApp = ({ user }) => {
     const [view, setView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [dateFilter, setDateFilter] = useState(null);
     
     // Data states
     const [ideaPad, setIdeaPad] = useState([]);
@@ -770,11 +885,11 @@ const MainApp = ({ user }) => {
 
     const renderView = () => {
         switch (view) {
-            case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
+            case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} />;
             case 'ideapad': return <BakeListIdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
-            case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} />;
+            case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
-            default: return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} />;
+            default: return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} />;
         }
     };
     
