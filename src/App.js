@@ -121,10 +121,19 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 // --- Main App Components ---
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId }) => {
-    // ... This component's code remains the same ...
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
-    const [inspiredBy, setInspiredBy] = useState(''); // 'inspireMe' or 'ideaPad'
+    const [inspiredBy, setInspiredBy] = useState('');
+
+    const handleGeneratorChange = (event) => {
+        const value = event.target.value;
+        if (value === 'inspireMe') {
+            inspireMe();
+        } else if (value === 'myIdeas') {
+            useMyIdea();
+        }
+        event.target.value = ""; // Reset dropdown after selection
+    };
 
     const inspireMe = useCallback(() => {
         const randomIndex = Math.floor(Math.random() * masterIdeaList.length);
@@ -183,19 +192,29 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
     const handleAddToIdeaPad = async () => {
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up")) return;
-        await addIdea({ ideaName: idea.name, notes: 'From Inspire Me!', sourceURL: '', createdAt: new Date() });
+        await addIdea({ ideaName: idea.name, notes: 'From Inspire Me!', sourceURL: '', createdAt: new Date(), categories: [] });
         setShowConfirmation({journal: false, idea: true});
         setIdea({name: '', id: null});
     };
 
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
-            <h1 className="text-4xl font-bold text-burnt-orange text-center">What should I bake?</h1>
             <div className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <button onClick={inspireMe} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg hover:opacity-90 transition-opacity shadow-sm font-montserrat">Inspire Me!</button>
-                    <button onClick={useMyIdea} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg hover:opacity-90 transition-opacity shadow-sm font-montserrat">Generate my Ideas!</button>
+                <div className="relative">
+                    <select 
+                        onChange={handleGeneratorChange} 
+                        className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg hover:opacity-90 transition-opacity shadow-sm font-montserrat appearance-none text-center"
+                        value=""
+                    >
+                        <option value="" disabled>What should I bake?</option>
+                        <option value="inspireMe">Generate from Inspire Me!</option>
+                        <option value="myIdeas">Generate from My Ideas</option>
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-light-peach">
+                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                    </div>
                 </div>
+
                 {idea.name && (
                     <div className="text-center bg-app-white p-4 rounded-xl mt-4">
                         <p className="text-burnt-orange text-2xl font-medium mb-4">{idea.name}</p>
@@ -209,22 +228,33 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                     </div>
                 )}
                 {showConfirmation.journal && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">Added to your Journal!</span></div>}
-                {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">Added to your Idea Pad!</span></div>}
+                {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">New idea added!</span></div>}
             </div>
-            <div className="text-center text-xs text-app-grey/70 pt-4">User ID: {userId}</div>
         </div>
     );
 };
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
-    // ... This component's code remains the same ...
-    const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '' });
+    const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '', categories: [] });
     const [showConfirmModal, setShowConfirmModal] = useState(null);
+    const [showAddConfirm, setShowAddConfirm] = useState(false);
+    const [showMoveConfirm, setShowMoveConfirm] = useState(false);
+    const [activeFilters, setActiveFilters] = useState([]);
+    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-    const handleAdd = () => {
+    const handleCategoryToggle = (cat) => {
+        const categories = newIdea.categories.includes(cat)
+            ? newIdea.categories.filter(c => c !== cat)
+            : [...newIdea.categories, cat];
+        setNewIdea(p => ({ ...p, categories }));
+    };
+
+    const handleAdd = async () => {
         if (newIdea.ideaName.trim()) {
-            addIdea({ ...newIdea, createdAt: new Date() });
-            setNewIdea({ ideaName: '', notes: '', sourceURL: '' });
+            await addIdea({ ...newIdea, createdAt: new Date() });
+            setNewIdea({ ideaName: '', notes: '', sourceURL: '', categories: [] });
+            setShowAddConfirm(true);
+            setTimeout(() => setShowAddConfirm(false), 3000);
         }
     };
     
@@ -240,7 +270,21 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
         };
         await addJournalEntry(newEntry);
         await deleteIdea(idea.id);
+        setShowMoveConfirm(true);
+        setTimeout(() => setShowMoveConfirm(false), 3000);
     };
+    
+    const handleFilterToggle = (cat) => {
+        setActiveFilters(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]);
+    };
+
+    const filteredIdeas = useMemo(() => {
+        if (!ideas) return [];
+        if (activeFilters.length === 0) return ideas;
+        return ideas.filter(idea => 
+            idea.categories && activeFilters.every(filter => idea.categories.includes(filter))
+        );
+    }, [ideas, activeFilters]);
 
     return (
         <div className="p-4 md:p-6 bg-app-white h-full font-patrick-hand">
@@ -249,10 +293,36 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
                 <input type="text" value={newIdea.ideaName} onChange={(e) => setNewIdea(p => ({...p, ideaName: e.target.value}))} placeholder="Baking Idea Name*" className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
                 <input type="text" value={newIdea.notes} onChange={(e) => setNewIdea(p => ({...p, notes: e.target.value}))} placeholder="Optional notes..." className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
                 <input type="text" value={newIdea.sourceURL} onChange={(e) => setNewIdea(p => ({...p, sourceURL: e.target.value}))} placeholder="Optional link..." className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
+                <div>
+                    <label className="block text-app-grey font-semibold mb-2 text-xl">Categories</label>
+                    <div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${newIdea.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
+                </div>
                 <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Add Idea</button>
+                {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base" role="alert"><span className="font-montserrat">New idea added!</span></div>}
             </div>
+            
+            <div className="bg-info-box p-3 rounded-xl my-4 border border-burnt-orange">
+                <button onClick={() => setShowFilterDropdown(!showFilterDropdown)} className="w-full flex justify-between items-center">
+                    <h3 className="text-lg font-semibold text-app-grey">Filter by Category</h3>
+                    <span className={`transform transition-transform text-burnt-orange ${showFilterDropdown ? 'rotate-180' : ''}`}>▼</span>
+                </button>
+                {showFilterDropdown && (
+                    <div className="mt-2 flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleFilterToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${activeFilters.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
+                )}
+                {activeFilters.length > 0 && 
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                        <span className="text-sm font-semibold text-app-grey">Active:</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                            {activeFilters.map(f => <span key={f} className="py-1 px-2 rounded-full text-xs bg-burnt-orange text-light-peach font-montserrat">{f}</span>)}
+                        </div>
+                        <button onClick={() => setActiveFilters([])} className="text-sm text-burnt-orange hover:underline mt-2">Clear Filters</button>
+                    </div>
+                }
+            </div>
+            {showMoveConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">Idea added to your journal!</span></div>}
+
             <div className="space-y-3 mt-6 max-h-96 overflow-y-auto p-1">
-                {ideas.length === 0 ? <p className="text-center text-app-grey py-8 text-2xl">Add Baking Notes & Ideas</p> : [...ideas].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()).map(idea => (
+                {filteredIdeas.length === 0 ? <p className="text-center text-app-grey py-8 text-2xl">{ideas.length > 0 ? "No ideas match filters" : "Add Baking Notes & Ideas"}</p> : [...filteredIdeas].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()).map(idea => (
                     <div key={idea.id} className="bg-info-box p-3 rounded-xl border border-burnt-orange">
                         <div className="flex items-center justify-between">
                             <span className="text-burnt-orange text-xl font-semibold">{idea.ideaName}</span>
@@ -263,6 +333,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
                         </div>
                         {idea.notes && <p className="text-app-grey/80 mt-1 text-base font-montserrat">{idea.notes}</p>}
                         {idea.sourceURL && <a href={idea.sourceURL} target="_blank" rel="noopener noreferrer" className="text-burnt-orange hover:underline text-lg"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></a>}
+                        {idea.categories && idea.categories.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{idea.categories.map(c => <span key={c} className="py-1 px-2 rounded-full text-xs bg-app-white border border-gray-200 text-app-grey font-montserrat">{c}</span>)}</div>}
                     </div>
                 ))}
             </div>
