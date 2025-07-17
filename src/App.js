@@ -120,6 +120,111 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 
 // --- Main App Components ---
 
+const DashboardStats = ({ journal }) => {
+    const stats = useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        const monthlyEntries = journal.filter(entry => {
+            const entryDate = new Date(entry.bakingDate);
+            return entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear;
+        });
+
+        const totalBakes = monthlyEntries.length;
+        const totalMinutes = monthlyEntries.reduce((acc, entry) => {
+            const hours = entry.timeHours || 0;
+            const minutes = entry.timeMinutes || 0;
+            return acc + (hours * 60) + minutes;
+        }, 0);
+
+        const totalHours = Math.floor(totalMinutes / 60);
+
+        return { totalBakes, totalHours };
+    }, [journal]);
+
+    return (
+        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
+            <div className="grid grid-cols-2 gap-4 text-center">
+                <div>
+                    <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-light-peach"></div>
+                        <div className="absolute inset-0 rounded-full border-4 border-add-idea" style={{ clipPath: 'inset(0 50% 0 0)' }}></div>
+                        <span className="text-4xl font-bold text-burnt-orange font-montserrat">{stats.totalBakes}</span>
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-app-grey font-montserrat">bakes this month</p>
+                </div>
+                <div>
+                     <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-4 border-light-peach"></div>
+                         <div className="absolute inset-0 rounded-full border-4 border-add-idea" style={{ clipPath: 'inset(0 0 50% 0)' }}></div>
+                        <span className="text-4xl font-bold text-burnt-orange font-montserrat">{stats.totalHours}</span>
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-app-grey font-montserrat">hours spent baking</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const BakingCalendar = ({ journal, setView, setDateFilter, openAddJournalModal }) => {
+    const [currentDate] = useState(new Date());
+
+    const bakedDays = useMemo(() => {
+        const dates = new Set();
+        journal.forEach(entry => {
+            dates.add(new Date(entry.bakingDate).toDateString());
+        });
+        return dates;
+    }, [journal]);
+
+    const handleDayClick = (day) => {
+        const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        if (bakedDays.has(fullDate.toDateString())) {
+            setDateFilter(fullDate.toISOString().split('T')[0]);
+            setView('journal');
+        } else {
+            alert("No baking activity on this day.");
+        }
+    };
+
+    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
+
+    const calendarDays = [];
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        calendarDays.push(<div key={`empty-${i}`}></div>);
+    }
+    for (let i = 1; i <= daysInMonth; i++) {
+        const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
+        const isBaked = bakedDays.has(dayDate.toDateString());
+        calendarDays.push(
+            <div key={i} onClick={() => handleDayClick(i)} className="text-center p-1 cursor-pointer relative">
+                {i}
+                {isBaked && <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-burnt-orange rounded-full"></div>}
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
+            <div className="flex justify-between items-center mb-2">
+                <h3 className="text-lg font-bold text-burnt-orange">My Baking Calendar</h3>
+                <button onClick={openAddJournalModal} className="text-burnt-orange" title="Add New Bake">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                </button>
+            </div>
+            <div className="grid grid-cols-7 gap-1 text-sm text-center text-app-grey font-montserrat font-bold">
+                <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+            </div>
+            <div className="grid grid-cols-7 gap-1 mt-2 font-montserrat text-app-grey">
+                {calendarDays}
+            </div>
+        </div>
+    );
+};
+
+
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal }) => {
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
@@ -236,6 +341,9 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
             </div>
             <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Go to My Cookbook</button>
+            
+            <DashboardStats journal={journal} />
+            <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} openAddJournalModal={openAddJournalModal} />
         </div>
     );
 };
@@ -275,11 +383,11 @@ const IdeaForm = ({ onSave, onCancel }) => {
 
 const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
     const [showConfirmModal, setShowConfirmModal] = useState(null);
-    const [showAddConfirm, setShowAddConfirm] = useState(false);
     const [showMoveConfirm, setShowMoveConfirm] = useState(false);
     const [activeFilters, setActiveFilters] = useState([]);
     const [showFilterDropdown, setShowFilterDropdown] = useState(false);
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
+    const [showAddConfirm, setShowAddConfirm] = useState(false);
 
     const handleAddIdea = async (ideaData) => {
         await addIdea({ ...ideaData, createdAt: new Date() });
