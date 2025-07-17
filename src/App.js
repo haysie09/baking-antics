@@ -120,111 +120,6 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
 
 // --- Main App Components ---
 
-const DashboardStats = ({ journal }) => {
-    const stats = useMemo(() => {
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        const monthlyEntries = journal.filter(entry => {
-            const entryDate = new Date(entry.bakingDate);
-            return entryDate.getMonth() === currentMonth && entryDate.getFullYear() === currentYear;
-        });
-
-        const totalBakes = monthlyEntries.length;
-        const totalMinutes = monthlyEntries.reduce((acc, entry) => {
-            const hours = entry.timeHours || 0;
-            const minutes = entry.timeMinutes || 0;
-            return acc + (hours * 60) + minutes;
-        }, 0);
-
-        const totalHours = Math.floor(totalMinutes / 60);
-
-        return { totalBakes, totalHours };
-    }, [journal]);
-
-    return (
-        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
-            <div className="grid grid-cols-2 gap-4 text-center">
-                <div>
-                    <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-                        <div className="absolute inset-0 rounded-full border-4 border-light-peach"></div>
-                        <div className="absolute inset-0 rounded-full border-4 border-add-idea" style={{ clipPath: 'inset(0 50% 0 0)' }}></div>
-                        <span className="text-4xl font-bold text-burnt-orange font-montserrat">{stats.totalBakes}</span>
-                    </div>
-                    <p className="mt-2 text-sm font-semibold text-app-grey font-montserrat">bakes this month</p>
-                </div>
-                <div>
-                     <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
-                        <div className="absolute inset-0 rounded-full border-4 border-light-peach"></div>
-                         <div className="absolute inset-0 rounded-full border-4 border-add-idea" style={{ clipPath: 'inset(0 0 50% 0)' }}></div>
-                        <span className="text-4xl font-bold text-burnt-orange font-montserrat">{stats.totalHours}</span>
-                    </div>
-                    <p className="mt-2 text-sm font-semibold text-app-grey font-montserrat">hours spent baking</p>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const BakingCalendar = ({ journal, setView, setDateFilter, openAddJournalModal }) => {
-    const [currentDate] = useState(new Date());
-
-    const bakedDays = useMemo(() => {
-        const dates = new Set();
-        journal.forEach(entry => {
-            dates.add(new Date(entry.bakingDate).toDateString());
-        });
-        return dates;
-    }, [journal]);
-
-    const handleDayClick = (day) => {
-        const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
-        if (bakedDays.has(fullDate.toDateString())) {
-            setDateFilter(fullDate.toISOString().split('T')[0]);
-            setView('journal');
-        } else {
-            alert("No baking activity on this day.");
-        }
-    };
-
-    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
-    const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
-
-    const calendarDays = [];
-    for (let i = 0; i < firstDayOfMonth; i++) {
-        calendarDays.push(<div key={`empty-${i}`}></div>);
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dayDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), i);
-        const isBaked = bakedDays.has(dayDate.toDateString());
-        calendarDays.push(
-            <div key={i} onClick={() => handleDayClick(i)} className="text-center p-1 cursor-pointer relative">
-                {i}
-                {isBaked && <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-burnt-orange rounded-full"></div>}
-            </div>
-        );
-    }
-
-    return (
-        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
-            <div className="flex justify-between items-center mb-2">
-                <h3 className="text-lg font-bold text-burnt-orange">My Baking Calendar</h3>
-                <button onClick={openAddJournalModal} className="text-burnt-orange" title="Add New Bake">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                </button>
-            </div>
-            <div className="grid grid-cols-7 gap-1 text-sm text-center text-app-grey font-montserrat font-bold">
-                <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
-            </div>
-            <div className="grid grid-cols-7 gap-1 mt-2 font-montserrat text-app-grey">
-                {calendarDays}
-            </div>
-        </div>
-    );
-};
-
-
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal }) => {
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
@@ -335,27 +230,12 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 {showConfirmation.journal && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">Added to your Journal!</span></div>}
                 {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">New idea added!</span></div>}
             </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-                <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
-                <button onClick={() => setView('ideapad')} className="w-full bg-add-idea text-white py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
-            </div>
-            <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Go to My Cookbook</button>
-            
-            <DashboardStats journal={journal} />
-            <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} openAddJournalModal={openAddJournalModal} />
         </div>
     );
 };
 
-const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
+const IdeaForm = ({ onSave, onCancel }) => {
     const [newIdea, setNewIdea] = useState({ ideaName: '', notes: '', sourceURL: '', categories: [] });
-    const [showConfirmModal, setShowConfirmModal] = useState(null);
-    const [showAddConfirm, setShowAddConfirm] = useState(false);
-    const [showMoveConfirm, setShowMoveConfirm] = useState(false);
-    const [activeFilters, setActiveFilters] = useState([]);
-    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
-    const [isAddFormVisible, setIsAddFormVisible] = useState(false);
 
     const handleCategoryToggle = (cat) => {
         const categories = newIdea.categories.includes(cat)
@@ -364,14 +244,40 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
         setNewIdea(p => ({ ...p, categories }));
     };
 
-    const handleAdd = async () => {
+    const handleAdd = () => {
         if (newIdea.ideaName.trim()) {
-            await addIdea({ ...newIdea, createdAt: new Date() });
-            setNewIdea({ ideaName: '', notes: '', sourceURL: '', categories: [] });
-            setShowAddConfirm(true);
-            setIsAddFormVisible(false);
-            setTimeout(() => setShowAddConfirm(false), 3000);
+            onSave(newIdea);
         }
+    };
+
+    return (
+        <Modal onClose={onCancel} size="md">
+             <div className="space-y-4 text-xl">
+                <h2 className="text-4xl font-bold text-burnt-orange">Add New Idea</h2>
+                <input type="text" value={newIdea.ideaName} onChange={(e) => setNewIdea(p => ({...p, ideaName: e.target.value}))} placeholder="Baking Idea Name*" className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
+                <input type="text" value={newIdea.notes} onChange={(e) => setNewIdea(p => ({...p, notes: e.target.value}))} placeholder="Optional notes..." className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
+                <input type="text" value={newIdea.sourceURL} onChange={(e) => setNewIdea(p => ({...p, sourceURL: e.target.value}))} placeholder="Optional link..." className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
+                <div>
+                    <label className="block text-app-grey font-semibold mb-2 text-xl">Categories</label>
+                    <div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${newIdea.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
+                </div>
+                <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Add to List</button>
+            </div>
+        </Modal>
+    );
+};
+
+
+const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
+    const [showConfirmModal, setShowConfirmModal] = useState(null);
+    const [showMoveConfirm, setShowMoveConfirm] = useState(false);
+    const [activeFilters, setActiveFilters] = useState([]);
+    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+    const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
+
+    const handleAddIdea = async (ideaData) => {
+        await addIdea({ ...ideaData, createdAt: new Date() });
+        setIsAddIdeaModalOpen(false);
     };
     
     const moveToJournal = async (idea) => {
@@ -404,26 +310,12 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
 
     return (
         <div className="p-4 md:p-6 bg-app-white h-full font-patrick-hand">
-            <h1 className="text-4xl font-bold text-burnt-orange text-center mb-6">Bake List Idea Pad</h1>
-            <div className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
-                <button onClick={() => setIsAddFormVisible(!isAddFormVisible)} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat flex justify-between items-center">
-                    <span>Add Baking Idea</span>
-                    <span className={`transform transition-transform ${isAddFormVisible ? 'rotate-180' : ''}`}>▼</span>
-                </button>
-                {isAddFormVisible && (
-                    <div className="space-y-4 pt-4">
-                        <input type="text" value={newIdea.ideaName} onChange={(e) => setNewIdea(p => ({...p, ideaName: e.target.value}))} placeholder="Baking Idea Name*" className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
-                        <input type="text" value={newIdea.notes} onChange={(e) => setNewIdea(p => ({...p, notes: e.target.value}))} placeholder="Optional notes..." className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
-                        <input type="text" value={newIdea.sourceURL} onChange={(e) => setNewIdea(p => ({...p, sourceURL: e.target.value}))} placeholder="Optional link..." className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat" />
-                        <div>
-                            <label className="block text-app-grey font-semibold mb-2 text-xl">Categories</label>
-                            <div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${newIdea.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
-                        </div>
-                        <button onClick={handleAdd} className="w-full bg-burnt-orange text-light-peach py-3 px-6 rounded-xl text-lg hover:opacity-90 transition-opacity font-montserrat">Add to List</button>
-                    </div>
-                )}
-                {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base" role="alert"><span className="font-montserrat">New idea added!</span></div>}
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-4xl font-bold text-burnt-orange">Bake List Idea Pad</h1>
+                <button onClick={() => setIsAddIdeaModalOpen(true)} className="bg-burnt-orange text-light-peach py-1 px-4 rounded-xl font-normal hover:opacity-90 transition-opacity text-base font-montserrat">Add Idea</button>
             </div>
+
+            {isAddIdeaModalOpen && <IdeaForm onSave={handleAddIdea} onCancel={() => setIsAddIdeaModalOpen(false)} />}
             
             <div className="bg-info-box p-3 rounded-xl my-4 border border-burnt-orange">
                 <button onClick={() => setShowFilterDropdown(!showFilterDropdown)} className="w-full flex justify-between items-center">
