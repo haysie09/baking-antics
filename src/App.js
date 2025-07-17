@@ -167,8 +167,8 @@ const DashboardStats = ({ journal }) => {
     );
 };
 
-const BakingCalendar = ({ journal, setView, setDateFilter }) => {
-    const [currentDate] = useState(new Date()); // Removed unused setCurrentDate
+const BakingCalendar = ({ journal, setView, setDateFilter, openAddJournalModal }) => {
+    const [currentDate, setCurrentDate] = useState(new Date());
 
     const bakedDays = useMemo(() => {
         const dates = new Set();
@@ -210,7 +210,7 @@ const BakingCalendar = ({ journal, setView, setDateFilter }) => {
         <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
             <div className="flex justify-between items-center mb-2">
                 <h3 className="text-lg font-bold text-burnt-orange">My Baking Calendar</h3>
-                <button onClick={() => setView('journal')} className="text-burnt-orange" title="Add New Bake">
+                <button onClick={openAddJournalModal} className="text-burnt-orange" title="Add New Bake">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                 </button>
             </div>
@@ -225,7 +225,7 @@ const BakingCalendar = ({ journal, setView, setDateFilter }) => {
 };
 
 
-const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter }) => {
+const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal }) => {
     const [idea, setIdea] = useState({name: '', id: null});
     const [showConfirmation, setShowConfirmation] = useState({journal: false, idea: false});
     const [inspiredBy, setInspiredBy] = useState('');
@@ -337,7 +337,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             </div>
             
             <DashboardStats journal={journal} />
-            <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} />
+            <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} openAddJournalModal={() => setView('addJournalFromDash')} />
         </div>
     );
 };
@@ -626,7 +626,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
 };
 
 const CookbookForm = ({ recipe, onSave, onCancel, isNew = false }) => {
-    // ... This component's code remains the same ...
     const [formData, setFormData] = useState(recipe || { recipeTitle: '', sourceURL: '', ingredients: [{ quantity: '', measurement: 'cup', name: '' }], instructions: '', categories: [] });
 
     const handleIngredientChange = (index, field, value) => {
