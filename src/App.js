@@ -859,6 +859,7 @@ const MainApp = ({ user }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [dateFilter, setDateFilter] = useState(null);
     const [isAddJournalModalOpen, setIsAddJournalModalOpen] = useState(false);
+    const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
     
     // Data states
     const [ideaPad, setIdeaPad] = useState([]);
@@ -889,7 +890,7 @@ const MainApp = ({ user }) => {
 
     const renderView = () => {
         switch (view) {
-            case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} openAddJournalModal={() => setIsAddJournalModalOpen(true)} />;
+            case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} openAddJournalModal={() => setIsAddJournalModalOpen(true)} openAddIdeaModal={() => setIsAddIdeaModalOpen(true)} />;
             case 'ideapad': return <BakeListIdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
@@ -934,7 +935,7 @@ const MainApp = ({ user }) => {
                             <button onClick={() => setIsSidebarOpen(true)} className="text-add-idea">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                             </button>
-                            <div className="text-2xl font-bold text-add-idea">Baking Antics</div>
+                            <button onClick={() => setView('dashboard')} className="text-2xl font-bold text-add-idea">Baking Antics</button>
                              {/* Placeholder for alignment */}
                             <div className="w-8"></div>
                         </nav>
