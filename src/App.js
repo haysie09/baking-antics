@@ -168,7 +168,7 @@ const DashboardStats = ({ journal }) => {
 };
 
 const BakingCalendar = ({ journal, setView, setDateFilter, openAddJournalModal }) => {
-    const [currentDate] = useState(new Date()); // Removed unused setCurrentDate
+    const [currentDate] = useState(new Date());
 
     const bakedDays = useMemo(() => {
         const dates = new Set();
@@ -852,6 +852,7 @@ const MainApp = ({ user }) => {
     const [view, setView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [dateFilter, setDateFilter] = useState(null);
+    const [isAddJournalModalOpen, setIsAddJournalModalOpen] = useState(false);
     
     // Data states
     const [ideaPad, setIdeaPad] = useState([]);
@@ -882,11 +883,11 @@ const MainApp = ({ user }) => {
 
     const renderView = () => {
         switch (view) {
-            case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} />;
+            case 'dashboard': return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} openAddJournalModal={() => setIsAddJournalModalOpen(true)} />;
             case 'ideapad': return <BakeListIdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
-            default: return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} />;
+            default: return <Dashboard setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={userId} journal={journal} setDateFilter={setDateFilter} openAddJournalModal={() => setIsAddJournalModalOpen(true)} />;
         }
     };
     
@@ -933,6 +934,7 @@ const MainApp = ({ user }) => {
                         </nav>
                     </header>
                     <main className="flex-grow overflow-y-auto bg-app-white">{renderView()}</main>
+                    {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false);}} onCancel={() => setIsAddJournalModalOpen(false)} />}
                 </div>
             </div>
         </div>
