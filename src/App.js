@@ -168,7 +168,7 @@ const DashboardStats = ({ journal }) => {
 };
 
 const BakingCalendar = ({ journal, setView, setDateFilter, openAddJournalModal }) => {
-    const [currentDate, setCurrentDate] = useState(new Date());
+    const [currentDate] = useState(new Date()); // Removed unused setCurrentDate
 
     const bakedDays = useMemo(() => {
         const dates = new Set();
