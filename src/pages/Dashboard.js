@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import DashboardStats from './DashboardStats';
 import BakingCalendar from './BakingCalendar';
-import UpcomingBakes from './UpcomingBakes'; // Import the new component
+import UpcomingBakes from './UpcomingBakes';
 
 // Note: The 'masterIdeaList' will be moved later. For now, we'll copy it here.
 const masterIdeaList = [
@@ -48,7 +48,7 @@ const masterIdeaList = [
     { ideaName: "Cheesecake", difficulty: "challenging" },
 ];
 
-const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake }) => {
+const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
     const [idea, setIdea] = useState({ name: '', id: null });
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
@@ -173,6 +173,8 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 addUpcomingBake={addUpcomingBake}
                 updateUpcomingBake={updateUpcomingBake}
                 deleteUpcomingBake={deleteUpcomingBake}
+                cookbook={cookbook}
+                addJournalEntry={addJournalEntry}
             />
         </div>
     );

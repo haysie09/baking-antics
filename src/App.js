@@ -19,7 +19,7 @@ import { useAuth } from './hooks/useAuth';
 import { useJournal } from './hooks/useJournal';
 import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
-import { useUpcomingBakes } from './hooks/useUpcomingBakes'; // This import was likely missing
+import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 
 // --- Main App Component ---
 export default function App() {
@@ -85,6 +85,7 @@ const MainApp = ({ user }) => {
                     addUpcomingBake={addUpcomingBake}
                     updateUpcomingBake={updateUpcomingBake}
                     deleteUpcomingBake={deleteUpcomingBake}
+                    cookbook={cookbook} // <-- ADD THIS PROP
                 />;
         }
     };

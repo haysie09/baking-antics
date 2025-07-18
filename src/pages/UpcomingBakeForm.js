@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import Modal from '../components/Modal';
 
-const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit }) => {
-    // Set initial state from bakeToEdit prop if it exists, otherwise use defaults
+const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit, cookbook }) => {
     const [formData, setFormData] = useState(bakeToEdit || {
         title: '',
         link: '',
@@ -11,15 +10,28 @@ const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit }) => {
     });
 
     const handleSave = () => {
-        // Basic validation to ensure title and date are filled
         if (formData.title && formData.bakeDate) {
             onSave(formData);
         } else {
             alert('Please provide a title and a date.');
         }
     };
+
+    const handleCookbookSelect = (e) => {
+        const recipeId = e.target.value;
+        if (!recipeId) return;
+
+        const selectedRecipe = cookbook.find(r => r.id === recipeId);
+        if (selectedRecipe) {
+            setFormData(prev => ({
+                ...prev, // Keep existing data like bakeDate
+                title: selectedRecipe.recipeTitle || '',
+                link: selectedRecipe.sourceURL || '',
+                notes: selectedRecipe.instructions || '' // Using instructions for notes
+            }));
+        }
+    };
     
-    // Prevent users from selecting a past date
     const today = new Date().toISOString().split('T')[0];
 
     return (
@@ -28,6 +40,26 @@ const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit }) => {
                 <h2 className="text-4xl font-bold text-burnt-orange">
                     {bakeToEdit ? 'Edit Upcoming Bake' : 'Add Upcoming Bake'}
                 </h2>
+                
+                {!bakeToEdit && cookbook && cookbook.length > 0 && (
+                    <div className="relative">
+                        <select
+                            onChange={handleCookbookSelect}
+                            className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
+                            defaultValue=""
+                        >
+                            <option value="" disabled>Or Choose from My Cookbook</option>
+                            {cookbook.map(recipe => (
+                                <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">
+                                    {recipe.recipeTitle}
+                                </option>
+                            ))}
+                        </select>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-add-idea">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+                        </div>
+                    </div>
+                )}
                 
                 <div>
                     <label className="block text-app-grey font-semibold mb-1">Title*</label>
