@@ -1,3 +1,5 @@
+import React from 'react';
+
 const StarRating = ({ rating, setRating, isEditable = true }) => (
     <div className="flex space-x-0.5">
         {[1, 2, 3, 4, 5].map((star) => (
@@ -5,3 +7,5 @@ const StarRating = ({ rating, setRating, isEditable = true }) => (
         ))}
     </div>
 );
+
+export default StarRating;

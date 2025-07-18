@@ -1,5 +1,7 @@
+import React from 'react';
+
 const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
-     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
         <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center">
             <p className="text-app-grey text-2xl mb-6">{message}</p>
             <div className="flex justify-center space-x-4">
@@ -9,3 +11,5 @@ const ConfirmationModal = ({ message, onConfirm, onCancel }) => (
         </div>
     </div>
 );
+
+export default ConfirmationModal;
