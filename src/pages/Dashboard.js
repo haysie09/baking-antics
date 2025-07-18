@@ -2,8 +2,10 @@ import React, { useState, useCallback } from 'react';
 import DashboardStats from './DashboardStats';
 import BakingCalendar from './BakingCalendar';
 import UpcomingBakes from './UpcomingBakes';
+import AddBakeChoiceModal from '../components/AddBakeChoiceModal'; // Import the new modal
+import UpcomingBakeForm from './UpcomingBakeForm'; // Import the form
 
-// Note: The 'masterIdeaList' will be moved later. For now, we'll copy it here.
+// Master Idea List constant
 const masterIdeaList = [
     { ideaName: "Simple Chocolate Chip Cookies", difficulty: "simple" },
     { ideaName: "Easy Banana Bread", difficulty: "simple" },
@@ -49,6 +51,28 @@ const masterIdeaList = [
 ];
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
+    
+    // --- State for our new modals ---
+    const [isAddChoiceModalOpen, setIsAddChoiceModalOpen] = useState(false);
+    const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
+
+    // --- Handlers for the choice modal ---
+    const handleOpenPastBakeForm = () => {
+        setIsAddChoiceModalOpen(false); // Close choice modal
+        openAddJournalModal(); // Open the journal form (function from App.js)
+    };
+
+    const handleOpenUpcomingBakeForm = () => {
+        setIsAddChoiceModalOpen(false); // Close choice modal
+        setIsAddUpcomingBakeModalOpen(true); // Open the upcoming bake form
+    };
+
+    const handleSaveUpcomingBake = async (bakeData) => {
+        await addUpcomingBake(bakeData);
+        setIsAddUpcomingBakeModalOpen(false); // Close form on save
+    };
+    
+    // --- Existing Dashboard Logic ---
     const [idea, setIdea] = useState({ name: '', id: null });
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
@@ -71,7 +95,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             setInspiredBy('ideaPad');
             return;
         }
-
         let newIdea = idea.name;
         let newIdeaId = idea.id;
         while (newIdea === idea.name && ideaPad.length > 1) {
@@ -83,7 +106,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             newIdea = ideaPad[0].ideaName;
             newIdeaId = ideaPad[0].id;
         }
-
         setIdea({ name: newIdea, id: newIdeaId });
         setShowConfirmation({ journal: false, idea: false });
         setInspiredBy('ideaPad');
@@ -96,12 +118,11 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         } else if (value === 'myIdeas') {
             generateFromMyIdeas();
         }
-        event.target.value = ""; // Reset dropdown after selection
+        event.target.value = "";
     };
 
     const handleLetsBake = async () => {
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up")) return;
-
         const newEntry = {
             entryTitle: idea.name,
             bakingDate: new Date().toISOString().split('T')[0],
@@ -109,11 +130,9 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             photoURLs: [], categories: [], sourceURL: '', createdAt: new Date(),
         };
         await addJournalEntry(newEntry);
-
         if (inspiredBy === 'ideaPad' && idea.id) {
             await deleteIdea(idea.id);
         }
-
         setShowConfirmation({ journal: true, idea: false });
         setIdea({ name: '', id: null });
     };
@@ -164,7 +183,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
             </div>
             <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Go to My Cookbook</button>
-
+            
             <DashboardStats journal={journal} />
             
             <BakingCalendar 
@@ -172,7 +191,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 upcomingBakes={upcomingBakes} 
                 setView={setView} 
                 setDateFilter={setDateFilter} 
-                openAddJournalModal={openAddJournalModal} 
+                openAddChoiceModal={() => setIsAddChoiceModalOpen(true)} 
             />
             
             <UpcomingBakes 
@@ -183,6 +202,23 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 cookbook={cookbook}
                 addJournalEntry={addJournalEntry}
             />
+
+            {/* --- Render Modals based on state --- */}
+            {isAddChoiceModalOpen && (
+                <AddBakeChoiceModal 
+                    onAddPastBake={handleOpenPastBakeForm}
+                    onScheduleBake={handleOpenUpcomingBakeForm}
+                    onCancel={() => setIsAddChoiceModalOpen(false)}
+                />
+            )}
+
+            {isAddUpcomingBakeModalOpen && (
+                <UpcomingBakeForm 
+                    onSave={handleSaveUpcomingBake}
+                    onCancel={() => setIsAddUpcomingBakeModalOpen(false)}
+                    cookbook={cookbook}
+                />
+            )}
         </div>
     );
 };
