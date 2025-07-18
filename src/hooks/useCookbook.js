@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react'; // Added useMemo
 import { db, auth } from '../firebase/config';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
@@ -14,10 +14,12 @@ export const useCookbook = () => {
     }, [userId]);
 
     useEffect(() => {
-        if (cookbookCol) {
-            const unsub = onSnapshot(cookbookCol, s => setCookbook(s.docs.map(d => ({ id: d.id, ...d.data() }))));
-            return () => unsub();
+        if (!cookbookCol) {
+            setCookbook([]);
+            return;
         }
+        const unsub = onSnapshot(cookbookCol, s => setCookbook(s.docs.map(d => ({ id: d.id, ...d.data() }))));
+        return () => unsub();
     }, [cookbookCol]);
 
     const addRecipe = useCallback(async (recipe) => {

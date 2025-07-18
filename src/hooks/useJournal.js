@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react'; // Added useMemo
 import { db, auth } from '../firebase/config';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
-const appId = 'baking-antics-v1'; // We'll move this to a config file later
+const appId = 'baking-antics-v1';
 
 export const useJournal = () => {
     const [journal, setJournal] = useState([]);
@@ -14,7 +14,10 @@ export const useJournal = () => {
     }, [userId]);
 
     useEffect(() => {
-        if (!journalCol) return;
+        if (!journalCol) {
+            setJournal([]);
+            return;
+        };
         const unsub = onSnapshot(journalCol, snapshot => {
             setJournal(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
         });

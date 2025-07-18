@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react'; // Added useMemo
 import { db, auth } from '../firebase/config';
 import { collection, onSnapshot, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
@@ -14,7 +14,10 @@ export const useIdeaPad = () => {
     }, [userId]);
 
     useEffect(() => {
-        if (!ideaPadCol) return;
+        if (!ideaPadCol) {
+            setIdeaPad([]);
+            return;
+        }
         const unsub = onSnapshot(ideaPadCol, snapshot => {
             setIdeaPad(snapshot.docs.map(d => ({ id: d.id, ...d.data() })));
         });
