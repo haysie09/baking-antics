@@ -10,3 +10,5 @@ const Modal = ({ children, onClose, size = 'sm' }) => (
         </div>
     </div>
 );
+
+export default Modal;

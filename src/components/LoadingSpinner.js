@@ -3,3 +3,5 @@ const LoadingSpinner = () => (
         <div className="w-16 h-16 border-4 border-light-peach border-t-add-idea rounded-full animate-spin"></div>
     </div>
 );
+
+export default LoadingSpinner;
