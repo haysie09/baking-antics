@@ -72,11 +72,20 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
 
         calendarDays.push(
             <div key={i} onClick={() => handleDayClick(i)} className="text-center p-1 cursor-pointer relative h-8 flex items-center justify-center">
-                <div className={`w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'bg-gray-300' : ''}`}>
+                {/* Today's date indicator is now a red-pink outline */}
+                <div className={`w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'border-2 border-add-idea' : ''}`}>
                     {i}
                 </div>
-                {isBaked && <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-burnt-orange rounded-full"></div>}
-                {isUpcoming && <div className="absolute top-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-add-idea rounded-full"></div>}
+                
+                {/* Container for dots, only rendered if there's at least one dot to show */}
+                {(isBaked || isUpcoming) && (
+                    <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-1">
+                        {/* Past bake dot (orange) */}
+                        {isBaked && <div className="w-2 h-2 bg-burnt-orange rounded-full"></div>}
+                        {/* Upcoming bake dot (grey) */}
+                        {isUpcoming && <div className="w-2 h-2 bg-gray-400 rounded-full"></div>}
+                    </div>
+                )}
             </div>
         );
     }
