@@ -1,17 +1,54 @@
 import React, { useState, useCallback } from 'react';
 import DashboardStats from './DashboardStats';
 import BakingCalendar from './BakingCalendar';
+import UpcomingBakes from './UpcomingBakes'; // Import the new component
 
 // Note: The 'masterIdeaList' will be moved later. For now, we'll copy it here.
 const masterIdeaList = [
     { ideaName: "Simple Chocolate Chip Cookies", difficulty: "simple" },
     { ideaName: "Easy Banana Bread", difficulty: "simple" },
     { ideaName: "Basic Blueberry Muffins", difficulty: "simple" },
-    // ... (keep the full list from your original App.js)
+    { ideaName: "Classic Victoria Sponge", difficulty: "simple" },
+    { ideaName: "No-Bake Cheesecake", difficulty: "simple" },
+    { ideaName: "Fudgy Brownies", difficulty: "simple" },
+    { ideaName: "Classic Apple Pie", difficulty: "simple" },
+    { ideaName: "Peanut Butter Cookies", difficulty: "simple" },
+    { ideaName: "Lemon Loaf Cake", difficulty: "simple" },
+    { ideaName: "Oatmeal Raisin Cookies", difficulty: "simple" },
+    { ideaName: "Rice Krispie Treats", difficulty: "simple" },
+    { ideaName: "Vanilla Cupcakes", difficulty: "simple" },
+    { ideaName: "Simple Shortbread", difficulty: "simple" },
+    { ideaName: "Chocolate Avocado Mousse", difficulty: "simple" },
+    { ideaName: "Anzac Biscuits", difficulty: "simple" },
+    { ideaName: "Complex Sourdough Loaf", difficulty: "challenging" },
+    { ideaName: "Multi-layer Opera Cake", difficulty: "challenging" },
+    { ideaName: "French Macarons", difficulty: "challenging" },
+    { ideaName: "Handmade Croissants", difficulty: "challenging" },
+    { ideaName: "Elaborate Pavlova Tower", difficulty: "challenging" },
+    { ideaName: "Artisan Baguettes", difficulty: "challenging" },
+    { ideaName: "Japanese Cotton Cheesecake", difficulty: "challenging" },
+    { ideaName: "Baklava", difficulty: "challenging" },
+    { ideaName: "Cronuts (Croissant-Doughnut Hybrid)", difficulty: "challenging" },
+    { ideaName: "Kouign-amann", difficulty: "challenging" },
+    { ideaName: "Prinsesstårta (Princess Cake)", difficulty: "challenging" },
+    { ideaName: "Dobos Torte", difficulty: "challenging" },
+    { ideaName: "Canele", difficulty: "challenging" },
+    { ideaName: "Ginger Crunch Slice", difficulty: "simple" },
+    { ideaName: "Caramel Slice", difficulty: "simple" },
+    { ideaName: "Lamingtons", difficulty: "simple" },
+    { ideaName: "Red Velvet Cake", difficulty: "challenging" },
+    { ideaName: "Carrot Cake", difficulty: "simple" },
+    { ideaName: "Sticky Toffee Pudding", difficulty: "simple" },
+    { ideaName: "Cinnamon Rolls", difficulty: "challenging" },
+    { ideaName: "Profiteroles with Chocolate Sauce", difficulty: "challenging" },
+    { ideaName: "Banana Bread", difficulty: "simple" },
+    { ideaName: "Marshmellow Slice", difficulty: "challenging" },
+    { ideaName: "Madeleines", difficulty: "challenging" },
+    { ideaName: "Churros with Chocolate Dip", difficulty: "simple" },
     { ideaName: "Cheesecake", difficulty: "challenging" },
 ];
 
-const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal }) => {
+const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake }) => {
     const [idea, setIdea] = useState({ name: '', id: null });
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
@@ -130,6 +167,13 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
             <DashboardStats journal={journal} />
             <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} openAddJournalModal={openAddJournalModal} />
+            
+            <UpcomingBakes 
+                upcomingBakes={upcomingBakes}
+                addUpcomingBake={addUpcomingBake}
+                updateUpcomingBake={updateUpcomingBake}
+                deleteUpcomingBake={deleteUpcomingBake}
+            />
         </div>
     );
 };
