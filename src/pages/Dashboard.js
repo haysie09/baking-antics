@@ -166,7 +166,14 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Go to My Cookbook</button>
 
             <DashboardStats journal={journal} />
-            <BakingCalendar journal={journal} setView={setView} setDateFilter={setDateFilter} openAddJournalModal={openAddJournalModal} />
+            
+            <BakingCalendar 
+                journal={journal} 
+                upcomingBakes={upcomingBakes} 
+                setView={setView} 
+                setDateFilter={setDateFilter} 
+                openAddJournalModal={openAddJournalModal} 
+            />
             
             <UpcomingBakes 
                 upcomingBakes={upcomingBakes}
