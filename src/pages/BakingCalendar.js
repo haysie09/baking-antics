@@ -56,7 +56,8 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
     const todayDateString = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())).toDateString();
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDayOfMonth = new Date(year, month, 1).getUTCDay();
+    // Logic updated to start the week on Monday
+    const firstDayOfMonth = (new Date(year, month, 1).getUTCDay() + 6) % 7;
 
     const calendarDays = [];
     for (let i = 0; i < firstDayOfMonth; i++) {
@@ -71,21 +72,19 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         const isToday = dayDateString === todayDateString;
 
         calendarDays.push(
-            <div key={i} onClick={() => handleDayClick(i)} className="text-center p-1 cursor-pointer relative h-8 flex items-center justify-center">
+            <div key={i} onClick={() => handleDayClick(i)} className="text-center cursor-pointer h-10 flex flex-col items-center justify-start pt-1">
                 {/* Today's date indicator is now a red-pink outline */}
                 <div className={`w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'border-2 border-add-idea' : ''}`}>
                     {i}
                 </div>
                 
-                {/* Container for dots, only rendered if there's at least one dot to show */}
-                {(isBaked || isUpcoming) && (
-                    <div className="absolute bottom-1 left-0 right-0 flex justify-center items-center space-x-1">
-                        {/* Past bake dot (orange) */}
-                        {isBaked && <div className="w-2 h-2 bg-burnt-orange rounded-full"></div>}
-                        {/* Upcoming bake dot (grey) */}
-                        {isUpcoming && <div className="w-2 h-2 bg-gray-400 rounded-full"></div>}
-                    </div>
-                )}
+                {/* Container for dots, now sits below the number */}
+                <div className="h-2 flex justify-center items-center space-x-1 mt-1">
+                    {/* Past bake dot (orange) */}
+                    {isBaked && <div className="w-2 h-2 bg-burnt-orange rounded-full"></div>}
+                    {/* Upcoming bake dot (grey) */}
+                    {isUpcoming && <div className="w-2 h-2 bg-gray-400 rounded-full"></div>}
+                </div>
             </div>
         );
     }
@@ -103,7 +102,8 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
                 <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-light-peach transition-colors">
                     <svg className="w-6 h-6 text-burnt-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" /></svg>
                 </button>
-                <h4 className="font-montserrat font-bold text-xl text-add-idea">
+                {/* Month name font size reduced */}
+                <h4 className="font-montserrat font-bold text-lg text-add-idea">
                     {currentDate.toLocaleString('default', { month: 'long' }).toUpperCase()} {year}
                 </h4>
                 <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-light-peach transition-colors">
@@ -111,8 +111,9 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
                 </button>
             </div>
 
+            {/* Weekday order changed to start with Monday */}
             <div className="grid grid-cols-7 gap-1 text-sm text-center text-app-grey font-montserrat font-bold">
-                <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
             </div>
             <div className="grid grid-cols-7 gap-1 mt-2 font-montserrat text-app-grey">
                 {calendarDays}
