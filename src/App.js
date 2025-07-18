@@ -455,7 +455,7 @@ const BakeListIdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
             {showMoveConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">Idea added to your journal!</span></div>}
 
             <div className="space-y-3 mt-6 max-h-96 overflow-y-auto p-1">
-                {filteredIdeas.length === 0 ? <p className="text-center text-app-grey py-8 text-2xl">{ideas.length > 0 ? "No ideas match filters" : "Add Baking Notes & Ideas"}</p> : [...filteredIdeas].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()).map(idea => (
+{filteredIdeas.length === 0 ? <p className="text-center text-app-grey py-8 text-2xl">{ideas.length > 0 ? "No ideas match filters" : "Add Baking Notes & Ideas"}</p> : [...filteredIdeas].sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0)).map(idea => (
                     <div key={idea.id} className="bg-info-box p-3 rounded-xl border border-burnt-orange">
                         <div className="flex items-center justify-between">
                             <span className="text-burnt-orange text-xl font-semibold">{idea.ideaName}</span>
