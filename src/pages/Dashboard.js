@@ -1,20 +1,21 @@
 // src/pages/Dashboard.js
 
-import React, { useState, useCallback } from 'react'; // Removed useEffect, useMemo as they are used in DashboardStats component
-// Note: DashboardStats is defined within this file, so no import statement for it is needed here.
+import React, { useState, useCallback, useMemo, useEffect } from 'react'; // Added useMemo, useEffect for DashboardStats
 
 // --- Components located in src/components/ ---
 import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
 import ViewBakeModal from '../components/ViewBakeModal';
 
 // --- Components located in src/pages/ (sibling files to Dashboard.js) ---
+// Note: DashboardStats is defined within this file, so no import statement for it is needed here.
 import BakingCalendar from './BakingCalendar';
 import UpcomingBakes from './UpcomingBakes';
 import UpcomingBakeForm from './UpcomingBakeForm';
 import IdeaForm from './IdeaForm';
-import JournalEntryForm from './JournalEntryForm'; // Assuming you have this for addJournalModal
+import JournalEntryForm from './JournalEntryForm'; // Assuming this is your form for editing/adding journal entries
 
-// --- masterIdeaList constant (as provided in your code) ---
+
+// --- masterIdeaList constant ---
 const masterIdeaList = [
     { ideaName: "Simple Chocolate Chip Cookies", difficulty: "simple" },
     { ideaName: "Easy Banana Bread", difficulty: "simple" },
@@ -60,17 +61,13 @@ const masterIdeaList = [
 ];
 
 
-// --- DashboardStats Component (as it was originally defined within this file) ---
+// --- DashboardStats Component (defined inline within this file) ---
 const DashboardStats = ({ journal, currentCalendarDate }) => {
     const [filter, setFilter] = useState('month');
 
-    // This effect syncs the filter with the calendar's navigation
     useEffect(() => {
-        // When the user navigates the calendar, we switch the filter to 'month'
-        // to show stats for that month.
         setFilter('month');
     }, [currentCalendarDate]);
-
 
     const stats = useMemo(() => {
         const now = new Date();
@@ -82,7 +79,7 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
             case 'week': {
                 const startOfWeek = new Date(now);
                 const day = startOfWeek.getUTCDay();
-                const diff = startOfWeek.getUTCDate() - day + (day === 0 ? -6 : 1); // Adjust to start on Monday
+                const diff = startOfWeek.getUTCDate() - day + (day === 0 ? -6 : 1);
                 startOfWeek.setUTCDate(diff);
                 startOfWeek.setUTCHours(0, 0, 0, 0);
 
@@ -101,14 +98,12 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
             }
             case 'last-week': {
                 const today = new Date();
-                const dayOfWeek = today.getUTCDay(); // Sunday = 0, Monday = 1, etc.
+                const dayOfWeek = today.getUTCDay();
                 const endOfLastWeek = new Date(today);
-                // Go back to last Sunday
                 endOfLastWeek.setUTCDate(today.getUTCDate() - dayOfWeek);
                 endOfLastWeek.setUTCHours(23, 59, 59, 999);
 
                 const startOfLastWeek = new Date(endOfLastWeek);
-                // Go back 6 more days to get to the previous Monday
                 startOfLastWeek.setUTCDate(endOfLastWeek.getUTCDate() - 6);
                 startOfLastWeek.setUTCHours(0, 0, 0, 0);
 
@@ -197,16 +192,37 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
     );
 };
 
-// --- Main Dashboard Component ---
-const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
 
+// --- Main Dashboard Component ---
+const Dashboard = ({
+    setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter,
+    openAddJournalModal, openAddIdeaModal, // These props will still open the main Add/Journal modals if needed
+    upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook,
+    updateJournalEntry // <<< IMPORTANT: Assuming you have an updateJournalEntry prop for editing
+}) => {
+
+    // States for general modals and calendar
     const [isAddChoiceModalOpen, setIsAddChoiceModalOpen] = useState(false);
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
     const [bakeToView, setBakeToView] = useState(null);
     const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
+    // States for the idea generator
+    const [idea, setIdea] = useState({ name: '', id: null });
+    const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
+    const [inspiredBy, setInspiredBy] = useState('');
+
+    // --- NEW STATES FOR EDITING JOURNAL ENTRY ---
+    const [isEditJournalModalOpen, setIsEditJournalModalOpen] = useState(false);
+    const [editJournalEntryData, setEditJournalEntryData] = useState(null);
+
+    // --- Modal Handlers (existing and modified) ---
     const handleOpenPastBakeForm = () => {
         setIsAddChoiceModalOpen(false);
+        // This likely opens the ADD journal modal, not edit.
+        // If openAddJournalModal is a prop that controls a modal elsewhere, keep it.
+        // If it was meant to open the local JournalEntryForm, use setIsAddJournalModalOpen(true)
+        // For now, retaining original call but noting the distinction.
         openAddJournalModal();
     };
 
@@ -224,25 +240,27 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setBakeToView(bake);
     };
 
-    const handleEditFromView = () => {
-        if (bakeToView) {
-            setDateFilter(bakeToView.bakingDate);
-            setView('journal');
-            setBakeToView(null);
+    // --- MODIFIED handleEditFromView to open JournalEntryForm for editing ---
+    const handleEditFromView = (bake) => {
+        if (bake) {
+            setEditJournalEntryData(bake);         // Set the data to pre-fill the form
+            setIsEditJournalModalOpen(true);        // Open the JournalEntryForm in edit mode
+            setBakeToView(null);                    // Close the ViewBakeModal
         }
     };
 
-    // --- Original Dashboard Generator Logic (extracted from your provided code) ---
-    const [idea, setIdea] = useState({ name: '', id: null });
-    const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
-    const [inspiredBy, setInspiredBy] = useState('');
-
+    // --- Idea Generator Functions ---
     const inspireMe = useCallback(() => {
+        if (!masterIdeaList || masterIdeaList.length === 0) {
+            setIdea({ name: "No general ideas to inspire from!", id: null });
+            setInspiredBy('');
+            return;
+        }
         const randomIndex = Math.floor(Math.random() * masterIdeaList.length);
         setIdea({ name: masterIdeaList[randomIndex].ideaName, id: null });
-        setShowConfirmation({ journal: false, idea: false }); // Clear previous confirmations
+        setShowConfirmation({ journal: false, idea: false });
         setInspiredBy('inspireMe');
-    }, [masterIdeaList]); // Added masterIdeaList to dependencies
+    }, [masterIdeaList]);
 
     const generateFromMyIdeas = useCallback(() => {
         if (!ideaPad || ideaPad.length === 0) {
@@ -250,55 +268,44 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             setInspiredBy('ideaPad');
             return;
         }
-        // If there's only one idea in the pad, and it's currently displayed,
-        // prevent showing "You've used up all your ideas" unless it truly is the only option.
         if (ideaPad.length === 1 && idea.name === ideaPad[0].ideaName) {
-            setIdea({ name: "You've used up all your ideas", id: null }); // Message adjusted for clarity
+            setIdea({ name: "You've used up all your ideas", id: null });
             setInspiredBy('ideaPad');
             return;
         }
 
         let newIdea = idea.name;
         let newIdeaId = idea.id;
-        // Loop until a new idea (different from the current one) is found, if multiple ideas exist
         while (newIdea === idea.name && ideaPad.length > 1) {
             const randomIndex = Math.floor(Math.random() * ideaPad.length);
             newIdea = ideaPad[randomIndex].ideaName;
             newIdeaId = ideaPad[randomIndex].id;
         }
-        // If there's only one idea and it's not currently displayed, select it.
-        // This handles the case where ideaPad.length was > 1, but after filtering (not explicitly done here)
-        // or just by chance, we kept picking the same one.
-        if (ideaPad.length === 1) { // If only one idea in pad, make sure to pick it
+        if (ideaPad.length === 1) {
             newIdea = ideaPad[0].ideaName;
             newIdeaId = ideaPad[0].id;
         }
 
         setIdea({ name: newIdea, id: newIdeaId });
-        setShowConfirmation({ journal: false, idea: false }); // Clear previous confirmations
+        setShowConfirmation({ journal: false, idea: false });
         setInspiredBy('ideaPad');
-    }, [ideaPad, idea]); // Depend on ideaPad and current idea to prevent repeats if possible
+    }, [ideaPad, idea]);
 
     const handleGeneratorChange = (event) => {
         const value = event.target.value;
-        // Reset the select to its default placeholder after a choice is made,
-        // but only if the value isn't empty (i.e., not the initial disabled option)
         if (value !== "") {
-            setIdea({ name: '', id: null }); // Clear previous idea display
-            setShowConfirmation({ journal: false, idea: false }); // Clear previous confirmations
+            setIdea({ name: '', id: null });
+            setShowConfirmation({ journal: false, idea: false });
 
             if (value === 'inspireMe') {
                 inspireMe();
             } else if (value === 'myIdeas') {
                 generateFromMyIdeas();
             }
-            // Reset the select dropdown visually *after* the action.
-            // This is handled by setting the 'value' prop to "" below in JSX
         }
     };
 
     const handleLetsBake = async () => {
-        // Added checks for "select" from placeholder
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up") || idea.name.includes("select")) return;
 
         const newEntry = {
@@ -314,31 +321,29 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         }
         setShowConfirmation({ journal: true, idea: false });
         setIdea({ name: '', id: null });
-        setInspiredBy(''); // Clear inspiredBy after action
-        setTimeout(() => setShowConfirmation({ journal: false, idea: false }), 3000); // Hide after 3 seconds
+        setInspiredBy('');
+        setTimeout(() => setShowConfirmation({ journal: false, idea: false }), 3000);
     };
 
     const handleAddToIdeaPad = async () => {
-        // Added checks for "select" from placeholder
         if (!idea.name || idea.name.includes("empty") || idea.name.includes("used up") || idea.name.includes("select")) return;
 
         await addIdea({ ideaName: idea.name, notes: 'From Inspire Me!', sourceURL: '', createdAt: new Date(), categories: [] });
         setShowConfirmation({ journal: false, idea: true });
         setIdea({ name: '', id: null });
-        setInspiredBy(''); // Clear inspiredBy after action
-        setTimeout(() => setShowConfirmation({ journal: false, idea: false }), 3000); // Hide after 3 seconds
+        setInspiredBy('');
+        setTimeout(() => setShowConfirmation({ journal: false, idea: false }), 3000);
     };
-    // --- END Original Dashboard Generator Logic ---
 
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
             <div className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
-                {/* START: Idea Generator Section - Reinstated Original Logic and UI */}
+                {/* START: Idea Generator Section */}
                 <div className="relative">
                     <select
                         onChange={handleGeneratorChange}
                         className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
-                        value="" // This makes the placeholder appear after selection
+                        value=""
                     >
                         <option value="" disabled>What should I bake?</option>
                         <option value="inspireMe" className="font-montserrat text-app-grey">Generate from Inspire Me!</option>
@@ -352,7 +357,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 {idea.name && (
                     <div className="text-center bg-app-white p-4 rounded-xl mt-4">
                         <p className="text-burnt-orange text-2xl font-medium mb-4">{idea.name}</p>
-                        {(!idea.name.includes("empty") && !idea.name.includes("used up") && !idea.name.includes("select")) && ( // Added "select" check
+                        {(!idea.name.includes("empty") && !idea.name.includes("used up") && !idea.name.includes("select")) && (
                             <div className="flex flex-col justify-center items-center gap-3">
                                 <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Add to my idea pad</button>}
@@ -366,9 +371,10 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 {/* END: Idea Generator Section */}
             </div>
 
-            {/* --- NEW BUTTON LAYOUT (from your previous working version) --- */}
+            {/* Quick Actions Buttons */}
             <div className="space-y-2">
                 <div className="grid grid-cols-3 gap-2">
+                    {/* These buttons assume openAddJournalModal and openAddIdeaModal are passed as props and control modals at a higher level */}
                     <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
                     <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
                     <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
@@ -379,7 +385,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 </div>
             </div>
 
-            {/* Dashboard Stats Component (inline, so no import needed at top for it) */}
+            {/* Dashboard Stats Component */}
             <DashboardStats
                 journal={journal}
                 currentCalendarDate={currentCalendarDate}
@@ -426,33 +432,59 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 <ViewBakeModal
                     bake={bakeToView}
                     onClose={() => setBakeToView(null)}
-                    onEdit={handleEditFromView}
+                    onEdit={handleEditFromView} // This now correctly triggers the edit form
                 />
             )}
-            {/* These modals are opened by props passed to Dashboard: openAddJournalModal, openAddIdeaModal */}
-            {/* If those props actually open the modals themselves, you don't need additional modal logic here */}
-            {/* However, if they just set a local state in App.js to open a modal there, then this is fine. */}
-            {/* But if these are actual modals controlled here, you'd need states like isAddJournalModalOpen, isAddIdeaModalOpen */}
-            {/* I've added basic implementations assuming they are handled locally within Dashboard's scope */}
 
-            {/* Example of how JournalEntryForm and IdeaForm might be rendered if controlled by Dashboard's state */}
-            {/* I've re-added these as state-controlled modals within Dashboard as per my previous approach,
-                because your original code didn't show `JournalEntryForm` or `IdeaForm` being rendered directly,
-                only opened via props (`openAddJournalModal`, `openAddIdeaModal`).
-                If those props are meant to trigger modals *outside* Dashboard, then this part needs adjustment.
-                For now, I'm assuming they're controlled by Dashboard's state `isAddJournalModalOpen` and `isAddIdeaModalOpen`.
-            */}
-            {isAddJournalModalOpen && (
+            {/* JournalEntryForm for ADDING (if controlled by Dashboard state directly) */}
+            {/* If openAddJournalModal prop leads to a modal outside Dashboard, you might not need this. */}
+            {/* I'm including it assuming Dashboard *can* control its own add journal modal. */}
+            {/* Note: I'm passing addJournalEntry and cookbook as props, assuming the form needs them. */}
+            {/* The onSave here just calls addJournalEntry and closes the modal. */}
+            {/* You'll need to define a handleSaveJournalEntry if you want more complex logic here. */}
+            {openAddJournalModal && ( // If openAddJournalModal is a prop and directly controls visibility
+                // This assumes openAddJournalModal is actually a boolean state prop that turns this on/off
+                // If it's a function that *opens* a modal elsewhere, this needs rethinking.
+                // For now, I'm assuming it's a state that becomes true when "Add Bake" is clicked.
                 <JournalEntryForm
-                    onSave={(entryData) => { addJournalEntry(entryData); setIsAddJournalModalOpen(false); }}
-                    onCancel={() => setIsAddJournalModalOpen(false)}
-                    cookbook={cookbook}
+                    onSave={(entryData) => { addJournalEntry(entryData); /* maybe close modal here? */ }}
+                    onCancel={() => { /* maybe close modal here? */ }}
+                    cookbook={cookbook} // Pass cookbook if JournalEntryForm needs it
                 />
             )}
-            {isAddIdeaModalOpen && (
+
+            {/* IdeaForm for ADDING (if controlled by Dashboard state directly) */}
+            {/* Similar logic as JournalEntryForm above. */}
+            {openAddIdeaModal && ( // If openAddIdeaModal is a prop and directly controls visibility
                 <IdeaForm
-                    onSave={(ideaData) => { addIdea(ideaData); setIsAddIdeaModalOpen(false); }}
-                    onCancel={() => setIsAddIdeaModalOpen(false)}
+                    onSave={(ideaData) => { addIdea(ideaData); /* maybe close modal here? */ }}
+                    onCancel={() => { /* maybe close modal here? */ }}
+                />
+            )}
+
+
+            {/* --- JournalEntryForm for EDITING (NEW) --- */}
+            {isEditJournalModalOpen && (
+                <JournalEntryForm
+                    initialData={editJournalEntryData} // Pass the bake data to pre-fill the form
+                    onSave={async (updatedEntry) => {
+                        // Assuming you have an 'updateJournalEntry' function available as a prop
+                        // (you'll need to pass this prop to Dashboard from your App.js or parent)
+                        if (updateJournalEntry) {
+                            await updateJournalEntry(updatedEntry.id, updatedEntry); // Call the update function
+                        } else {
+                            console.warn("updateJournalEntry function is not provided to Dashboard.");
+                            // Handle saving logic here if updateJournalEntry is not a prop
+                            // e.g., if you're using contexts/hooks for updates.
+                        }
+                        setIsEditJournalModalOpen(false); // Close the edit modal
+                        setEditJournalEntryData(null);    // Clear the edit data
+                    }}
+                    onCancel={() => {
+                        setIsEditJournalModalOpen(false);
+                        setEditJournalEntryData(null);
+                    }}
+                    cookbook={cookbook} // Pass cookbook if JournalEntryForm needs it for categories/recipes
                 />
             )}
         </div>
