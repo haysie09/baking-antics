@@ -9,10 +9,11 @@ import ViewBakeModal from '../components/ViewBakeModal';
 // --- Components located in src/pages/ (sibling files to Dashboard.js) ---
 // DashboardStats is defined inline below, so no import needed here.
 import BakingCalendar from './BakingCalendar';
-import UpcomingBakes from './UpcomingBakes';
+// Removed UpcomingBakes from here as it's being moved.
 import UpcomingBakeForm from './UpcomingBakeForm';
-import IdeaForm from './IdeaForm'; // This import is needed if you are using IdeaForm for the generator's "Add to Idea Pad" functionality
-import JournalEntryForm from './JournalEntryForm'; // This import is needed for the Calendar Edit functionality
+import IdeaForm from './IdeaForm';
+import JournalEntryForm from './JournalEntryForm';
+import UpcomingBakes from './UpcomingBakes'; // <<< Re-added import as it's a sibling file
 
 
 // --- masterIdeaList constant ---
@@ -196,9 +197,9 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
 // --- Main Dashboard Component ---
 const Dashboard = ({
     setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter,
-    openAddJournalModal, openAddIdeaModal, // These are functions from parent (App.js) to open modals
+    openAddJournalModal, openAddIdeaModal,
     upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook,
-    updateJournalEntry // IMPORTANT: Assuming you have an updateJournalEntry prop for editing
+    updateJournalEntry
 }) => {
 
     // States for general modals and calendar
@@ -212,14 +213,14 @@ const Dashboard = ({
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
 
-    // --- NEW STATES FOR EDITING JOURNAL ENTRY (controlled by Dashboard) ---
+    // States for editing journal entry
     const [isEditJournalModalOpen, setIsEditJournalModalOpen] = useState(false);
     const [editJournalEntryData, setEditJournalEntryData] = useState(null);
 
-    // --- Modal Handlers (existing and modified) ---
+    // --- Modal Handlers ---
     const handleOpenPastBakeForm = () => {
         setIsAddChoiceModalOpen(false);
-        openAddJournalModal(); // Call the prop function
+        openAddJournalModal();
     };
 
     const handleOpenUpcomingBakeForm = () => {
@@ -236,12 +237,11 @@ const Dashboard = ({
         setBakeToView(bake);
     };
 
-    // --- MODIFIED handleEditFromView to open JournalEntryForm for editing ---
     const handleEditFromView = (bake) => {
         if (bake) {
-            setEditJournalEntryData(bake);         // Set the data to pre-fill the form
-            setIsEditJournalModalOpen(true);        // Open the JournalEntryForm in edit mode
-            setBakeToView(null);                    // Close the ViewBakeModal
+            setEditJournalEntryData(bake);
+            setIsEditJournalModalOpen(true);
+            setBakeToView(null);
         }
     };
 
@@ -367,19 +367,28 @@ const Dashboard = ({
                 {/* END: Idea Generator Section */}
             </div>
 
-            {/* Quick Actions Buttons */}
+            {/* Quick Actions Buttons (Styling Adjusted) */}
             <div className="space-y-2">
                 <div className="grid grid-cols-3 gap-2">
-                    {/* These buttons now explicitly call the prop functions */}
-                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
-                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
-                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
+                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-1.5 px-2.5 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
+                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-1.5 px-2.5 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
+                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-1.5 px-2.5 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">My Cookbook</button>
-                    <button onClick={() => setView('journal')} className="w-full bg-burnt-orange text-light-peach py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">My Journal</button>
+                    <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-1.5 px-2.5 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">My Cookbook</button>
+                    <button onClick={() => setView('journal')} className="w-full bg-burnt-orange text-light-peach py-1.5 px-2.5 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">My Journal</button>
                 </div>
             </div>
+
+            {/* Upcoming Bakes Component (MOVED HERE) */}
+            <UpcomingBakes
+                upcomingBakes={upcomingBakes}
+                addUpcomingBake={addUpcomingBake}
+                updateUpcomingBake={updateUpcomingBake}
+                deleteUpcomingBake={deleteUpcomingBake}
+                cookbook={cookbook}
+                addJournalEntry={addJournalEntry}
+            />
 
             {/* Dashboard Stats Component */}
             <DashboardStats
@@ -397,16 +406,6 @@ const Dashboard = ({
                 onViewBake={handleViewBake}
                 currentDate={currentCalendarDate}
                 setCurrentDate={setCurrentCalendarDate}
-            />
-
-            {/* Upcoming Bakes Component */}
-            <UpcomingBakes
-                upcomingBakes={upcomingBakes}
-                addUpcomingBake={addUpcomingBake}
-                updateUpcomingBake={updateUpcomingBake}
-                deleteUpcomingBake={deleteUpcomingBake}
-                cookbook={cookbook}
-                addJournalEntry={addJournalEntry}
             />
 
             {/* --- Modals controlled by Dashboard's local state --- */}
@@ -432,10 +431,10 @@ const Dashboard = ({
                 />
             )}
 
-            {/* JournalEntryForm for EDITING (NEW) - controlled by Dashboard's state */}
+            {/* JournalEntryForm for EDITING (controlled by Dashboard's state) */}
             {isEditJournalModalOpen && (
                 <JournalEntryForm
-                    initialData={editJournalEntryData} // Pass the bake data to pre-fill the form
+                    initialData={editJournalEntryData}
                     onSave={async (updatedEntry) => {
                         if (updateJournalEntry) {
                             await updateJournalEntry(updatedEntry.id, updatedEntry);
