@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import CookbookForm from './CookbookForm';
 import ConfirmationModal from '../components/ConfirmationModal';
+import FilterComponent from '../components/FilterComponent'; // 1. Import the new filter component
 
-// Note: This constant will be moved later. For now, we'll copy it here.
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 
 const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
@@ -10,8 +10,13 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [expandedCookbookId, setExpandedCookbookId] = useState(null);
-    const [activeFilters, setActiveFilters] = useState([]);
-    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+    
+    // 2. New state to hold all active filters
+    const [activeFilters, setActiveFilters] = useState({
+        categories: [],
+        month: 'all',
+        year: 'all'
+    });
 
     const handleSave = async (recipeData) => {
         if (isCreatingNew) await addRecipe({ ...recipeData, createdAt: new Date() });
@@ -19,42 +24,48 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
         setEditingRecipe(null); setIsCreatingNew(false);
     };
 
-    const handleFilterToggle = (cat) => {
-        setActiveFilters(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]);
+    // 3. Handler to receive filter changes
+    const handleFilterChange = (filters) => {
+        setActiveFilters(filters);
     };
 
+    // 4. `useMemo` is updated with the new advanced filtering logic
     const filteredCookbook = useMemo(() => {
-        if (!cookbook) return [];
-        if (activeFilters.length === 0) return cookbook;
-        return cookbook.filter(recipe =>
-            recipe.categories && activeFilters.every(filter => recipe.categories.includes(filter))
-        );
+        let recipes = cookbook || [];
+
+        // Apply category filter
+        if (activeFilters.categories.length > 0) {
+            recipes = recipes.filter(recipe => 
+                activeFilters.categories.every(filterCat => recipe.categories?.includes(filterCat))
+            );
+        }
+
+        // Apply month filter (using createdAt timestamp)
+        if (activeFilters.month !== 'all') {
+            recipes = recipes.filter(recipe => recipe.createdAt && new Date(recipe.createdAt.toDate()).getMonth() === parseInt(activeFilters.month));
+        }
+
+        // Apply year filter (using createdAt timestamp)
+        if (activeFilters.year !== 'all') {
+            recipes = recipes.filter(recipe => recipe.createdAt && new Date(recipe.createdAt.toDate()).getFullYear() === parseInt(activeFilters.year));
+        }
+
+        return recipes;
     }, [cookbook, activeFilters]);
 
     return (
         <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-4xl font-bold text-burnt-orange">My Cookbook</h1>
-                <button onClick={() => setIsCreatingNew(true)} className="bg-burnt-orange text-light-peach py-1 px-4 rounded-xl font-normal hover:opacity-90 transition-opacity text-base font-montserrat">Add Recipe</button>
+                <button onClick={() => setIsCreatingNew(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Recipe</button>
             </div>
-            <div className="bg-info-box p-3 rounded-xl mb-4 border border-burnt-orange">
-                <button onClick={() => setShowFilterDropdown(!showFilterDropdown)} className="w-full flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-app-grey">Filter by Category</h3>
-                    <span className={`transform transition-transform text-burnt-orange ${showFilterDropdown ? 'rotate-180' : ''}`}>▼</span>
-                </button>
-                {showFilterDropdown && (
-                    <div className="mt-2 flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleFilterToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${activeFilters.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
-                )}
-                {activeFilters.length > 0 &&
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                        <span className="text-sm font-semibold text-app-grey">Active:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                            {activeFilters.map(f => <span key={f} className="py-1 px-2 rounded-full text-xs bg-burnt-orange text-light-peach font-montserrat">{f}</span>)}
-                        </div>
-                        <button onClick={() => setActiveFilters([])} className="text-sm text-burnt-orange hover:underline mt-2">Clear Filters</button>
-                    </div>
-                }
-            </div>
+            
+            {/* 5. Old filter UI is replaced with the new component */}
+            <FilterComponent 
+                categories={journalCategories}
+                onFilterChange={handleFilterChange}
+            />
+
             <div className="space-y-4">
                 {filteredCookbook.length === 0 ? <div className="text-center py-16 bg-info-box rounded-xl border border-burnt-orange"><p className="text-app-grey text-2xl">{cookbook && cookbook.length > 0 ? "No recipes match filters" : "Save your favorite recipes"}</p></div> : [...filteredCookbook].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()).map(recipe => (
                     <div key={recipe.id} className="bg-info-box p-4 rounded-xl border border-burnt-orange">

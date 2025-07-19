@@ -1,19 +1,21 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react'; // Added useEffect for potential data fetching if 'ideas' isn't passed as a prop
 import ConfirmationModal from '../components/ConfirmationModal';
 import IdeaForm from './IdeaForm';
+import FilterComponent from '../components/FilterComponent'; // Import the new FilterComponent
 
-// Note: This constant will be moved later. For now, we'll copy it here.
-const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
-
-// We are renaming BakeListIdeaPad to just IdeaPad for simplicity
 const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
+    // Original states
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [showMoveConfirm, setShowMoveConfirm] = useState(false);
-    const [activeFilters, setActiveFilters] = useState([]);
-    const [showFilterDropdown, setShowFilterDropdown] = useState(false);
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
 
+    // New states for the FilterComponent
+    const [selectedMonth, setSelectedMonth] = useState('');
+    const [selectedYear, setSelectedYear] = useState('');
+    const [selectedCategories, setSelectedCategories] = useState([]);
+
+    // --- Original Functions ---
     const handleAddIdea = async (ideaData) => {
         await addIdea({ ...ideaData, createdAt: new Date() });
         setIsAddIdeaModalOpen(false);
@@ -37,50 +39,65 @@ const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
         setTimeout(() => setShowMoveConfirm(false), 3000);
     };
 
-    const handleFilterToggle = (cat) => {
-        setActiveFilters(prev => prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]);
+    // --- Handler for filter changes from FilterComponent ---
+    const handleFilterChange = ({ month, year, categories }) => {
+        setSelectedMonth(month);
+        setSelectedYear(year);
+        setSelectedCategories(categories);
     };
 
+    // --- Updated filteredIdeas memo ---
     const filteredIdeas = useMemo(() => {
         if (!ideas) return [];
-        if (activeFilters.length === 0) return ideas;
-        return ideas.filter(idea =>
-            idea.categories && activeFilters.every(filter => idea.categories.includes(filter))
-        );
-    }, [ideas, activeFilters]);
+
+        let currentFilteredIdeas = ideas;
+
+        // Apply month filter
+        if (selectedMonth) {
+            currentFilteredIdeas = currentFilteredIdeas.filter(
+                (idea) => idea.createdAt && new Date(idea.createdAt.toDate()).getMonth() + 1 === parseInt(selectedMonth)
+            );
+        }
+
+        // Apply year filter
+        if (selectedYear) {
+            currentFilteredIdeas = currentFilteredIdeas.filter(
+                (idea) => idea.createdAt && new Date(idea.createdAt.toDate()).getFullYear() === parseInt(selectedYear)
+            );
+        }
+
+        // Apply category filter
+        if (selectedCategories.length > 0) {
+            currentFilteredIdeas = currentFilteredIdeas.filter((idea) =>
+                idea.categories && selectedCategories.every((cat) => idea.categories.includes(cat))
+            );
+        }
+
+        return currentFilteredIdeas;
+    }, [ideas, selectedMonth, selectedYear, selectedCategories]);
 
     return (
         <div className="p-4 md:p-6 bg-app-white h-full font-patrick-hand">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-4xl font-bold text-burnt-orange">Bake List Idea Pad</h1>
+                <h1 className="text-4xl font-bold text-burnt-orange">Idea Pad</h1>
                 <button onClick={() => setIsAddIdeaModalOpen(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
             </div>
 
             {isAddIdeaModalOpen && <IdeaForm onSave={handleAddIdea} onCancel={() => setIsAddIdeaModalOpen(false)} />}
             {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">New idea added!</span></div>}
 
-            <div className="bg-info-box p-3 rounded-xl my-4 border border-burnt-orange">
-                <button onClick={() => setShowFilterDropdown(!showFilterDropdown)} className="w-full flex justify-between items-center">
-                    <h3 className="text-lg font-semibold text-app-grey">Filter by Category</h3>
-                    <span className={`transform transition-transform text-burnt-orange ${showFilterDropdown ? 'rotate-180' : ''}`}>▼</span>
-                </button>
-                {showFilterDropdown && (
-                    <div className="mt-2 flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleFilterToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${activeFilters.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div>
-                )}
-                {activeFilters.length > 0 &&
-                    <div className="mt-2 pt-2 border-t border-gray-200">
-                        <span className="text-sm font-semibold text-app-grey">Active:</span>
-                        <div className="flex flex-wrap gap-1 mt-1">
-                            {activeFilters.map(f => <span key={f} className="py-1 px-2 rounded-full text-xs bg-burnt-orange text-light-peach font-montserrat">{f}</span>)}
-                        </div>
-                        <button onClick={() => setActiveFilters([])} className="text-sm text-burnt-orange hover:underline mt-2">Clear Filters</button>
-                    </div>
-                }
-            </div>
+            {/* NEW FILTER COMPONENT */}
+            <FilterComponent
+                onFilterChange={handleFilterChange}
+                // Pass all available categories from your ideas for the filter component to display
+                allCategories={[...new Set(ideas ? ideas.flatMap(idea => idea.categories || []) : [])]}
+            />
+            {/* END NEW FILTER COMPONENT */}
+
             {showMoveConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">Idea added to your journal!</span></div>}
 
             <div className="space-y-3 mt-6 max-h-96 overflow-y-auto p-1">
-                {filteredIdeas.length === 0 ? <p className="text-center text-app-grey py-8 text-2xl">{ideas.length > 0 ? "No ideas match filters" : "Add Baking Notes & Ideas"}</p> : [...filteredIdeas].sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0)).map(idea => (
+                {filteredIdeas.length === 0 ? <p className="text-center text-app-grey py-8 text-2xl">{ideas && ideas.length > 0 ? "No ideas match filters" : "Add Baking Notes & Ideas"}</p> : [...filteredIdeas].sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0)).map(idea => (
                     <div key={idea.id} className="bg-info-box p-3 rounded-xl border border-burnt-orange">
                         <div className="flex items-center justify-between">
                             <span className="text-burnt-orange text-xl font-semibold">{idea.ideaName}</span>

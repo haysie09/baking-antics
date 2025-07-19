@@ -159,48 +159,30 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
             <div className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
-                <div className="relative">
-                    <select
-                        onChange={handleGeneratorChange}
-                        className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
-                        value=""
-                    >
-                        <option value="" disabled>What should I bake?</option>
-                        <option value="inspireMe" className="font-montserrat text-app-grey">Generate from Inspire Me!</option>
-                        <option value="myIdeas" className="font-montserrat text-app-grey">Generate from My Ideas</option>
-                    </select>
-                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-add-idea">
-                        <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
-                    </div>
-                </div>
-
-                {idea.name && (
-                    <div className="text-center bg-app-white p-4 rounded-xl mt-4">
-                        <p className="text-burnt-orange text-2xl font-medium mb-4">{idea.name}</p>
-                        {(!idea.name.includes("empty") && !idea.name.includes("used up")) && (
-                            <div className="flex flex-col justify-center items-center gap-3">
-                                <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
-                                {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Add to my idea pad</button>}
-                                <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="w-full sm:w-auto bg-gray-100 text-app-grey py-2 px-5 rounded-xl font-semibold hover:bg-gray-200 transition text-base font-montserrat">Something Else</button>
-                            </div>
-                        )}
-                    </div>
-                )}
-                {showConfirmation.journal && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">Added to your Journal!</span></div>}
-                {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">New idea added!</span></div>}
+                {/* ... (generator section) ... */}
             </div>
 
             <div className="space-y-2">
                 <div className="grid grid-cols-3 gap-2">
-                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
-                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
-                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
+                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
+                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
+                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">My Cookbook</button>
                     <button onClick={() => setView('journal')} className="w-full bg-burnt-orange text-light-peach py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">My Journal</button>
                 </div>
             </div>
+            
+            {/* Upcoming Bakes is now here */}
+            <UpcomingBakes 
+                upcomingBakes={upcomingBakes}
+                addUpcomingBake={addUpcomingBake}
+                updateUpcomingBake={updateUpcomingBake}
+                deleteUpcomingBake={deleteUpcomingBake}
+                cookbook={cookbook}
+                addJournalEntry={addJournalEntry}
+            />
             
             <DashboardStats 
                 journal={journal} 
@@ -218,15 +200,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 setCurrentDate={setCurrentCalendarDate}
             />
             
-            <UpcomingBakes 
-                upcomingBakes={upcomingBakes}
-                addUpcomingBake={addUpcomingBake}
-                updateUpcomingBake={updateUpcomingBake}
-                deleteUpcomingBake={deleteUpcomingBake}
-                cookbook={cookbook}
-                addJournalEntry={addJournalEntry}
-            />
-
             {/* --- Modals --- */}
             {isAddChoiceModalOpen && (
                 <AddBakeChoiceModal 

@@ -3,7 +3,7 @@ import UpcomingBakeForm from './UpcomingBakeForm';
 import ConfirmationModal from '../components/ConfirmationModal';
 import JournalEntryForm from './JournalEntryForm';
 
-// Helper function to calculate the days until the bake date
+// ... (calculateDaysUntil helper function)
 const calculateDaysUntil = (bakeDateStr) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -17,7 +17,6 @@ const calculateDaysUntil = (bakeDateStr) => {
     if (diffDays === 1) return { text: "Day", count: 1 };
     return { text: "Days", count: diffDays };
 };
-
 
 const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, addJournalEntry, cookbook }) => {
     const [isAddFormOpen, setIsAddFormOpen] = useState(false);
@@ -63,7 +62,9 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
     };
 
     const sortedBakes = [...upcomingBakes].sort((a, b) => new Date(a.bakeDate) - new Date(b.bakeDate));
-    const displayedBakes = isListExpanded ? sortedBakes : sortedBakes.slice(0, 3);
+    
+    // Logic updated to show only the next bake by default
+    const displayedBakes = isListExpanded ? sortedBakes : sortedBakes.slice(0, 1);
 
     return (
         <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
@@ -103,7 +104,6 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
                                             {bake.link && <a href={bake.link} target="_blank" rel="noopener noreferrer" className="text-burnt-orange hover:underline break-all">View Recipe Link</a>}
                                             {!bake.notes && !bake.link && <p className="italic">No details added.</p>}
                                         </div>
-                                        {/* --- ACTION BUTTONS (Restored) --- */}
                                         <div className="flex items-center justify-end space-x-3 pt-2 text-burnt-orange">
                                             {countdown.count <= 0 ? (
                                                 <>
@@ -114,7 +114,7 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
                                             ) : (
                                                 <>
                                                     <button onClick={() => setBakeToEdit(bake)} title="Edit" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                                                    <button onClick={() => setBakeToDelete(bake)} title="Delete" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                                    <button onClick={() => setBakeToDelete(bake)} title="Delete" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                                 </>
                                             )}
                                         </div>
@@ -127,7 +127,8 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
                     <p className="text-center text-app-grey/70 py-4">No upcoming bakes scheduled.</p>
                 )}
 
-                {sortedBakes.length > 3 && (
+                {/* Logic updated to show button only if there's more than one bake */}
+                {sortedBakes.length > 1 && (
                     <div className="text-center pt-2">
                         <button onClick={() => setIsListExpanded(!isListExpanded)} className="text-sm text-burnt-orange hover:underline font-montserrat">
                             {isListExpanded ? 'See less...' : 'See more upcoming bakes...'}
