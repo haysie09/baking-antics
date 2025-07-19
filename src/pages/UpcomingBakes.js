@@ -14,23 +14,19 @@ const calculateDaysUntil = (bakeDateStr) => {
 
     if (diffDays < 0) return { text: "Overdue", count: diffDays };
     if (diffDays === 0) return { text: "Today", count: diffDays };
-    if (diffDays === 1) return { text: "Day", count: 1 }; // Simplified text
-    return { text: "Days", count: diffDays }; // Simplified text
+    if (diffDays === 1) return { text: "Day", count: 1 };
+    return { text: "Days", count: diffDays };
 };
 
 
 const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, addJournalEntry, cookbook }) => {
-    // --- STATE FOR MODALS ---
     const [isAddFormOpen, setIsAddFormOpen] = useState(false);
     const [bakeToEdit, setBakeToEdit] = useState(null);
     const [bakeToDelete, setBakeToDelete] = useState(null);
     const [bakeToJournal, setBakeToJournal] = useState(null);
     const [expandedId, setExpandedId] = useState(null);
-    
-    // --- NEW: State for collapsible list ---
     const [isListExpanded, setIsListExpanded] = useState(false);
 
-    // --- HANDLER FUNCTIONS ---
     const handleSaveNewBake = async (bakeData) => {
         await addUpcomingBake(bakeData);
         setIsAddFormOpen(false);
@@ -67,8 +63,6 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
     };
 
     const sortedBakes = [...upcomingBakes].sort((a, b) => new Date(a.bakeDate) - new Date(b.bakeDate));
-    
-    // --- NEW: Logic to determine which bakes to display ---
     const displayedBakes = isListExpanded ? sortedBakes : sortedBakes.slice(0, 3);
 
     return (
@@ -90,7 +84,6 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
                                 <div className="flex justify-between items-center cursor-pointer" onClick={() => handleToggleExpand(bake.id)}>
                                     <p className="font-montserrat text-lg text-app-grey">{bake.title}</p>
                                     <div className="flex items-center gap-2">
-                                        {/* --- Countdown text is now smaller --- */}
                                         <div className="text-right font-montserrat">
                                             <div className="flex items-baseline gap-1 justify-end">
                                                 <span className="font-bold text-xl text-add-idea">
@@ -105,7 +98,26 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
                                 
                                 {isExpanded && (
                                     <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                                        {/* ... (details and action buttons logic remains the same) ... */}
+                                        <div className="font-montserrat text-base text-app-grey">
+                                            {bake.notes && <p>{bake.notes}</p>}
+                                            {bake.link && <a href={bake.link} target="_blank" rel="noopener noreferrer" className="text-burnt-orange hover:underline break-all">View Recipe Link</a>}
+                                            {!bake.notes && !bake.link && <p className="italic">No details added.</p>}
+                                        </div>
+                                        {/* --- ACTION BUTTONS (Restored) --- */}
+                                        <div className="flex items-center justify-end space-x-3 pt-2 text-burnt-orange">
+                                            {countdown.count <= 0 ? (
+                                                <>
+                                                    <button onClick={() => handleMoveToJournal(bake)} title="Add to Journal" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg></button>
+                                                    <button onClick={() => setBakeToDelete(bake)} title="Delete" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                                                    <button onClick={() => setBakeToEdit(bake)} title="Reschedule" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <button onClick={() => setBakeToEdit(bake)} title="Edit" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                                                    <button onClick={() => setBakeToDelete(bake)} title="Delete" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -115,7 +127,6 @@ const UpcomingBakes = ({ upcomingBakes, addUpcomingBake, updateUpcomingBake, del
                     <p className="text-center text-app-grey/70 py-4">No upcoming bakes scheduled.</p>
                 )}
 
-                {/* --- NEW: "See more" button --- */}
                 {sortedBakes.length > 3 && (
                     <div className="text-center pt-2">
                         <button onClick={() => setIsListExpanded(!isListExpanded)} className="text-sm text-burnt-orange hover:underline font-montserrat">
