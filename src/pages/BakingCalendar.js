@@ -1,19 +1,23 @@
 import React, { useState, useMemo } from 'react';
 
-// The prop `openAddJournalModal` is replaced with `openAddChoiceModal`
-const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAddChoiceModal }) => {
+// Accept the new `onViewBake` prop
+const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAddChoiceModal, onViewBake }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
 
-    const bakedDays = useMemo(() => {
-        const dates = new Set();
+    // Create a map for quick lookup of bakes by date string
+    const bakedDaysMap = useMemo(() => {
+        const map = new Map();
         if (journal) {
             journal.forEach(entry => {
                 const bakeDate = new Date(entry.bakingDate);
                 const utcDate = new Date(Date.UTC(bakeDate.getFullYear(), bakeDate.getMonth(), bakeDate.getDate()));
-                dates.add(utcDate.toDateString());
+                // For simplicity, we'll just show the first bake if there are multiple on one day
+                if (!map.has(utcDate.toDateString())) {
+                    map.set(utcDate.toDateString(), entry);
+                }
             });
         }
-        return dates;
+        return map;
     }, [journal]);
 
     const upcomingBakeDays = useMemo(() => {
@@ -36,12 +40,15 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
     };
 
+    // Updated handler to trigger the view modal
     const handleDayClick = (day) => {
         const fullDate = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), day));
-        if (bakedDays.has(fullDate.toDateString())) {
-            setDateFilter(fullDate.toISOString().split('T')[0]);
-            setView('journal');
-        } else if (upcomingBakeDays.has(fullDate.toDateString())) {
+        const dateString = fullDate.toDateString();
+
+        if (bakedDaysMap.has(dateString)) {
+            const bakeToView = bakedDaysMap.get(dateString);
+            onViewBake(bakeToView); // Call the function passed from Dashboard
+        } else if (upcomingBakeDays.has(dateString)) {
             alert("This is an upcoming bake! You can edit it from the list below.");
         } else {
             alert("No past bake on this day. Use the '+' to add one.");
@@ -64,7 +71,7 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         const dayDate = new Date(Date.UTC(year, month, i));
         const dayDateString = dayDate.toDateString();
         
-        const isBaked = bakedDays.has(dayDateString);
+        const isBaked = bakedDaysMap.has(dayDateString);
         const isUpcoming = upcomingBakeDays.has(dayDateString);
         const isToday = dayDateString === todayDateString;
 
@@ -85,7 +92,6 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-2xl font-bold text-burnt-orange">My Baking Calendar</h3>
-                {/* The onClick now opens the choice modal */}
                 <button onClick={openAddChoiceModal} className="text-add-idea" title="Add Bake">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
                 </button>

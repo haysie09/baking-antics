@@ -2,8 +2,9 @@ import React, { useState, useCallback } from 'react';
 import DashboardStats from './DashboardStats';
 import BakingCalendar from './BakingCalendar';
 import UpcomingBakes from './UpcomingBakes';
-import AddBakeChoiceModal from '../components/AddBakeChoiceModal'; // Import the new modal
-import UpcomingBakeForm from './UpcomingBakeForm'; // Import the form
+import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
+import UpcomingBakeForm from './UpcomingBakeForm';
+import ViewBakeModal from '../components/ViewBakeModal'; // 1. Import the new view modal
 
 // Master Idea List constant
 const masterIdeaList = [
@@ -52,24 +53,39 @@ const masterIdeaList = [
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
     
-    // --- State for our new modals ---
+    // --- State for our modals ---
     const [isAddChoiceModalOpen, setIsAddChoiceModalOpen] = useState(false);
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
+    const [bakeToView, setBakeToView] = useState(null); // 2. New state to hold the bake being viewed
 
     // --- Handlers for the choice modal ---
     const handleOpenPastBakeForm = () => {
-        setIsAddChoiceModalOpen(false); // Close choice modal
-        openAddJournalModal(); // Open the journal form (function from App.js)
+        setIsAddChoiceModalOpen(false);
+        openAddJournalModal();
     };
 
     const handleOpenUpcomingBakeForm = () => {
-        setIsAddChoiceModalOpen(false); // Close choice modal
-        setIsAddUpcomingBakeModalOpen(true); // Open the upcoming bake form
+        setIsAddChoiceModalOpen(false);
+        setIsAddUpcomingBakeModalOpen(true);
     };
 
     const handleSaveUpcomingBake = async (bakeData) => {
         await addUpcomingBake(bakeData);
-        setIsAddUpcomingBakeModalOpen(false); // Close form on save
+        setIsAddUpcomingBakeModalOpen(false);
+    };
+
+    // --- 3. New handlers for the view modal ---
+    const handleViewBake = (bake) => {
+        setBakeToView(bake);
+    };
+
+    const handleEditFromView = () => {
+        // This will navigate to the main journal page to handle editing
+        if (bakeToView) {
+            setDateFilter(bakeToView.bakingDate);
+            setView('journal');
+            setBakeToView(null); // Close the modal
+        }
     };
     
     // --- Existing Dashboard Logic ---
@@ -191,7 +207,8 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 upcomingBakes={upcomingBakes} 
                 setView={setView} 
                 setDateFilter={setDateFilter} 
-                openAddChoiceModal={() => setIsAddChoiceModalOpen(true)} 
+                openAddChoiceModal={() => setIsAddChoiceModalOpen(true)}
+                onViewBake={handleViewBake} // 4. Pass the new handler down
             />
             
             <UpcomingBakes 
@@ -217,6 +234,15 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                     onSave={handleSaveUpcomingBake}
                     onCancel={() => setIsAddUpcomingBakeModalOpen(false)}
                     cookbook={cookbook}
+                />
+            )}
+
+            {/* 5. Render the new view modal */}
+            {bakeToView && (
+                <ViewBakeModal 
+                    bake={bakeToView}
+                    onClose={() => setBakeToView(null)}
+                    onEdit={handleEditFromView}
                 />
             )}
         </div>
