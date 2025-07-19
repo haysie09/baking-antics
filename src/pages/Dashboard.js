@@ -1,18 +1,18 @@
 // src/pages/Dashboard.js
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react'; // Added useMemo, useEffect for DashboardStats
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 // --- Components located in src/components/ ---
 import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
 import ViewBakeModal from '../components/ViewBakeModal';
 
 // --- Components located in src/pages/ (sibling files to Dashboard.js) ---
-// Note: DashboardStats is defined within this file, so no import statement for it is needed here.
+// DashboardStats is defined inline below, so no import needed here.
 import BakingCalendar from './BakingCalendar';
 import UpcomingBakes from './UpcomingBakes';
 import UpcomingBakeForm from './UpcomingBakeForm';
-import IdeaForm from './IdeaForm';
-import JournalEntryForm from './JournalEntryForm'; // Assuming this is your form for editing/adding journal entries
+import IdeaForm from './IdeaForm'; // This import is needed if you are using IdeaForm for the generator's "Add to Idea Pad" functionality
+import JournalEntryForm from './JournalEntryForm'; // This import is needed for the Calendar Edit functionality
 
 
 // --- masterIdeaList constant ---
@@ -196,9 +196,9 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
 // --- Main Dashboard Component ---
 const Dashboard = ({
     setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter,
-    openAddJournalModal, openAddIdeaModal, // These props will still open the main Add/Journal modals if needed
+    openAddJournalModal, openAddIdeaModal, // These are functions from parent (App.js) to open modals
     upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook,
-    updateJournalEntry // <<< IMPORTANT: Assuming you have an updateJournalEntry prop for editing
+    updateJournalEntry // IMPORTANT: Assuming you have an updateJournalEntry prop for editing
 }) => {
 
     // States for general modals and calendar
@@ -212,18 +212,14 @@ const Dashboard = ({
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
 
-    // --- NEW STATES FOR EDITING JOURNAL ENTRY ---
+    // --- NEW STATES FOR EDITING JOURNAL ENTRY (controlled by Dashboard) ---
     const [isEditJournalModalOpen, setIsEditJournalModalOpen] = useState(false);
     const [editJournalEntryData, setEditJournalEntryData] = useState(null);
 
     // --- Modal Handlers (existing and modified) ---
     const handleOpenPastBakeForm = () => {
         setIsAddChoiceModalOpen(false);
-        // This likely opens the ADD journal modal, not edit.
-        // If openAddJournalModal is a prop that controls a modal elsewhere, keep it.
-        // If it was meant to open the local JournalEntryForm, use setIsAddJournalModalOpen(true)
-        // For now, retaining original call but noting the distinction.
-        openAddJournalModal();
+        openAddJournalModal(); // Call the prop function
     };
 
     const handleOpenUpcomingBakeForm = () => {
@@ -374,7 +370,7 @@ const Dashboard = ({
             {/* Quick Actions Buttons */}
             <div className="space-y-2">
                 <div className="grid grid-cols-3 gap-2">
-                    {/* These buttons assume openAddJournalModal and openAddIdeaModal are passed as props and control modals at a higher level */}
+                    {/* These buttons now explicitly call the prop functions */}
                     <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
                     <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
                     <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
@@ -413,7 +409,7 @@ const Dashboard = ({
                 addJournalEntry={addJournalEntry}
             />
 
-            {/* --- Modals --- */}
+            {/* --- Modals controlled by Dashboard's local state --- */}
             {isAddChoiceModalOpen && (
                 <AddBakeChoiceModal
                     onAddPastBake={handleOpenPastBakeForm}
@@ -432,59 +428,28 @@ const Dashboard = ({
                 <ViewBakeModal
                     bake={bakeToView}
                     onClose={() => setBakeToView(null)}
-                    onEdit={handleEditFromView} // This now correctly triggers the edit form
+                    onEdit={handleEditFromView}
                 />
             )}
 
-            {/* JournalEntryForm for ADDING (if controlled by Dashboard state directly) */}
-            {/* If openAddJournalModal prop leads to a modal outside Dashboard, you might not need this. */}
-            {/* I'm including it assuming Dashboard *can* control its own add journal modal. */}
-            {/* Note: I'm passing addJournalEntry and cookbook as props, assuming the form needs them. */}
-            {/* The onSave here just calls addJournalEntry and closes the modal. */}
-            {/* You'll need to define a handleSaveJournalEntry if you want more complex logic here. */}
-            {openAddJournalModal && ( // If openAddJournalModal is a prop and directly controls visibility
-                // This assumes openAddJournalModal is actually a boolean state prop that turns this on/off
-                // If it's a function that *opens* a modal elsewhere, this needs rethinking.
-                // For now, I'm assuming it's a state that becomes true when "Add Bake" is clicked.
-                <JournalEntryForm
-                    onSave={(entryData) => { addJournalEntry(entryData); /* maybe close modal here? */ }}
-                    onCancel={() => { /* maybe close modal here? */ }}
-                    cookbook={cookbook} // Pass cookbook if JournalEntryForm needs it
-                />
-            )}
-
-            {/* IdeaForm for ADDING (if controlled by Dashboard state directly) */}
-            {/* Similar logic as JournalEntryForm above. */}
-            {openAddIdeaModal && ( // If openAddIdeaModal is a prop and directly controls visibility
-                <IdeaForm
-                    onSave={(ideaData) => { addIdea(ideaData); /* maybe close modal here? */ }}
-                    onCancel={() => { /* maybe close modal here? */ }}
-                />
-            )}
-
-
-            {/* --- JournalEntryForm for EDITING (NEW) --- */}
+            {/* JournalEntryForm for EDITING (NEW) - controlled by Dashboard's state */}
             {isEditJournalModalOpen && (
                 <JournalEntryForm
                     initialData={editJournalEntryData} // Pass the bake data to pre-fill the form
                     onSave={async (updatedEntry) => {
-                        // Assuming you have an 'updateJournalEntry' function available as a prop
-                        // (you'll need to pass this prop to Dashboard from your App.js or parent)
                         if (updateJournalEntry) {
-                            await updateJournalEntry(updatedEntry.id, updatedEntry); // Call the update function
+                            await updateJournalEntry(updatedEntry.id, updatedEntry);
                         } else {
                             console.warn("updateJournalEntry function is not provided to Dashboard.");
-                            // Handle saving logic here if updateJournalEntry is not a prop
-                            // e.g., if you're using contexts/hooks for updates.
                         }
-                        setIsEditJournalModalOpen(false); // Close the edit modal
-                        setEditJournalEntryData(null);    // Clear the edit data
+                        setIsEditJournalModalOpen(false);
+                        setEditJournalEntryData(null);
                     }}
                     onCancel={() => {
                         setIsEditJournalModalOpen(false);
                         setEditJournalEntryData(null);
                     }}
-                    cookbook={cookbook} // Pass cookbook if JournalEntryForm needs it for categories/recipes
+                    cookbook={cookbook}
                 />
             )}
         </div>
