@@ -1,17 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
-// Accept the new `onViewBake` prop
-const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAddChoiceModal, onViewBake }) => {
-    const [currentDate, setCurrentDate] = useState(new Date());
+// Accept `currentDate` and `setCurrentDate` as props
+const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAddChoiceModal, onViewBake, currentDate, setCurrentDate }) => {
+    
+    // REMOVED: The local `useState` for `currentDate` is gone.
 
-    // Create a map for quick lookup of bakes by date string
     const bakedDaysMap = useMemo(() => {
         const map = new Map();
         if (journal) {
             journal.forEach(entry => {
                 const bakeDate = new Date(entry.bakingDate);
                 const utcDate = new Date(Date.UTC(bakeDate.getFullYear(), bakeDate.getMonth(), bakeDate.getDate()));
-                // For simplicity, we'll just show the first bake if there are multiple on one day
                 if (!map.has(utcDate.toDateString())) {
                     map.set(utcDate.toDateString(), entry);
                 }
@@ -32,6 +31,8 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         return dates;
     }, [upcomingBakes]);
 
+
+    // Handlers now use the `setCurrentDate` prop
     const handlePrevMonth = () => {
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() - 1, 1));
     };
@@ -40,14 +41,13 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
     };
 
-    // Updated handler to trigger the view modal
     const handleDayClick = (day) => {
         const fullDate = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), day));
         const dateString = fullDate.toDateString();
 
         if (bakedDaysMap.has(dateString)) {
             const bakeToView = bakedDaysMap.get(dateString);
-            onViewBake(bakeToView); // Call the function passed from Dashboard
+            onViewBake(bakeToView);
         } else if (upcomingBakeDays.has(dateString)) {
             alert("This is an upcoming bake! You can edit it from the list below.");
         } else {

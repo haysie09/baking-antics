@@ -4,7 +4,7 @@ import BakingCalendar from './BakingCalendar';
 import UpcomingBakes from './UpcomingBakes';
 import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
 import UpcomingBakeForm from './UpcomingBakeForm';
-import ViewBakeModal from '../components/ViewBakeModal'; // 1. Import the new view modal
+import ViewBakeModal from '../components/ViewBakeModal';
 
 // Master Idea List constant
 const masterIdeaList = [
@@ -53,12 +53,15 @@ const masterIdeaList = [
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
     
-    // --- State for our modals ---
+    // --- State for modals ---
     const [isAddChoiceModalOpen, setIsAddChoiceModalOpen] = useState(false);
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
-    const [bakeToView, setBakeToView] = useState(null); // 2. New state to hold the bake being viewed
+    const [bakeToView, setBakeToView] = useState(null);
+    
+    // --- NEW: State for calendar's date, lifted up ---
+    const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
-    // --- Handlers for the choice modal ---
+    // --- Handlers for modals ---
     const handleOpenPastBakeForm = () => {
         setIsAddChoiceModalOpen(false);
         openAddJournalModal();
@@ -74,17 +77,15 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setIsAddUpcomingBakeModalOpen(false);
     };
 
-    // --- 3. New handlers for the view modal ---
     const handleViewBake = (bake) => {
         setBakeToView(bake);
     };
 
     const handleEditFromView = () => {
-        // This will navigate to the main journal page to handle editing
         if (bakeToView) {
             setDateFilter(bakeToView.bakingDate);
             setView('journal');
-            setBakeToView(null); // Close the modal
+            setBakeToView(null);
         }
     };
     
@@ -200,7 +201,10 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             </div>
             <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-3 px-4 rounded-xl text-lg font-normal font-montserrat hover:opacity-90 transition-opacity">Go to My Cookbook</button>
             
-            <DashboardStats journal={journal} />
+            <DashboardStats 
+                journal={journal} 
+                currentCalendarDate={currentCalendarDate} 
+            />
             
             <BakingCalendar 
                 journal={journal} 
@@ -208,7 +212,9 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 setView={setView} 
                 setDateFilter={setDateFilter} 
                 openAddChoiceModal={() => setIsAddChoiceModalOpen(true)}
-                onViewBake={handleViewBake} // 4. Pass the new handler down
+                onViewBake={handleViewBake}
+                currentDate={currentCalendarDate}
+                setCurrentDate={setCurrentCalendarDate}
             />
             
             <UpcomingBakes 
@@ -220,7 +226,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 addJournalEntry={addJournalEntry}
             />
 
-            {/* --- Render Modals based on state --- */}
+            {/* --- Modals --- */}
             {isAddChoiceModalOpen && (
                 <AddBakeChoiceModal 
                     onAddPastBake={handleOpenPastBakeForm}
@@ -228,7 +234,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                     onCancel={() => setIsAddChoiceModalOpen(false)}
                 />
             )}
-
             {isAddUpcomingBakeModalOpen && (
                 <UpcomingBakeForm 
                     onSave={handleSaveUpcomingBake}
@@ -236,8 +241,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                     cookbook={cookbook}
                 />
             )}
-
-            {/* 5. Render the new view modal */}
             {bakeToView && (
                 <ViewBakeModal 
                     bake={bakeToView}
