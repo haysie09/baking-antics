@@ -3,13 +3,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 const DashboardStats = ({ journal, currentCalendarDate }) => {
     const [filter, setFilter] = useState('month');
 
-    // This effect syncs the filter with the calendar's navigation
     useEffect(() => {
-        // When the user navigates the calendar, we switch the filter to 'month'
-        // to show stats for that month.
         setFilter('month');
     }, [currentCalendarDate]);
-
 
     const stats = useMemo(() => {
         const now = new Date();
@@ -39,17 +35,16 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
                 break;
             }
             case 'last-week': {
-                const today = new Date();
-                const dayOfWeek = today.getUTCDay(); // Sunday = 0, Monday = 1, etc.
-                const endOfLastWeek = new Date(today);
-                // Go back to last Sunday
-                endOfLastWeek.setUTCDate(today.getUTCDate() - dayOfWeek);
-                endOfLastWeek.setUTCHours(23, 59, 59, 999);
+                // Corrected and robust logic for "Last Week"
+                const startOfThisWeek = new Date();
+                const day = startOfThisWeek.getUTCDay();
+                const diffToMonday = startOfThisWeek.getUTCDate() - day + (day === 0 ? -6 : 1);
+                startOfThisWeek.setUTCDate(diffToMonday);
+                startOfThisWeek.setUTCHours(0, 0, 0, 0);
 
+                const endOfLastWeek = new Date(startOfThisWeek.getTime() - 1); // This is last Sunday
                 const startOfLastWeek = new Date(endOfLastWeek);
-                // Go back 6 more days to get to the previous Monday
-                startOfLastWeek.setUTCDate(endOfLastWeek.getUTCDate() - 6);
-                startOfLastWeek.setUTCHours(0, 0, 0, 0);
+                startOfLastWeek.setUTCDate(endOfLastWeek.getUTCDate() - 6); // This is last Monday
 
                 dateLabel = 'Last Week';
                 dateSubLabel = `(${startOfLastWeek.getDate()}/${startOfLastWeek.getMonth() + 1} - ${endOfLastWeek.getDate()}/${endOfLastWeek.getMonth() + 1})`;

@@ -24,10 +24,10 @@ const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit, cookbook }) => {
         const selectedRecipe = cookbook.find(r => r.id === recipeId);
         if (selectedRecipe) {
             setFormData(prev => ({
-                ...prev, // Keep existing data like bakeDate
+                ...prev,
                 title: selectedRecipe.recipeTitle || '',
                 link: selectedRecipe.sourceURL || '',
-                notes: selectedRecipe.instructions || '' // Using instructions for notes
+                notes: selectedRecipe.instructions || ''
             }));
         }
     };
@@ -48,7 +48,8 @@ const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit, cookbook }) => {
                             className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                             defaultValue=""
                         >
-                            <option value="" disabled>Or Choose from My Cookbook</option>
+                            {/* Text updated here */}
+                            <option value="" disabled>Pick from My Recipes</option>
                             {cookbook.map(recipe => (
                                 <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">
                                     {recipe.recipeTitle}

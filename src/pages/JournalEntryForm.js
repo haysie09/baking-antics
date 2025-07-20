@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Modal from '../components/Modal';
 import StarRating from '../components/StarRating';
 
-// Note: These constants will be moved later. For now, we'll copy them here.
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 
 const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) => {
@@ -44,7 +43,8 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
                             className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                             defaultValue=""
                         >
-                            <option value="" disabled>Or Choose from My Cookbook</option>
+                            {/* Text updated here */}
+                            <option value="" disabled>Pick from My Recipes</option>
                             {cookbook.map(recipe => (
                                 <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">{recipe.recipeTitle}</option>
                             ))}

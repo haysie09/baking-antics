@@ -1,5 +1,3 @@
-// src/pages/Dashboard.js
-
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 
 // --- Components located in src/components/ ---
@@ -7,13 +5,11 @@ import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
 import ViewBakeModal from '../components/ViewBakeModal';
 
 // --- Components located in src/pages/ (sibling files to Dashboard.js) ---
-// DashboardStats is defined inline below, so no import needed here.
 import BakingCalendar from './BakingCalendar';
-// Removed UpcomingBakes from here as it's being moved.
 import UpcomingBakeForm from './UpcomingBakeForm';
 import IdeaForm from './IdeaForm';
 import JournalEntryForm from './JournalEntryForm';
-import UpcomingBakes from './UpcomingBakes'; // <<< Re-added import as it's a sibling file
+import UpcomingBakes from './UpcomingBakes';
 
 
 // --- masterIdeaList constant ---
@@ -342,8 +338,9 @@ const Dashboard = ({
                         value=""
                     >
                         <option value="" disabled>What should I bake?</option>
-                        <option value="inspireMe" className="font-montserrat text-app-grey">Generate from Inspire Me!</option>
-                        <option value="myIdeas" className="font-montserrat text-app-grey">Generate from My Ideas</option>
+                        {/* Text updated here */}
+                        <option value="inspireMe" className="font-montserrat text-app-grey">Help me decide</option>
+                        <option value="myIdeas" className="font-montserrat text-app-grey">Use My Ideas</option>
                     </select>
                     <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-add-idea">
                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
