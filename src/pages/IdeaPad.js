@@ -1,21 +1,24 @@
-import React, { useState, useMemo, useEffect } from 'react'; // Added useEffect for potential data fetching if 'ideas' isn't passed as a prop
+import React, { useState, useMemo } from 'react';
 import ConfirmationModal from '../components/ConfirmationModal';
 import IdeaForm from './IdeaForm';
-import FilterComponent from '../components/FilterComponent'; // Import the new FilterComponent
+import FilterComponent from '../components/FilterComponent'; // Correctly imported
+
+// This constant will be moved to a central config file later
+const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 
 const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
-    // Original states
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [showMoveConfirm, setShowMoveConfirm] = useState(false);
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
 
-    // New states for the FilterComponent
-    const [selectedMonth, setSelectedMonth] = useState('');
-    const [selectedYear, setSelectedYear] = useState('');
-    const [selectedCategories, setSelectedCategories] = useState([]);
+    // 1. Use a single state object for all filters for consistency
+    const [activeFilters, setActiveFilters] = useState({
+        categories: [],
+        month: 'all',
+        year: 'all'
+    });
 
-    // --- Original Functions ---
     const handleAddIdea = async (ideaData) => {
         await addIdea({ ...ideaData, createdAt: new Date() });
         setIsAddIdeaModalOpen(false);
@@ -39,42 +42,35 @@ const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
         setTimeout(() => setShowMoveConfirm(false), 3000);
     };
 
-    // --- Handler for filter changes from FilterComponent ---
-    const handleFilterChange = ({ month, year, categories }) => {
-        setSelectedMonth(month);
-        setSelectedYear(year);
-        setSelectedCategories(categories);
+    // 2. Handler correctly updates the single state object
+    const handleFilterChange = (filters) => {
+        setActiveFilters(filters);
     };
 
-    // --- Updated filteredIdeas memo ---
+    // 3. `useMemo` is updated with the correct filtering logic
     const filteredIdeas = useMemo(() => {
-        if (!ideas) return [];
+        let currentFilteredIdeas = ideas || [];
 
-        let currentFilteredIdeas = ideas;
-
-        // Apply month filter
-        if (selectedMonth) {
-            currentFilteredIdeas = currentFilteredIdeas.filter(
-                (idea) => idea.createdAt && new Date(idea.createdAt.toDate()).getMonth() + 1 === parseInt(selectedMonth)
+        if (activeFilters.categories.length > 0) {
+            currentFilteredIdeas = currentFilteredIdeas.filter(idea =>
+                activeFilters.categories.every(filterCat => idea.categories?.includes(filterCat))
             );
         }
 
-        // Apply year filter
-        if (selectedYear) {
-            currentFilteredIdeas = currentFilteredIdeas.filter(
-                (idea) => idea.createdAt && new Date(idea.createdAt.toDate()).getFullYear() === parseInt(selectedYear)
+        if (activeFilters.month !== 'all') {
+            currentFilteredIdeas = currentFilteredIdeas.filter(idea =>
+                idea.createdAt && new Date(idea.createdAt.toDate()).getMonth() === parseInt(activeFilters.month)
             );
         }
 
-        // Apply category filter
-        if (selectedCategories.length > 0) {
-            currentFilteredIdeas = currentFilteredIdeas.filter((idea) =>
-                idea.categories && selectedCategories.every((cat) => idea.categories.includes(cat))
+        if (activeFilters.year !== 'all') {
+            currentFilteredIdeas = currentFilteredIdeas.filter(idea =>
+                idea.createdAt && new Date(idea.createdAt.toDate()).getFullYear() === parseInt(activeFilters.year)
             );
         }
 
         return currentFilteredIdeas;
-    }, [ideas, selectedMonth, selectedYear, selectedCategories]);
+    }, [ideas, activeFilters]);
 
     return (
         <div className="p-4 md:p-6 bg-app-white h-full font-patrick-hand">
@@ -86,13 +82,11 @@ const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
             {isAddIdeaModalOpen && <IdeaForm onSave={handleAddIdea} onCancel={() => setIsAddIdeaModalOpen(false)} />}
             {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">New idea added!</span></div>}
 
-            {/* NEW FILTER COMPONENT */}
+            {/* 4. FilterComponent now uses the consistent `journalCategories` prop */}
             <FilterComponent
+                categories={journalCategories}
                 onFilterChange={handleFilterChange}
-                // Pass all available categories from your ideas for the filter component to display
-                allCategories={[...new Set(ideas ? ideas.flatMap(idea => idea.categories || []) : [])]}
             />
-            {/* END NEW FILTER COMPONENT */}
 
             {showMoveConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">Idea added to your journal!</span></div>}
 
