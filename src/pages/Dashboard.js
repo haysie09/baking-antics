@@ -6,9 +6,7 @@ import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
 import UpcomingBakeForm from './UpcomingBakeForm';
 import ViewBakeModal from '../components/ViewBakeModal';
 import ViewUpcomingBakeModal from '../components/ViewUpcomingBakeModal';
-import masterIdeaList from '../data/masterIdeaList'; // 1. Import the list from its new location
-
-// The masterIdeaList constant has been removed from this file.
+import masterIdeaList from '../data/masterIdeaList';
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
     
@@ -138,6 +136,14 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setIdea({ name: '', id: null });
     };
 
+    // --- NEW: Handler for the "Find a Recipe" button ---
+    const handleFindRecipe = () => {
+        if (idea.name) {
+            const query = `${idea.name} recipe`;
+            window.open(`https://www.google.com/search?q=${encodeURIComponent(query)}`, '_blank');
+        }
+    };
+
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
             <div className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
@@ -162,6 +168,8 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         {(!idea.name.includes("empty") && !idea.name.includes("used up")) && (
                             <div className="flex flex-col justify-center items-center gap-3">
                                 <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
+                                {/* --- NEW: "Find a Recipe" Button --- */}
+                                <button onClick={handleFindRecipe} className="w-full sm:w-auto bg-gray-100 text-app-grey py-2 px-5 rounded-xl font-semibold hover:bg-gray-200 transition text-base font-montserrat">Find a Recipe</button>
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Add to my idea pad</button>}
                                 <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="w-full sm:w-auto bg-gray-100 text-app-grey py-2 px-5 rounded-xl font-semibold hover:bg-gray-200 transition text-base font-montserrat">Something Else</button>
                             </div>
