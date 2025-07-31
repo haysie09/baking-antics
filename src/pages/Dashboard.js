@@ -153,7 +153,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         value=""
                     >
                         <option value="" disabled>What should I bake?</option>
-                        {/* 1. Text capitalized */}
                         <option value="inspireMe" className="font-montserrat text-app-grey">Help Me Decide</option>
                         <option value="myIdeas" className="font-montserrat text-app-grey">Use My Ideas</option>
                     </select>
@@ -167,18 +166,18 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         <p className="text-burnt-orange text-2xl font-medium mb-4">{idea.name}</p>
                         {(!idea.name.includes("empty") && !idea.name.includes("used up")) && (
                             <div className="flex flex-col justify-center items-center gap-3">
+                                {/* --- NEW BUTTON LAYOUT --- */}
+                                <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
+                                
                                 <div className="flex items-center justify-center gap-3">
-                                    <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
-                                    {/* 2. "Find a Recipe" button restyled */}
                                     <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-add-idea text-add-idea bg-transparent py-2 px-5 rounded-xl font-semibold hover:bg-add-idea/10 transition text-base font-montserrat">Find a Recipe</button>
-                                    {/* 3. "Something Else" replaced with refresh icon button */}
                                     <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="text-add-idea p-2 rounded-full hover:bg-add-idea/10 transition" title="Try another">
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h5M20 20v-5h-5M20 4h-5v5M4 20h5v-5" />
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h5M20 20v-5h-5m-4-4l-4 4m0 0l4 4m-4-4h12" transform="rotate(45 12 12)" />
                                         </svg>
                                     </button>
                                 </div>
-                                {/* 4. "Add to Idea Pad" button made smaller */}
+
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-1.5 px-4 rounded-xl font-semibold hover:opacity-90 transition text-sm font-montserrat">Add to my idea pad</button>}
                             </div>
                         )}
