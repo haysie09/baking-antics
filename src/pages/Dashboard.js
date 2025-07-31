@@ -166,19 +166,20 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         <p className="text-burnt-orange text-2xl font-medium mb-4">{idea.name}</p>
                         {(!idea.name.includes("empty") && !idea.name.includes("used up")) && (
                             <div className="flex flex-col justify-center items-center gap-3">
-                                {/* --- NEW BUTTON LAYOUT --- */}
+                                {/* --- NEW STACKED BUTTON LAYOUT --- */}
                                 <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
+                                <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-add-idea text-add-idea bg-transparent py-2 px-5 rounded-xl font-semibold hover:bg-add-idea/10 transition text-base font-montserrat">Find a Recipe</button>
                                 
-                                <div className="flex items-center justify-center gap-3">
-                                    <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-add-idea text-add-idea bg-transparent py-2 px-5 rounded-xl font-semibold hover:bg-add-idea/10 transition text-base font-montserrat">Find a Recipe</button>
-                                    <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="text-add-idea p-2 rounded-full hover:bg-add-idea/10 transition" title="Try another">
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h5M20 20v-5h-5m-4-4l-4 4m0 0l4 4m-4-4h12" transform="rotate(45 12 12)" />
-                                        </svg>
-                                    </button>
-                                </div>
-
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-1.5 px-4 rounded-xl font-semibold hover:opacity-90 transition text-sm font-montserrat">Add to my idea pad</button>}
+                                
+                                <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="text-add-idea p-2 rounded-full hover:bg-add-idea/10 transition" title="Try another">
+                                    {/* New Dice Icon */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 8.25l-2.5 2.5-2.5-2.5m4.998 4.998l-2.5-2.5-2.5 2.5" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 8.25h.01M14.25 12.75h.01M9.75 12.75h.01" />
+                                    </svg>
+                                </button>
                             </div>
                         )}
                     </div>
