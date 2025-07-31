@@ -163,21 +163,21 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
                 {idea.name && (
                     <div className="text-center bg-app-white p-4 rounded-xl mt-4">
-                        <p className="text-burnt-orange text-2xl font-medium mb-4">{idea.name}</p>
+                        {/* 4. Title is now bold and uses Montserrat font */}
+                        <p className="text-burnt-orange text-2xl font-bold font-montserrat mb-4">{idea.name}</p>
                         {(!idea.name.includes("empty") && !idea.name.includes("used up")) && (
                             <div className="flex flex-col justify-center items-center gap-3">
-                                {/* --- NEW STACKED BUTTON LAYOUT --- */}
                                 <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
-                                <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-add-idea text-add-idea bg-transparent py-2 px-5 rounded-xl font-semibold hover:bg-add-idea/10 transition text-base font-montserrat">Find a Recipe</button>
+                                
+                                {/* 3. Button size updated to match "Add to my idea pad" */}
+                                <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-add-idea text-add-idea bg-transparent py-1.5 px-4 rounded-xl font-semibold hover:bg-add-idea/10 transition text-sm font-montserrat">Find a Recipe</button>
                                 
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-1.5 px-4 rounded-xl font-semibold hover:opacity-90 transition text-sm font-montserrat">Add to my idea pad</button>}
                                 
                                 <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="text-add-idea p-2 rounded-full hover:bg-add-idea/10 transition" title="Try another">
-                                    {/* New Dice Icon */}
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.25 8.25l-2.5 2.5-2.5-2.5m4.998 4.998l-2.5-2.5-2.5 2.5" />
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 8.25h.01M14.25 12.75h.01M9.75 12.75h.01" />
+                                    {/* 1. & 2. New refresh icon with correct color */}
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                     </svg>
                                 </button>
                             </div>
