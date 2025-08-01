@@ -163,19 +163,16 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
                 {idea.name && (
                     <div className="text-center bg-app-white p-4 rounded-xl mt-4">
-                        {/* 4. Title is now bold and uses Montserrat font */}
                         <p className="text-burnt-orange text-2xl font-bold font-montserrat mb-4">{idea.name}</p>
                         {(!idea.name.includes("empty") && !idea.name.includes("used up")) && (
                             <div className="flex flex-col justify-center items-center gap-3">
                                 <button onClick={handleLetsBake} className="w-full sm:w-auto bg-burnt-orange text-light-peach py-2 px-5 rounded-xl font-semibold hover:opacity-90 transition text-base font-montserrat">Let's Bake This</button>
                                 
-                                {/* 3. Button size updated to match "Add to my idea pad" */}
                                 <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-add-idea text-add-idea bg-transparent py-1.5 px-4 rounded-xl font-semibold hover:bg-add-idea/10 transition text-sm font-montserrat">Find a Recipe</button>
                                 
                                 {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-add-idea text-light-peach py-1.5 px-4 rounded-xl font-semibold hover:opacity-90 transition text-sm font-montserrat">Add to my idea pad</button>}
                                 
                                 <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="text-add-idea p-2 rounded-full hover:bg-add-idea/10 transition" title="Try another">
-                                    {/* 1. & 2. New refresh icon with correct color */}
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
                                     </svg>
@@ -190,9 +187,19 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
             <div className="space-y-2">
                 <div className="grid grid-cols-3 gap-2">
-                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
-                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
-                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-3 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Schedule Bake</button>
+                    {/* --- BUTTONS UPDATED --- */}
+                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Bake
+                    </button>
+                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Idea
+                    </button>
+                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Schedule
+                    </button>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                     <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-2 px-3 rounded-xl text-base font-normal font-montserrat hover:opacity-90 transition-opacity">My Cookbook</button>
