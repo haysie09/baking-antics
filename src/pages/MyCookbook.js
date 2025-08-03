@@ -35,76 +35,32 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
         setActiveFilters(filters);
     };
 
+    // --- UPDATED: This function is now much simpler ---
     const handleImportRecipe = async (url) => {
+        // 1. Call our Netlify serverless function
         const functionUrl = `/.netlify/functions/fetch-recipe?url=${encodeURIComponent(url)}`;
         
         try {
             const response = await fetch(functionUrl);
+            // The function now returns the final JSON directly
+            const recipeData = await response.json();
+
             if (!response.ok) {
-                throw new Error('Could not fetch the website content.');
-            }
-            const { content: siteHtml } = await response.json();
-
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(siteHtml, 'text/html');
-            const pageText = doc.body.textContent || "";
-
-            const apiKey = "";
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-
-            const payload = {
-                contents: [{
-                    parts: [{
-                        text: `Analyze the following website text and extract the recipe details. Provide the output in a valid JSON format. Here is the website content: "${pageText}"`
-                    }]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            recipeTitle: { type: "STRING" },
-                            ingredients: {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        quantity: { type: "STRING" },
-                                        measurement: { type: "STRING" },
-                                        name: { type: "STRING" }
-                                    },
-                                    required: ["name"]
-                                }
-                            },
-                            instructions: { type: "STRING" }
-                        },
-                        required: ["recipeTitle", "ingredients", "instructions"]
-                    }
-                }
-            };
-
-            const aiResponse = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            if (!aiResponse.ok) {
-                throw new Error('The AI model could not process the request.');
+                // If the function returned an error, it will be in the JSON body
+                throw new Error(recipeData.error || 'An unknown error occurred during import.');
             }
 
-            const result = await aiResponse.json();
-            const recipeJsonText = result.candidates[0].content.parts[0].text;
-            const recipeData = JSON.parse(recipeJsonText);
-
+            // 2. Set the extracted data and open the pre-filled form
             setImportedRecipeData(recipeData);
             setIsUrlModalOpen(false);
             
         } catch (error) {
             console.error("Import Error:", error);
-            throw new Error("Failed to import recipe. The website might be blocking requests, or no recipe was found.");
+            // Re-throw the error so the modal can display it to the user
+            throw new Error(error.message);
         }
     };
+
 
     const filteredCookbook = useMemo(() => {
         let recipes = cookbook || [];
@@ -191,7 +147,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
             )}
             {editingRecipe && (
                  <CookbookForm 
-                    recipe={editingRecipe} // <<< THIS IS THE CORRECTED LINE
+                    recipe={editingRecipe}
                     onSave={handleSave} 
                     onCancel={() => setEditingRecipe(null)} 
                 />
