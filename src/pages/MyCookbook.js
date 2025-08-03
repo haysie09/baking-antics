@@ -127,8 +127,15 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-4xl font-bold text-burnt-orange">My Cookbook</h1>
                 <div className="flex gap-2">
-                    <button onClick={() => setIsUrlModalOpen(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add from Website</button>
-                    <button onClick={() => setIsCreatingNew(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Recipe</button>
+                    {/* --- BUTTONS UPDATED --- */}
+                    <button onClick={() => setIsUrlModalOpen(true)} className="bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Import Website
+                    </button>
+                    <button onClick={() => setIsCreatingNew(true)} className="bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Own Recipe
+                    </button>
                 </div>
             </div>
             
@@ -137,7 +144,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
                 onFilterChange={handleFilterChange}
             />
 
-            {/* --- THIS SECTION IS NOW RESTORED --- */}
             <div className="space-y-4">
                 {filteredCookbook.length === 0 ? <div className="text-center py-16 bg-info-box rounded-xl border border-burnt-orange"><p className="text-app-grey text-2xl">{cookbook && cookbook.length > 0 ? "No recipes match filters" : "Save your favorite recipes"}</p></div> : [...filteredCookbook].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate()).map(recipe => (
                     <div key={recipe.id} className="bg-info-box p-4 rounded-xl border border-burnt-orange">
@@ -186,7 +192,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
             )}
             {editingRecipe && (
                  <CookbookForm 
-                    recipe={editingRecipe} 
+                    recipe={recipe} 
                     onSave={handleSave} 
                     onCancel={() => setEditingRecipe(null)} 
                 />
