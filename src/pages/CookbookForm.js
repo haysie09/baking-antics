@@ -4,9 +4,9 @@ import Modal from '../components/Modal';
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 const recipeMeasurements = ["cup", "tbsp", "tsp", "g", "kg", "ml", "L", "oz", "lb", "pinch", "unit(s)"];
 
-// 1. Accept a new `initialData` prop
+// Accept a new `initialData` prop
 const CookbookForm = ({ recipe, onSave, onCancel, isNew = false, initialData }) => {
-    // 2. Use `initialData` if it exists, otherwise fall back to the `recipe` prop or a blank form
+    // Use `initialData` if it exists, otherwise fall back to the `recipe` prop or a blank form
     const [formData, setFormData] = useState(initialData || recipe || { 
         recipeTitle: '', 
         sourceURL: '', 
@@ -38,11 +38,11 @@ const CookbookForm = ({ recipe, onSave, onCancel, isNew = false, initialData }) 
                 <div><label className="block text-app-grey font-semibold mb-1">Source URL</label><input type="text" value={formData.sourceURL} onChange={(e) => setFormData(p=>({...p, sourceURL: e.target.value}))} className="w-full p-3 border border-gray-300 rounded-xl text-xl font-montserrat"/></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Categories</label><div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${formData.categories && formData.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Ingredients</label>
-                    <div className="space-y-2 font-montserrat">{formData.ingredients.map((ing, index) => (
+                    <div className="space-y-2 font-montserrat">{formData.ingredients && formData.ingredients.map((ing, index) => (
                         <div key={index} className="flex items-center gap-2">
-                            <input type="text" placeholder="Qty" value={ing.quantity} onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)} className="w-1/4 p-2 border border-gray-300 rounded-xl text-lg" />
-                            <select value={ing.measurement} onChange={(e) => handleIngredientChange(index, 'measurement', e.target.value)} className="w-1/2 p-2 border border-gray-300 rounded-xl text-lg bg-white"><option value="">Unit</option>{recipeMeasurements.map(m => <option key={m} value={m}>{m}</option>)}</select>
-                            <input type="text" placeholder="Name" value={ing.name} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} className="w-full p-2 border border-gray-300 rounded-xl text-lg" />
+                            <input type="text" placeholder="Qty" value={ing.quantity || ''} onChange={(e) => handleIngredientChange(index, 'quantity', e.target.value)} className="w-1/4 p-2 border border-gray-300 rounded-xl text-lg" />
+                            <select value={ing.measurement || 'unit(s)'} onChange={(e) => handleIngredientChange(index, 'measurement', e.target.value)} className="w-1/2 p-2 border border-gray-300 rounded-xl text-lg bg-white"><option value="">Unit</option>{recipeMeasurements.map(m => <option key={m} value={m}>{m}</option>)}</select>
+                            <input type="text" placeholder="Name" value={ing.name || ''} onChange={(e) => handleIngredientChange(index, 'name', e.target.value)} className="w-full p-2 border border-gray-300 rounded-xl text-lg" />
                             <button onClick={() => removeIngredient(index)} className="text-red-500 hover:text-red-700">&times;</button>
                         </div>))}
                     </div>
