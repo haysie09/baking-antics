@@ -1,4 +1,5 @@
-const fetch = require('node-fetch');
+const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 
 exports.handler = async function(event, context) {
   const { url } = event.queryStringParameters;
@@ -10,34 +11,41 @@ exports.handler = async function(event, context) {
     };
   }
 
+  let browser = null;
   try {
-    // --- ADDED: Headers to mimic a real browser request ---
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-      'Accept-Language': 'en-US,en;q=0.9',
-    };
+    // Launch a headless browser instance
+    browser = await puppeteer.launch({
+      args: chromium.args,
+      executablePath: await chromium.executablePath,
+      headless: chromium.headless,
+    });
 
-    const response = await fetch(url, { headers: headers }); // Pass the headers with the request
-
-    if (!response.ok) {
-      return {
-        statusCode: response.status,
-        body: JSON.stringify({ error: `Failed to fetch from ${url}` }),
-      };
-    }
+    const page = await browser.newPage();
     
-    const pageText = await response.text();
+    // Set a realistic user agent to avoid being blocked
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+    
+    // Navigate to the URL and wait for the page to be fully loaded (including JavaScript)
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
+    // Extract the full HTML content of the page after JavaScript has run
+    const pageContent = await page.content();
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ content: pageText }),
+      body: JSON.stringify({ content: pageContent }),
     };
 
   } catch (error) {
+    console.error('Puppeteer error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Could not fetch the website content. It may be blocking requests.' }),
+      body: JSON.stringify({ error: 'Could not fetch or process the website content.' }),
     };
+  } finally {
+    // Ensure the browser is closed even if an error occurs
+    if (browser !== null) {
+      await browser.close();
+    }
   }
 };
