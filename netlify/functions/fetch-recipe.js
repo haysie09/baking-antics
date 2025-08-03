@@ -1,8 +1,6 @@
-// This is a Node.js function, so it uses `require` instead of `import`
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
-  // Get the URL from the query string, e.g., /.netlify/functions/fetch-recipe?url=...
   const { url } = event.queryStringParameters;
 
   if (!url) {
@@ -13,19 +11,24 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    const response = await fetch(url);
+    // --- ADDED: Headers to mimic a real browser request ---
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.9',
+    };
+
+    const response = await fetch(url, { headers: headers }); // Pass the headers with the request
+
     if (!response.ok) {
-      // If the website returns an error (like 404 Not Found), pass it along
       return {
         statusCode: response.status,
         body: JSON.stringify({ error: `Failed to fetch from ${url}` }),
       };
     }
     
-    // Get the raw HTML text of the website
     const pageText = await response.text();
 
-    // Send the text back to our React app
     return {
       statusCode: 200,
       body: JSON.stringify({ content: pageText }),
