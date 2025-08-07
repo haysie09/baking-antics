@@ -51,7 +51,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
 
             // Set the extracted data, which will trigger the CookbookForm to open.
             setImportedRecipeData(recipeData);
-            setIsUrlModalOpen(false); // Close the URL input modal.
+            setIsUrlModalOpen(false);
             
         } catch (error) {
             console.error("Import Error:", error);

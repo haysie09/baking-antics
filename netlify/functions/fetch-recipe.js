@@ -1,5 +1,7 @@
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
+// We need to use node-fetch for our API calls inside the function
+const fetch = require('node-fetch');
 
 // This is a helper function to make calls to the Gemini API
 async function callGemini(apiKey, payload) {
@@ -20,7 +22,7 @@ async function callGemini(apiKey, payload) {
 exports.handler = async function(event, context) {
     const { url } = event.queryStringParameters;
     // IMPORTANT: You must set this environment variable in your Netlify settings
-    const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
+    const apiKey = process.env.REACT_APP_GEMINI_API_KEY || ""; 
 
     if (!url) {
         return { statusCode: 400, body: JSON.stringify({ error: 'URL parameter is required.' }) };
