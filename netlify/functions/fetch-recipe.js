@@ -10,6 +10,8 @@ async function callGemini(apiKey, payload) {
         body: JSON.stringify(payload),
     });
     if (!response.ok) {
+        const errorBody = await response.json();
+        console.error("AI API Error:", errorBody);
         throw new Error(`AI API request failed with status ${response.status}`);
     }
     return response.json();
@@ -17,7 +19,8 @@ async function callGemini(apiKey, payload) {
 
 exports.handler = async function(event, context) {
     const { url } = event.queryStringParameters;
-    const apiKey = process.env.REACT_APP_GEMINI_API_KEY || ""; // Use environment variable for API key
+    // IMPORTANT: You must set this environment variable in your Netlify settings
+    const apiKey = process.env.REACT_APP_GEMINI_API_KEY || "";
 
     if (!url) {
         return { statusCode: 400, body: JSON.stringify({ error: 'URL parameter is required.' }) };
@@ -26,6 +29,7 @@ exports.handler = async function(event, context) {
     let browser = null;
     try {
         // --- Step 1: Fetch the Raw HTML using a Headless Browser ---
+        await chromium.font('https://raw.githack.com/googlei18n/noto-cjk/main/NotoSansCJK-Regular.ttc');
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -42,7 +46,7 @@ exports.handler = async function(event, context) {
         // --- Step 2: AI as a "Cleaner" ---
         const cleaningPayload = {
             contents: [{
-                parts: [{ text: `Analyze the following HTML content and extract only the main recipe text, including title, ingredients, and instructions. Return only the clean text. HTML: "${siteHtml}"` }]
+                parts: [{ text: `From the following HTML content, extract only the main recipe text, including its title, ingredients list, and instructions. Return only the clean, plain text, with no HTML tags. HTML: "${siteHtml}"` }]
             }]
         };
         const cleaningResult = await callGemini(apiKey, cleaningPayload);

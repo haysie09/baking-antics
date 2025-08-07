@@ -35,32 +35,30 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
         setActiveFilters(filters);
     };
 
-    // --- UPDATED: This function is now much simpler ---
     const handleImportRecipe = async (url) => {
-        // 1. Call our Netlify serverless function
+        // This function is now much simpler, as all the heavy lifting is in the serverless function.
         const functionUrl = `/.netlify/functions/fetch-recipe?url=${encodeURIComponent(url)}`;
         
         try {
             const response = await fetch(functionUrl);
-            // The function now returns the final JSON directly
+            // The serverless function now returns the final, structured JSON directly.
             const recipeData = await response.json();
 
             if (!response.ok) {
-                // If the function returned an error, it will be in the JSON body
+                // If the function returned an error, the error message will be in the JSON body.
                 throw new Error(recipeData.error || 'An unknown error occurred during import.');
             }
 
-            // 2. Set the extracted data and open the pre-filled form
+            // Set the extracted data, which will trigger the CookbookForm to open.
             setImportedRecipeData(recipeData);
-            setIsUrlModalOpen(false);
+            setIsUrlModalOpen(false); // Close the URL input modal.
             
         } catch (error) {
             console.error("Import Error:", error);
-            // Re-throw the error so the modal can display it to the user
+            // Re-throw the error so the AddFromURLModal can display it to the user.
             throw new Error(error.message);
         }
     };
-
 
     const filteredCookbook = useMemo(() => {
         let recipes = cookbook || [];
