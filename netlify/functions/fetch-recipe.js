@@ -23,21 +23,17 @@ async function callGemini(apiKey, payload) {
 }
 
 exports.handler = async function(event, context) {
-    console.log("Function started.");
     const { url } = event.queryStringParameters;
     const apiKey = process.env.GEMINI_API_KEY || ""; 
 
     if (!url) {
-        console.log("Error: URL parameter is missing.");
         return { statusCode: 400, body: JSON.stringify({ error: 'URL parameter is required.' }) };
     }
-    console.log(`Received URL: ${url}`);
 
     let browser = null;
     try {
         // --- Step 1: Fetch and Clean HTML ---
-        console.log("Step 1: Launching headless browser...");
-        await chromium.font('https://raw.githack.com/googlei18n/noto-cjk/main/NotoSansCJK-Regular.ttc');
+        // REMOVED: The non-essential chromium.font() call has been removed.
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -45,23 +41,18 @@ exports.handler = async function(event, context) {
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
-        console.log("Browser launched successfully.");
 
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-        console.log(`Navigating to page: ${url}`);
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
-        console.log("Page navigation successful.");
         
         const cleanPageText = await page.evaluate(() => document.body.innerText);
-        console.log(`Successfully extracted page text (length: ${cleanPageText.length}).`);
 
         if (!cleanPageText || cleanPageText.length < 100) {
             throw new Error("Failed to retrieve enough valid text content from the page.");
         }
 
         // --- Step 2: AI Structuring ---
-        console.log("Step 2: Sending clean text to AI for structuring...");
         const structuringPayload = {
             contents: [{
                 parts: [{ text: `Analyze the following recipe text and provide the output in a valid JSON format. Recipe Text: "${cleanPageText}"` }]
@@ -92,7 +83,6 @@ exports.handler = async function(event, context) {
         };
         const structuringResult = await callGemini(apiKey, structuringPayload);
         const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
-        console.log("AI structuring successful. Final JSON created.");
 
         JSON.parse(recipeJsonText);
 
@@ -110,9 +100,7 @@ exports.handler = async function(event, context) {
         };
     } finally {
         if (browser !== null) {
-            console.log("Closing browser.");
             await browser.close();
         }
-        console.log("Function finished.");
     }
 };
