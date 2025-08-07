@@ -1,14 +1,10 @@
-# This section configures the build settings for your site.
 [build]
   command = "npm run build"
   publish = "build"
 
-# This section configures the serverless function settings.
-# We are adding a longer timeout to handle complex tasks.
 [functions]
   timeout = 26
 
-# This section handles routing for single-page applications.
 [[redirects]]
   from = "/*"
   to = "/index.html"
