@@ -4,22 +4,26 @@ const fetch = require('node-fetch');
 
 async function callGemini(apiKey, payload) {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
-    const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
-    if (!response.ok) {
-        const errorBody = await response.json();
-        console.error("AI API Error:", errorBody);
-        throw new Error(`AI API request failed with status ${response.status}`);
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+        });
+        if (!response.ok) {
+            const errorBody = await response.json();
+            console.error("AI API Error:", errorBody);
+            throw new Error(`AI API request failed with status ${response.status}`);
+        }
+        return response.json();
+    } catch (error) {
+        console.error("Error calling Gemini API:", error);
+        throw error;
     }
-    return response.json();
 }
 
 exports.handler = async function(event, context) {
     const { url } = event.queryStringParameters;
-    // 1. CORRECTED: In Netlify functions, environment variables are not prefixed with REACT_APP_
     const apiKey = process.env.GEMINI_API_KEY || ""; 
 
     if (!url) {
@@ -28,8 +32,8 @@ exports.handler = async function(event, context) {
 
     let browser = null;
     try {
-        // --- Step 1: Fetch the Raw HTML ---
-        // 2. REMOVED: The non-essential chromium.font() call has been removed to prevent errors.
+        // --- Step 1: Fetch and Clean HTML ---
+        await chromium.font('https://raw.githack.com/googlei18n/noto-cjk/main/NotoSansCJK-Regular.ttc');
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -40,32 +44,19 @@ exports.handler = async function(event, context) {
 
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-        
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
         
-        const siteHtml = await page.content();
+        // Instead of getting all HTML, we get the clean body text directly
+        const cleanPageText = await page.evaluate(() => document.body.innerText);
 
-        if (!siteHtml || siteHtml.length < 1000) { // Basic check for valid HTML content
-            throw new Error("Failed to retrieve valid page content. The site may be blocking requests.");
+        if (!cleanPageText || cleanPageText.length < 100) {
+            throw new Error("Failed to retrieve enough valid text content from the page.");
         }
 
-        // --- Step 2: AI as a "Cleaner" ---
-        const cleaningPayload = {
-            contents: [{
-                parts: [{ text: `From the following HTML content, extract only the main recipe text, including its title, ingredients list, and instructions. Return only the clean, plain text, with no HTML tags. HTML: "${siteHtml}"` }]
-            }]
-        };
-        const cleaningResult = await callGemini(apiKey, cleaningPayload);
-        const cleanRecipeText = cleaningResult.candidates[0].content.parts[0].text;
-
-        if (!cleanRecipeText || cleanRecipeText.length < 50) {
-             throw new Error("AI could not find a valid recipe in the page content.");
-        }
-
-        // --- Step 3: AI as a "Structurer" ---
+        // --- Step 2: AI Structuring ---
         const structuringPayload = {
             contents: [{
-                parts: [{ text: `Analyze the following recipe text and provide the output in a valid JSON format. Recipe Text: "${cleanRecipeText}"` }]
+                parts: [{ text: `Analyze the following recipe text and provide the output in a valid JSON format. Recipe Text: "${cleanPageText}"` }]
             }],
             generationConfig: {
                 responseMimeType: "application/json",
@@ -94,8 +85,12 @@ exports.handler = async function(event, context) {
         const structuringResult = await callGemini(apiKey, structuringPayload);
         const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
 
+        // Final check to ensure the response is valid JSON before sending
+        JSON.parse(recipeJsonText);
+
         return {
             statusCode: 200,
+            headers: { 'Content-Type': 'application/json' },
             body: recipeJsonText,
         };
 
