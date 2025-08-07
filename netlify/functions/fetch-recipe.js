@@ -2,6 +2,11 @@ const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
 const fetch = require('node-fetch');
 
+// Set a higher timeout for the entire function
+exports.config = {
+  timeout: 28, // 28 seconds
+};
+
 async function callGemini(apiKey, payload) {
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
     try {
@@ -32,7 +37,6 @@ exports.handler = async function(event, context) {
 
     let browser = null;
     try {
-        // --- Step 1: Fetch and Clean HTML ---
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -43,7 +47,7 @@ exports.handler = async function(event, context) {
 
         const page = await browser.newPage();
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
         
         const cleanPageText = await page.evaluate(() => document.body.innerText);
 
@@ -51,7 +55,6 @@ exports.handler = async function(event, context) {
             throw new Error("Failed to retrieve enough valid text content from the page.");
         }
 
-        // --- Step 2: AI Structuring ---
         const structuringPayload = {
             contents: [{
                 parts: [{ text: `Analyze the following recipe text and provide the output in a valid JSON format. Recipe Text: "${cleanPageText}"` }]
@@ -80,7 +83,7 @@ exports.handler = async function(event, context) {
                 }
             }
         };
-        // --- THIS LINE IS NOW CORRECTED ---
+        
         const structuringResult = await callGemini(apiKey, structuringPayload);
         const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
 
@@ -94,9 +97,11 @@ exports.handler = async function(event, context) {
 
     } catch (error) {
         console.error('Function Error:', error.message);
+        // This ensures we always send back a JSON error
         return {
             statusCode: 500,
-            body: JSON.stringify({ error: 'Could not fetch or process the recipe from the website.' }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ error: `Could not process the recipe. Reason: ${error.message}` }),
         };
     } finally {
         if (browser !== null) {
