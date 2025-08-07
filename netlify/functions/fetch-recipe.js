@@ -33,7 +33,6 @@ exports.handler = async function(event, context) {
     let browser = null;
     try {
         // --- Step 1: Fetch and Clean HTML ---
-        // REMOVED: The non-essential chromium.font() call has been removed.
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -81,6 +80,7 @@ exports.handler = async function(event, context) {
                 }
             }
         };
+        // --- THIS LINE IS NOW CORRECTED ---
         const structuringResult = await callGemini(apiKey, structuringPayload);
         const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
 
