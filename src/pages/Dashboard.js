@@ -10,7 +10,6 @@ import masterIdeaList from '../data/masterIdeaList';
 
 const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, userId, journal, setDateFilter, openAddJournalModal, openAddIdeaModal, upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake, cookbook }) => {
     
-    // --- State for modals ---
     const [isAddChoiceModalOpen, setIsAddChoiceModalOpen] = useState(false);
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
     const [bakeToView, setBakeToView] = useState(null);
@@ -18,7 +17,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
     const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
-    // --- Handlers for modals ---
     const handleOpenPastBakeForm = () => {
         setIsAddChoiceModalOpen(false);
         openAddJournalModal();
@@ -64,7 +62,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setUpcomingBakeToEdit(null);
     };
     
-    // --- Existing Dashboard Logic ---
     const [idea, setIdea] = useState({ name: '', id: null });
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
@@ -145,7 +142,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
-            <div className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
+            <div id="generator-box" className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
                 <div className="relative">
                     <select
                         onChange={handleGeneratorChange}
@@ -183,7 +180,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             </div>
 
             <div className="space-y-2">
-                <div className="grid grid-cols-3 gap-2">
+                <div id="quick-add-buttons" className="grid grid-cols-3 gap-2">
                     <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         Bake
@@ -197,8 +194,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         Schedule
                     </button>
                 </div>
-                {/* --- NAVIGATION BUTTONS UPDATED --- */}
-                <div className="grid grid-cols-3 gap-2">
+                <div id="navigation-buttons" className="grid grid-cols-3 gap-2">
                     <button onClick={() => setView('cookbook')} className="w-full bg-burnt-orange text-light-peach py-2 px-3 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
@@ -221,31 +217,37 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 </div>
             </div>
             
-            <UpcomingBakes 
-                upcomingBakes={upcomingBakes}
-                addUpcomingBake={addUpcomingBake}
-                updateUpcomingBake={updateUpcomingBake}
-                deleteUpcomingBake={deleteUpcomingBake}
-                cookbook={cookbook}
-                addJournalEntry={addJournalEntry}
-            />
+            <div id="upcoming-bakes">
+                <UpcomingBakes 
+                    upcomingBakes={upcomingBakes}
+                    addUpcomingBake={addUpcomingBake}
+                    updateUpcomingBake={updateUpcomingBake}
+                    deleteUpcomingBake={deleteUpcomingBake}
+                    cookbook={cookbook}
+                    addJournalEntry={addJournalEntry}
+                />
+            </div>
             
-            <DashboardStats 
-                journal={journal} 
-                currentCalendarDate={currentCalendarDate} 
-            />
+            <div id="stats-box">
+                <DashboardStats 
+                    journal={journal} 
+                    currentCalendarDate={currentCalendarDate} 
+                />
+            </div>
             
-            <BakingCalendar 
-                journal={journal} 
-                upcomingBakes={upcomingBakes} 
-                setView={setView} 
-                setDateFilter={setDateFilter} 
-                openAddChoiceModal={() => setIsAddChoiceModalOpen(true)}
-                onViewBake={handleViewBake}
-                onViewUpcomingBake={handleViewUpcomingBake}
-                currentDate={currentCalendarDate}
-                setCurrentDate={setCurrentCalendarDate}
-            />
+            <div id="calendar-box">
+                <BakingCalendar 
+                    journal={journal} 
+                    upcomingBakes={upcomingBakes} 
+                    setView={setView} 
+                    setDateFilter={setDateFilter} 
+                    openAddChoiceModal={() => setIsAddChoiceModalOpen(true)}
+                    onViewBake={handleViewBake}
+                    onViewUpcomingBake={handleViewUpcomingBake}
+                    currentDate={currentCalendarDate}
+                    setCurrentDate={setCurrentCalendarDate}
+                />
+            </div>
             
             {/* --- MODALS --- */}
             {isAddChoiceModalOpen && (

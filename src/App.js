@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 
 // --- Helper Components ---
 import LoadingSpinner from './components/LoadingSpinner';
+import OnboardingTour from './components/OnboardingTour';
 
 // --- Page Components ---
 import AuthPage from './pages/AuthPage';
@@ -16,12 +17,29 @@ import IdeaForm from './pages/IdeaForm';
 
 // --- Custom Hooks ---
 import { useAuth } from './hooks/useAuth';
+import { useUser } from './hooks/useUser';
 import { useJournal } from './hooks/useJournal';
 import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 
-// --- Main App Component ---
+// --- A small local component for the welcome message ---
+const WelcomeModal = ({ onStartTour, onSkip }) => (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
+        <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4">
+            <h2 className="text-3xl text-burnt-orange">Welcome to Baking Antics!</h2>
+            <p className="font-montserrat text-app-grey/80 text-base">
+                Would you like a quick tour to see how everything works?
+            </p>
+            <div className="flex justify-center space-x-4 pt-2">
+                <button onClick={onStartTour} className="bg-add-idea text-white py-3 px-8 rounded-xl text-xl font-montserrat">Take a Tour</button>
+                <button onClick={onSkip} className="bg-gray-100 text-app-grey py-3 px-8 rounded-xl text-xl font-montserrat">Skip</button>
+            </div>
+        </div>
+    </div>
+);
+
+
 export default function App() {
     const { user, isAuthReady } = useAuth();
 
@@ -46,10 +64,36 @@ const MainApp = ({ user }) => {
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
 
     // --- Data from Custom Hooks ---
+    const { userProfile, updateUserProfile } = useUser();
     const { journal, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useJournal();
     const { ideaPad, addIdea, deleteIdea } = useIdeaPad();
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
+
+    // --- NEW: State for the tour ---
+    const [showWelcome, setShowWelcome] = useState(false);
+    const [showTour, setShowTour] = useState(false);
+
+    // Effect to check if the user is new
+    useEffect(() => {
+        if (userProfile && userProfile.hasCompletedTour === false) {
+            setTimeout(() => {
+                setShowWelcome(true);
+            }, 1000);
+        }
+    }, [userProfile]);
+
+    // Function to finish or skip the tour
+    const handleFinishTour = () => {
+        setShowWelcome(false);
+        setShowTour(false);
+        updateUserProfile({ hasCompletedTour: true });
+    };
+
+    const handleStartTour = () => {
+        setShowWelcome(false);
+        setShowTour(true);
+    };
 
     // --- Navigation and Actions ---
     const handleSignOut = () => {
@@ -85,13 +129,17 @@ const MainApp = ({ user }) => {
                     addUpcomingBake={addUpcomingBake}
                     updateUpcomingBake={updateUpcomingBake}
                     deleteUpcomingBake={deleteUpcomingBake}
-                    cookbook={cookbook} // <-- ADD THIS PROP
+                    cookbook={cookbook}
                 />;
         }
     };
 
     return (
         <div className="bg-app-white text-app-grey">
+            {/* --- Render the tour components conditionally --- */}
+            {showWelcome && <WelcomeModal onStartTour={handleStartTour} onSkip={handleFinishTour} />}
+            {showTour && <OnboardingTour onFinish={handleFinishTour} />}
+            
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
                     {/* Sidebar */}
