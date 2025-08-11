@@ -48,7 +48,6 @@ const UpcomingBakeForm = ({ onSave, onCancel, bakeToEdit, cookbook }) => {
                             className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                             defaultValue=""
                         >
-                            {/* Text updated here */}
                             <option value="" disabled>Pick from My Recipes</option>
                             {cookbook.map(recipe => (
                                 <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">

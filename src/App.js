@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 
-// --- Helper Components ---
+// --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
 
-// --- Page Components ---
+// --- Pages ---
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import IdeaPad from './pages/IdeaPad';
@@ -15,7 +15,7 @@ import MyCookbook from './pages/MyCookbook';
 import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
 
-// --- Custom Hooks ---
+// --- Hooks ---
 import { useAuth } from './hooks/useAuth';
 import { useUser } from './hooks/useUser';
 import { useJournal } from './hooks/useJournal';
@@ -122,6 +122,7 @@ const MainApp = ({ user }) => {
                     userId={user.uid} 
                     journal={journal} 
                     addJournalEntry={addJournalEntry}
+                    updateJournalEntry={updateJournalEntry}
                     setDateFilter={setDateFilter} 
                     openAddJournalModal={() => setIsAddJournalModalOpen(true)} 
                     openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
@@ -130,13 +131,15 @@ const MainApp = ({ user }) => {
                     updateUpcomingBake={updateUpcomingBake}
                     deleteUpcomingBake={deleteUpcomingBake}
                     cookbook={cookbook}
+                    addRecipe={addRecipe}
+                    updateRecipe={updateRecipe}
+                    deleteRecipe={deleteRecipe}
                 />;
         }
     };
 
     return (
         <div className="bg-app-white text-app-grey">
-            {/* --- Render the tour components conditionally --- */}
             {showWelcome && <WelcomeModal onStartTour={handleStartTour} onSkip={handleFinishTour} />}
             {showTour && <OnboardingTour onFinish={handleFinishTour} />}
             
@@ -151,7 +154,7 @@ const MainApp = ({ user }) => {
                                 <button onClick={() => navigate('dashboard')} className="text-left p-2 rounded-lg hover:bg-light-peach">Dashboard</button>
                                 <button onClick={() => navigate('ideapad')} className="text-left p-2 rounded-lg hover:bg-light-peach">Idea Pad</button>
                                 <button onClick={() => navigate('journal')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Journal</button>
-                                <button onClick={() => navigate('cookbook')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Cookbook</button>
+                                <button onClick={() => navigate('cookbook')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Recipes</button>
                             </nav>
                             <div className="absolute bottom-0 left-0 w-full p-4">
                                 <button onClick={handleSignOut} className="w-full text-left p-2 rounded-lg hover:bg-light-peach font-montserrat">Sign Out</button>
@@ -167,12 +170,11 @@ const MainApp = ({ user }) => {
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
                             </button>
                             <button onClick={() => setView('dashboard')} className="text-2xl font-bold text-add-idea">Baking Antics</button>
-                            <div className="w-8"></div> {/* Placeholder for alignment */}
+                            <div className="w-8"></div>
                         </nav>
                     </header>
                     <main className="flex-grow overflow-y-auto bg-app-white">{renderView()}</main>
                     
-                    {/* Modals triggered from Dashboard */}
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                 </div>

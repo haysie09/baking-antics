@@ -36,14 +36,13 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
             <div className="space-y-4 text-xl">
                 <h2 className="text-4xl font-bold text-burnt-orange">{isNew ? 'Add a Past Bake' : 'Edit Journal Entry'}</h2>
 
-                {isNew && (
+                {isNew && cookbook && cookbook.length > 0 && (
                     <div className="relative">
                         <select
                             onChange={handleCookbookSelect}
                             className="w-full bg-white text-add-idea font-bold py-3 px-4 rounded-xl text-lg hover:bg-light-peach transition-colors shadow-sm font-montserrat appearance-none text-center"
                             defaultValue=""
                         >
-                            {/* Text updated here */}
                             <option value="" disabled>Pick from My Recipes</option>
                             {cookbook.map(recipe => (
                                 <option key={recipe.id} value={recipe.id} className="font-montserrat text-app-grey">{recipe.recipeTitle}</option>
