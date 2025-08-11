@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
-
-// --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
-
-// --- Pages ---
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import IdeaPad from './pages/IdeaPad';
@@ -14,8 +10,6 @@ import BakingJournal from './pages/BakingJournal';
 import MyCookbook from './pages/MyCookbook';
 import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
-
-// --- Hooks ---
 import { useAuth } from './hooks/useAuth';
 import { useUser } from './hooks/useUser';
 import { useJournal } from './hooks/useJournal';
@@ -23,7 +17,6 @@ import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 
-// --- A small local component for the welcome message ---
 const WelcomeModal = ({ onStartTour, onSkip }) => (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
         <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4">
@@ -39,51 +32,32 @@ const WelcomeModal = ({ onStartTour, onSkip }) => (
     </div>
 );
 
-
 export default function App() {
     const { user, isAuthReady } = useAuth();
-
-    if (!isAuthReady) {
-        return <LoadingSpinner />;
-    }
-
-    return (
-        <>
-            {user ? <MainApp user={user} /> : <AuthPage />}
-        </>
-    );
+    if (!isAuthReady) return <LoadingSpinner />;
+    return <>{user ? <MainApp user={user} /> : <AuthPage />}</>;
 }
 
-
 const MainApp = ({ user }) => {
-    // --- UI State ---
     const [view, setView] = useState('dashboard');
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [dateFilter, setDateFilter] = useState(null);
     const [isAddJournalModalOpen, setIsAddJournalModalOpen] = useState(false);
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
-
-    // --- Data from Custom Hooks ---
     const { userProfile, updateUserProfile } = useUser();
     const { journal, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useJournal();
     const { ideaPad, addIdea, deleteIdea } = useIdeaPad();
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
-
-    // --- NEW: State for the tour ---
     const [showWelcome, setShowWelcome] = useState(false);
     const [showTour, setShowTour] = useState(false);
 
-    // Effect to check if the user is new
     useEffect(() => {
         if (userProfile && userProfile.hasCompletedTour === false) {
-            setTimeout(() => {
-                setShowWelcome(true);
-            }, 1000);
+            setTimeout(() => setShowWelcome(true), 1000);
         }
     }, [userProfile]);
 
-    // Function to finish or skip the tour
     const handleFinishTour = () => {
         setShowWelcome(false);
         setShowTour(false);
@@ -95,10 +69,7 @@ const MainApp = ({ user }) => {
         setShowTour(true);
     };
 
-    // --- Navigation and Actions ---
-    const handleSignOut = () => {
-        signOut(auth);
-    };
+    const handleSignOut = () => signOut(auth);
 
     const navigate = (newView) => {
         setView(newView);
@@ -107,33 +78,16 @@ const MainApp = ({ user }) => {
 
     const renderView = () => {
         switch (view) {
-            case 'ideapad':
-                return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
-            case 'journal':
-                return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
-            case 'cookbook':
-                return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
-            default: // 'dashboard'
+            case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
+            case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
+            case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
+            default:
                 return <Dashboard 
-                    setView={setView} 
-                    ideaPad={ideaPad} 
-                    addIdea={addIdea} 
-                    deleteIdea={deleteIdea} 
-                    userId={user.uid} 
-                    journal={journal} 
-                    addJournalEntry={addJournalEntry}
-                    updateJournalEntry={updateJournalEntry}
-                    setDateFilter={setDateFilter} 
-                    openAddJournalModal={() => setIsAddJournalModalOpen(true)} 
-                    openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
-                    upcomingBakes={upcomingBakes}
-                    addUpcomingBake={addUpcomingBake}
-                    updateUpcomingBake={updateUpcomingBake}
-                    deleteUpcomingBake={deleteUpcomingBake}
-                    cookbook={cookbook}
-                    addRecipe={addRecipe}
-                    updateRecipe={updateRecipe}
-                    deleteRecipe={deleteRecipe}
+                    setView={setView} ideaPad={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} userId={user.uid} journal={journal} 
+                    addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} setDateFilter={setDateFilter} 
+                    openAddJournalModal={() => setIsAddJournalModalOpen(true)} openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
+                    upcomingBakes={upcomingBakes} addUpcomingBake={addUpcomingBake} updateUpcomingBake={updateUpcomingBake} 
+                    deleteUpcomingBake={deleteUpcomingBake} cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe}
                 />;
         }
     };
@@ -142,10 +96,8 @@ const MainApp = ({ user }) => {
         <div className="bg-app-white text-app-grey">
             {showWelcome && <WelcomeModal onStartTour={handleStartTour} onSkip={handleFinishTour} />}
             {showTour && <OnboardingTour onFinish={handleFinishTour} />}
-            
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
-                    {/* Sidebar */}
                     <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg`}>
                         <div className="p-4 font-patrick-hand">
                             <h2 className="text-2xl font-bold text-add-idea">My Baking Hub</h2>
@@ -161,9 +113,7 @@ const MainApp = ({ user }) => {
                             </div>
                         </div>
                     </div>
-                    {/* Overlay */}
                     {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>}
-
                     <header className="bg-app-white shadow-md sticky top-0 z-30 font-patrick-hand">
                         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
                             <button onClick={() => setIsSidebarOpen(true)} className="text-add-idea">
@@ -174,7 +124,6 @@ const MainApp = ({ user }) => {
                         </nav>
                     </header>
                     <main className="flex-grow overflow-y-auto bg-app-white">{renderView()}</main>
-                    
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                 </div>
