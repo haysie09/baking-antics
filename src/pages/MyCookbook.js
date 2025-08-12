@@ -7,7 +7,6 @@ import AddFromURLModal from '../components/AddFromURLModal';
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 
 const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
-    // --- MISSING STATE AND HANDLERS NOW RESTORED ---
     const [editingRecipe, setEditingRecipe] = useState(null);
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
@@ -17,6 +16,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
         month: 'all',
         year: 'all'
     });
+    
     const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
     const [importedRecipeData, setImportedRecipeData] = useState(null);
 
@@ -36,21 +36,73 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
     };
 
     const handleImportRecipe = async (url) => {
-        const functionUrl = `/.netlify/functions/fetch-recipe?url=${encodeURIComponent(url)}`;
         try {
+            // Step 1: Get the clean text from our simplified serverless function
+            const functionUrl = `/.netlify/functions/fetch-recipe?url=${encodeURIComponent(url)}`;
             const response = await fetch(functionUrl);
-            const recipeData = await response.json();
+            const data = await response.json();
+
             if (!response.ok) {
-                throw new Error(recipeData.error || 'An unknown error occurred during import.');
+                throw new Error(data.error || 'Failed to fetch website content.');
             }
+            const cleanRecipeText = data.textContent;
+
+            // Step 2: Send the clean text to the Gemini AI from the browser for structuring
+            const apiKey = ""; // This will be provided by the environment
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            
+            const structuringPayload = {
+                contents: [{
+                    parts: [{ text: `Analyze the following recipe text and provide the output in a valid JSON format. Recipe Text: "${cleanRecipeText}"` }]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            recipeTitle: { type: "STRING" },
+                            ingredients: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        quantity: { type: "STRING" },
+                                        measurement: { type: "STRING" },
+                                        name: { type: "STRING" }
+                                    },
+                                    required: ["name"]
+                                }
+                            },
+                            instructions: { type: "STRING" }
+                        },
+                        required: ["recipeTitle", "ingredients", "instructions"]
+                    }
+                }
+            };
+
+            const aiResponse = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(structuringPayload)
+            });
+
+            if (!aiResponse.ok) {
+                throw new Error('The AI model could not process the recipe text.');
+            }
+
+            const result = await aiResponse.json();
+            const recipeJsonText = result.candidates[0].content.parts[0].text;
+            const recipeData = JSON.parse(recipeJsonText);
+
+            // Set the final structured data and open the form
             setImportedRecipeData(recipeData);
             setIsUrlModalOpen(false);
+            
         } catch (error) {
             console.error("Import Error:", error);
             throw new Error(error.message);
         }
     };
-    // --- END OF RESTORED LOGIC ---
 
     const filteredCookbook = useMemo(() => {
         let recipes = cookbook || [];
