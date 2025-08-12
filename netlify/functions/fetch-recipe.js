@@ -17,20 +17,16 @@ async function callGemini(apiKey, payload) {
     return response.json();
 }
 
-// --- NEW: Fast fetch function ---
-async function fetchWithNode(url) {
-    const headers = {
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-    };
-    const response = await fetch(url, { headers });
-    if (!response.ok) throw new Error("Simple fetch failed.");
-    return response.text();
-}
+exports.handler = async function(event, context) {
+    const { url } = event.queryStringParameters;
+    const apiKey = process.env.GEMINI_API_KEY || "";
 
-// --- NEW: Powerful browser function ---
-async function fetchWithPuppeteer(url) {
+    if (!url) return { statusCode: 400, body: JSON.stringify({ error: 'URL is required.' }) };
+    if (!apiKey) return { statusCode: 500, body: JSON.stringify({ error: 'API key is not configured.' }) };
+
     let browser = null;
     try {
+        // --- Step 1: Fetch HTML ---
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -40,42 +36,12 @@ async function fetchWithPuppeteer(url) {
         });
         const page = await browser.newPage();
         await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
-        return page.evaluate(() => document.body.innerText);
-    } finally {
-        if (browser) await browser.close();
-    }
-}
+        const siteHtml = await page.content();
+        if (!siteHtml) throw new Error("Failed to retrieve page content.");
 
-
-exports.handler = async function(event, context) {
-    const { url } = event.queryStringParameters;
-    const apiKey = process.env.GEMINI_API_KEY || "";
-
-    if (!url) return { statusCode: 400, body: JSON.stringify({ error: 'URL is required.' }) };
-    if (!apiKey) return { statusCode: 500, body: JSON.stringify({ error: 'API key is not configured.' }) };
-
-    try {
-        let cleanPageText;
-        console.log("Attempting fast fetch...");
-        try {
-            // --- Try the fast way first ---
-            cleanPageText = await fetchWithNode(url);
-            console.log("Fast fetch successful.");
-        } catch (e) {
-            console.log("Fast fetch failed, falling back to browser...");
-            // --- Fallback to the powerful way ---
-            cleanPageText = await fetchWithPuppeteer(url);
-            console.log("Browser fetch successful.");
-        }
-
-        if (!cleanPageText || cleanPageText.length < 100) {
-            throw new Error("Failed to retrieve enough valid text content from the page.");
-        }
-
-        // --- AI Structuring (only one step needed now) ---
-        console.log("Sending text to AI for structuring...");
+        // --- Step 2: AI Structuring ---
         const structuringPayload = {
-            contents: [{ parts: [{ text: `Analyze the following recipe text and provide the output in a valid JSON format. Recipe Text: "${cleanPageText}"` }] }],
+            contents: [{ parts: [{ text: `From the following HTML, extract the recipe title, ingredients, and instructions. HTML: "${siteHtml}"` }] }],
             generationConfig: {
                 responseMimeType: "application/json",
                 responseSchema: {
@@ -90,14 +56,21 @@ exports.handler = async function(event, context) {
             }
         };
         const structuringResult = await callGemini(apiKey, structuringPayload);
-        const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
-        
-        JSON.parse(recipeJsonText); // Validate JSON before returning
+        let recipeData = JSON.parse(structuringResult.candidates[0].content.parts[0].text);
+
+        // --- Step 3: AI Formatting ---
+        if (recipeData.instructions) {
+            const formattingPayload = {
+                contents: [{ parts: [{ text: `Reformat the following recipe instructions into a clean, numbered list. Instructions: "${recipeData.instructions}"` }] }]
+            };
+            const formattingResult = await callGemini(apiKey, formattingPayload);
+            recipeData.instructions = formattingResult.candidates[0].content.parts[0].text;
+        }
 
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json' },
-            body: recipeJsonText,
+            body: JSON.stringify(recipeData),
         };
 
     } catch (error) {
@@ -107,5 +80,7 @@ exports.handler = async function(event, context) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ error: `Could not process the recipe. Reason: ${error.message}` }),
         };
+    } finally {
+        if (browser) await browser.close();
     }
 };
