@@ -21,11 +21,20 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
     const [importedRecipeData, setImportedRecipeData] = useState(null);
 
     const handleSave = async (recipeData) => {
+        // Auto-capitalize ingredients before saving
+        const sanitizedData = {
+            ...recipeData,
+            ingredients: recipeData.ingredients.map(ing => ({
+                ...ing,
+                name: ing.name.charAt(0).toUpperCase() + ing.name.slice(1)
+            }))
+        };
+
         if (isCreatingNew || importedRecipeData) {
-            await addRecipe({ ...recipeData, createdAt: new Date() });
+            await addRecipe({ ...sanitizedData, createdAt: new Date() });
             setImportedRecipeData(null);
         } else {
-            await updateRecipe(editingRecipe.id, recipeData);
+            await updateRecipe(editingRecipe.id, sanitizedData);
         }
         setEditingRecipe(null);
         setIsCreatingNew(false);
@@ -43,8 +52,8 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
             if (!response.ok) {
                 throw new Error(recipeData.error || 'An unknown error occurred during import.');
             }
-            // Add the source URL to the data before opening the form
-            const finalRecipeData = { ...recipeData, sourceURL: url };
+            // Add the source URL and ensure categories is an array
+            const finalRecipeData = { ...recipeData, sourceURL: url, categories: [] };
             setImportedRecipeData(finalRecipeData);
             setIsUrlModalOpen(false);
         } catch (error) {
