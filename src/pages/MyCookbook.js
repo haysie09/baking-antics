@@ -21,7 +21,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
     const [importedRecipeData, setImportedRecipeData] = useState(null);
 
     const handleSave = async (recipeData) => {
-        // Auto-capitalize ingredients before saving
         const sanitizedData = {
             ...recipeData,
             ingredients: recipeData.ingredients.map(ing => ({
@@ -52,7 +51,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
             if (!response.ok) {
                 throw new Error(recipeData.error || 'An unknown error occurred during import.');
             }
-            // Add the source URL and ensure categories is an array
             const finalRecipeData = { ...recipeData, sourceURL: url, categories: [] };
             setImportedRecipeData(finalRecipeData);
             setIsUrlModalOpen(false);

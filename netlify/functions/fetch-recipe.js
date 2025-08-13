@@ -39,7 +39,7 @@ exports.handler = async function(event, context) {
         const siteHtml = await page.content();
         if (!siteHtml) throw new Error("Failed to retrieve page content.");
 
-        // --- Step 2: AI Structuring ---
+        // --- Step 2: AI Structuring (Single Step) ---
         const structuringPayload = {
             contents: [{ parts: [{ text: `From the following HTML, extract the recipe title, ingredients, and instructions. HTML: "${siteHtml}"` }] }],
             generationConfig: {
@@ -56,21 +56,15 @@ exports.handler = async function(event, context) {
             }
         };
         const structuringResult = await callGemini(apiKey, structuringPayload);
-        let recipeData = JSON.parse(structuringResult.candidates[0].content.parts[0].text);
-
-        // --- Step 3: AI Formatting ---
-        if (recipeData.instructions) {
-            const formattingPayload = {
-                contents: [{ parts: [{ text: `Reformat the following recipe instructions into a clean, numbered list. Instructions: "${recipeData.instructions}"` }] }]
-            };
-            const formattingResult = await callGemini(apiKey, formattingPayload);
-            recipeData.instructions = formattingResult.candidates[0].content.parts[0].text;
-        }
+        const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
+        
+        // Validate that the AI returned valid JSON before sending
+        JSON.parse(recipeJsonText);
 
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(recipeData),
+            body: recipeJsonText,
         };
 
     } catch (error) {
