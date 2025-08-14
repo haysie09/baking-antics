@@ -1,9 +1,10 @@
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
 const fetch = require('node-fetch');
+const cheerio = require('cheerio'); // <-- ADDED: For parsing HTML
 
 async function callGemini(apiKey, payload) {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`; // Updated model for potential better performance
     const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -26,7 +27,7 @@ exports.handler = async function(event, context) {
 
     let browser = null;
     try {
-        // --- Step 1: Fetch HTML ---
+        // --- Step 1: Fetch and Clean HTML ---
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -34,37 +35,67 @@ exports.handler = async function(event, context) {
             headless: chromium.headless,
             ignoreHTTPSErrors: true,
         });
+
         const page = await browser.newPage();
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 25000 });
+        // REDUCED TIMEOUT: Prevents serverless function timeout
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 8000 }); 
         const siteHtml = await page.content();
         if (!siteHtml) throw new Error("Failed to retrieve page content.");
 
-        // --- Step 2: AI Structuring (Single Step) ---
-        const structuringPayload = {
-            contents: [{ parts: [{ text: `From the following HTML, extract the recipe title, ingredients, and instructions. HTML: "${siteHtml}"` }] }],
+        // ADDED: Pre-process HTML with Cheerio to reduce tokens and improve AI focus
+        const $ = cheerio.load(siteHtml);
+        // Try to find a specific recipe container, otherwise fall back to the body's text
+        const recipeContent = $('[itemtype*="schema.org/Recipe"]').html() || $('article.recipe').html() || $('body').text();
+        const cleanedText = recipeContent.replace(/\s\s+/g, ' ').trim(); // Remove extra whitespace
+
+        // --- Step 2: AI Structuring & Formatting (Single Call) ---
+        const payload = {
+            contents: [{ 
+                parts: [{ 
+                    text: `From the following text, extract the recipe. Ensure the instructions are a simple array of strings, with each string being one step. Text: "${cleanedText}"` 
+                }] 
+            }],
             generationConfig: {
                 responseMimeType: "application/json",
+                // UPDATED SCHEMA: Gets formatted instructions in one go
                 responseSchema: {
                     type: "OBJECT",
                     properties: {
                         recipeTitle: { type: "STRING" },
-                        ingredients: { type: "ARRAY", items: { type: "OBJECT", properties: { quantity: { type: "STRING" }, measurement: { type: "STRING" }, name: { type: "STRING" } }, required: ["name"] } },
-                        instructions: { type: "STRING" }
+                        ingredients: { 
+                            type: "ARRAY", 
+                            items: { 
+                                type: "OBJECT", 
+                                properties: { 
+                                    quantity: { type: "STRING" }, 
+                                    measurement: { type: "STRING" }, 
+                                    name: { type: "STRING" } 
+                                }, 
+                                required: ["name"] 
+                            } 
+                        },
+                        instructions: { 
+                            type: "ARRAY",
+                            items: { type: "STRING" }
+                        }
                     },
                     required: ["recipeTitle", "ingredients", "instructions"]
                 }
             }
         };
-        const structuringResult = await callGemini(apiKey, structuringPayload);
-        const recipeJsonText = structuringResult.candidates[0].content.parts[0].text;
-        
-        // Validate that the AI returned valid JSON before sending
-        JSON.parse(recipeJsonText);
+
+        const result = await callGemini(apiKey, payload);
+        let recipeData = JSON.parse(result.candidates[0].content.parts[0].text);
+
+        // Convert instructions array to a single string for the textarea
+        if (Array.isArray(recipeData.instructions)) {
+            recipeData.instructions = recipeData.instructions.join('\n');
+        }
 
         return {
             statusCode: 200,
             headers: { 'Content-Type': 'application/json' },
-            body: recipeJsonText,
+            body: JSON.stringify(recipeData),
         };
 
     } catch (error) {

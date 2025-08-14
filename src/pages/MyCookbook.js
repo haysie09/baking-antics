@@ -47,15 +47,24 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe }) => {
         const functionUrl = `/.netlify/functions/fetch-recipe?url=${encodeURIComponent(url)}`;
         try {
             const response = await fetch(functionUrl);
-            const recipeData = await response.json();
+            
+            // This check is crucial. If the response isn't OK, we'll parse the error message.
             if (!response.ok) {
-                throw new Error(recipeData.error || 'An unknown error occurred during import.');
+                // Try to parse the error from the backend function's JSON response
+                const errorData = await response.json().catch(() => ({ 
+                    error: "The server returned an invalid response. The import feature may be temporarily down." 
+                }));
+                throw new Error(errorData.error || 'An unknown error occurred during import.');
             }
+
+            const recipeData = await response.json();
             const finalRecipeData = { ...recipeData, sourceURL: url, categories: [] };
             setImportedRecipeData(finalRecipeData);
             setIsUrlModalOpen(false);
         } catch (error) {
             console.error("Import Error:", error);
+            // This re-throws the error so the calling component (AddFromURLModal) can catch it and display it.
+            // The error message is now more informative.
             throw new Error(error.message);
         }
     };
