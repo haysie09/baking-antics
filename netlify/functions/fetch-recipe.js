@@ -38,7 +38,7 @@ exports.handler = async function(event, context) {
 
         const page = await browser.newPage();
         // REDUCED TIMEOUT: Prevents serverless function timeout
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 8000 }); 
+        await page.goto(url, { waitUntil: 'networkidle2', timeout: 14000 }); 
         const siteHtml = await page.content();
         if (!siteHtml) throw new Error("Failed to retrieve page content.");
 
