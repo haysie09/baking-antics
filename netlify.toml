@@ -10,6 +10,5 @@
 [functions."fetch-recipe"]
   timeout = 20
   memory = 1024
-  node_bundler = "esbuild"
+  node_bundler = "zisi"
   node_version = "20"
-  included_files = ["node_modules/@sparticuz/chromium/bin/**"]
