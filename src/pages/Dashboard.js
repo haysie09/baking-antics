@@ -7,6 +7,7 @@ import UpcomingBakeForm from './UpcomingBakeForm';
 import ViewBakeModal from '../components/ViewBakeModal';
 import ViewUpcomingBakeModal from '../components/ViewUpcomingBakeModal';
 import masterIdeaList from '../data/masterIdeaList';
+import MyCookbook from './MyCookbook';
 import AddRecipeChoiceModal from '../components/AddRecipeChoiceModal';
 import AddFromURLModal from '../components/AddFromURLModal';
 import CookbookForm from './CookbookForm';
@@ -19,13 +20,10 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
     const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
-    
-    // --- State for the recipe modal flow ---
     const [isRecipeChoiceModalOpen, setIsRecipeChoiceModalOpen] = useState(false);
     const [isUrlModalOpen, setIsUrlModalOpen] = useState(false);
     const [isManualRecipeOpen, setIsManualRecipeOpen] = useState(false);
     const [importedRecipeData, setImportedRecipeData] = useState(null);
-
 
     const handleOpenPastBakeForm = () => {
         setIsAddChoiceModalOpen(false);
@@ -72,7 +70,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         setUpcomingBakeToEdit(null);
     };
 
-    // --- Handlers for the recipe choice modal ---
     const handleOpenImportModal = () => {
         setIsRecipeChoiceModalOpen(false);
         setIsUrlModalOpen(true);
@@ -86,7 +83,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     const handleSaveNewRecipe = async (recipeData) => {
         await addRecipe({ ...recipeData, createdAt: new Date() });
         setIsManualRecipeOpen(false);
-        setImportedRecipeData(null); // Also clear imported data
+        setImportedRecipeData(null);
     };
 
     const handleImportRecipe = async (url) => {
@@ -97,9 +94,9 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
             if (!response.ok) {
                 throw new Error(recipeData.error || 'An unknown error occurred during import.');
             }
-            // Close the URL modal and open the manual form pre-filled with data
+            const finalRecipeData = { ...recipeData, sourceURL: url, categories: [] };
+            setImportedRecipeData(finalRecipeData);
             setIsUrlModalOpen(false);
-            setImportedRecipeData(recipeData); // Set data to pre-fill the form
             setIsManualRecipeOpen(true); 
         } catch (error) {
             console.error("Import Error:", error);
@@ -107,7 +104,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
         }
     };
     
-    // ... (rest of the dashboard logic)
     const [idea, setIdea] = useState({ name: '', id: null });
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
@@ -121,7 +117,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
     const generateFromMyIdeas = useCallback(() => {
         if (!ideaPad || ideaPad.length === 0) {
-            setIdea({ name: <p className="text-center text-app-grey/70 py-4 text-base font-montserrat">Your Idea Pad is empty!</p>, id: null });
+            setIdea({ name: <p className="text-center text-app-grey/70 py-4 text-sm font-montserrat">Your Idea Pad is empty!</p>, id: null });
             setInspiredBy('ideaPad');
             return;
         }
@@ -246,6 +242,28 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         Recipe
                     </button>
                 </div>
+            </div>
+            
+            <div id="navigation-buttons" className="grid grid-cols-3 gap-3">
+                <button onClick={() => setView('cookbook')} className="bg-burnt-orange text-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 aspect-square hover:opacity-90 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-bookmark-heart" viewBox="0 0 16 16">
+                        <path fillRule="evenodd" d="M8 4.41c1.387-1.425 4.854 1.07 0 4.277C3.146 5.48 6.613 2.986 8 4.412z"/>
+                        <path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v13.5a.5.5 0 0 1-.777.416L8 13.101l-5.223 2.815A.5.5 0 0 1 2 15.5zm2-1a1 1 0 0 0-1 1v12.566l4.723-2.482a.5.5 0 0 1 .554 0L13 14.566V2a1 1 0 0 0-1-1z"/>
+                    </svg>
+                    <span className="text-xs font-bold font-montserrat">Recipes</span>
+                </button>
+                <button onClick={() => setView('journal')} className="bg-burnt-orange text-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 aspect-square hover:opacity-90 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-book" viewBox="0 0 16 16">
+                        <path d="M1 2.828c.885-.37 2.154-.769 3.388-.893 1.33-.134 2.458.063 3.112.752v9.746c-.935-.53-2.12-.603-3.213-.493-1.18.12-2.37.461-3.287.811zm7.5-.141c.654-.689 1.782-.886 3.112-.752 1.234.124 2.503.523 3.388.893v9.923c-.918-.35-2.107-.692-3.287-.81-1.094-.111-2.278-.039-3.213.492zM8 1.783C7.015.936 5.587.81 4.287.94c-1.514.153-3.042.672-3.994 1.105A.5.5 0 0 0 0 2.5v11a.5.5 0 0 0 .707.455c.882-.4 2.303-.881 3.68-1.02 1.409-.142 2.59.087 3.223.877a.5.5 0 0 0 .78 0c.633-.79 1.814-1.019 3.222-.877 1.378.139 2.8.62 3.681 1.02A.5.5 0 0 0 16 13.5v-11a.5.5 0 0 0-.293-.455c-.952-.433-2.48-.952-3.994-1.105C10.413.809 8.985.936 8 1.783"/>
+                    </svg>
+                    <span className="text-xs font-bold font-montserrat">Journal</span>
+                </button>
+                <button onClick={() => setView('ideapad')} className="bg-burnt-orange text-white rounded-2xl p-3 flex flex-col items-center justify-center gap-2 aspect-square hover:opacity-90 transition-opacity">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" className="bi bi-lightbulb" viewBox="0 0 16 16">
+                        <path d="M2 6a6 6 0 1 1 10.174 4.31c-.203.196-.359.4-.453.619l-.762 1.769A.5.5 0 0 1 10.5 13a.5.5 0 0 1 0 1 .5.5 0 0 1 0 1l-.224.447a1 1 0 0 1-.894.553H6.618a1 1 0 0 1-.894-.553L5.5 15a.5.5 0 0 1 0-1 .5.5 0 0 1 0-1 .5.5 0 0 1-.46-.302l-.761-1.77a2 2 0 0 0-.453-.618A5.98 5.98 0 0 1 2 6m6-5a5 5 0 0 0-3.479 8.592c.263.254.514.564.676.941L5.83 12h4.342l.632-1.467c.162-.377.413-.687.676-.941A5 5 0 0 0 8 1"/>
+                    </svg>
+                    <span className="text-xs font-bold font-montserrat">Ideas</span>
+                </button>
             </div>
             
             <div id="upcoming-bakes">
