@@ -71,29 +71,29 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     };
 
     return (
-        <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
+        <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand dark:bg-gray-900">
             <div className="mb-8">
                 <h1 className="text-4xl font-bold text-burnt-orange">My Account</h1>
             </div>
 
             <div className="space-y-10">
                 {/* --- Profile Settings Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-gray-800 dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Profile Settings</h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-4 font-montserrat">
                         <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">Login Email</label>
-                            <p className="w-full p-3 bg-gray-200 text-gray-500 rounded-xl text-base">
+                            <label className="block text-app-grey font-semibold mb-1 text-lg dark:text-gray-300">Login Email</label>
+                            <p className="w-full p-3 bg-gray-200 text-gray-500 rounded-xl text-base dark:bg-gray-700 dark:text-gray-400">
                                 {user.email}
                             </p>
                         </div>
                         <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">Display Name</label>
+                            <label className="block text-app-grey font-semibold mb-1 text-lg dark:text-gray-300">Display Name</label>
                             <input 
                                 type="text"
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-xl text-base"
+                                className="w-full p-3 border border-gray-300 rounded-xl text-base dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             />
                         </div>
                         <button type="submit" className="w-full bg-burnt-orange text-light-peach py-2 px-4 rounded-xl text-base font-semibold hover:opacity-90">Save Name</button>
@@ -101,11 +101,11 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                     </form>
                 </div>
 
-                {/* --- NEW: Appearance Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
+                {/* --- Appearance Section --- */}
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-gray-800 dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Appearance</h2>
                     <div className="flex justify-between items-center font-montserrat">
-                        <label className="text-app-grey font-semibold text-lg">Dark Mode</label>
+                        <label className="text-app-grey font-semibold text-lg dark:text-gray-300">Dark Mode</label>
                         <label className="relative inline-flex items-center cursor-pointer">
                             <input 
                                 type="checkbox" 
@@ -113,31 +113,31 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                                 checked={userProfile?.theme === 'dark'}
                                 onChange={handleThemeToggle}
                             />
-                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-add-idea"></div>
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-add-idea dark:bg-gray-600"></div>
                         </label>
                     </div>
                 </div>
 
                 {/* --- Security Settings Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-gray-800 dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Change Password</h2>
                     <form onSubmit={handlePasswordUpdate} className="space-y-4 font-montserrat">
                         <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">New Password</label>
+                            <label className="block text-app-grey font-semibold mb-1 text-lg dark:text-gray-300">New Password</label>
                             <input 
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-xl text-base"
+                                className="w-full p-3 border border-gray-300 rounded-xl text-base dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             />
                         </div>
                          <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">Confirm New Password</label>
+                            <label className="block text-app-grey font-semibold mb-1 text-lg dark:text-gray-300">Confirm New Password</label>
                             <input 
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-xl text-base"
+                                className="w-full p-3 border border-gray-300 rounded-xl text-base dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             />
                         </div>
                         <button type="submit" className="w-full bg-burnt-orange text-light-peach py-2 px-4 rounded-xl text-base font-semibold hover:opacity-90">Update Password</button>

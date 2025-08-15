@@ -27,14 +27,14 @@ import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 // --- Welcome Modal ---
 const WelcomeModal = ({ onStartTour, onSkip }) => (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
-        <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4">
+        <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4 dark:bg-gray-700">
             <h2 className="text-3xl text-burnt-orange">Welcome to Baking Antics!</h2>
-            <p className="font-montserrat text-app-grey/80 text-base">
+            <p className="font-montserrat text-app-grey/80 text-base dark:text-gray-300">
                 Would you like a quick tour to see how everything works?
             </p>
             <div className="flex justify-center space-x-4 pt-2">
                 <button onClick={onStartTour} className="bg-add-idea text-white py-3 px-8 rounded-xl text-xl font-montserrat">Take a Tour</button>
-                <button onClick={onSkip} className="bg-gray-100 text-app-grey py-3 px-8 rounded-xl text-xl font-montserrat">Skip</button>
+                <button onClick={onSkip} className="bg-gray-100 text-app-grey py-3 px-8 rounded-xl text-xl font-montserrat dark:bg-gray-600 dark:text-gray-200">Skip</button>
             </div>
         </div>
     </div>
@@ -113,24 +113,24 @@ const MainApp = ({ user }) => {
     };
 
     return (
-        <div className="bg-app-white text-app-grey dark:bg-gray-800 dark:text-gray-200">
+        <div className="bg-app-white text-app-grey dark:bg-gray-900 dark:text-gray-300">
             {showWelcome && <WelcomeModal onStartTour={handleStartTour} onSkip={handleFinishTour} />}
             {showTour && <OnboardingTour onFinish={handleFinishTour} />}
-            <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100 dark:bg-gray-900">
-                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative dark:bg-gray-800">
-                    <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg dark:bg-gray-700 dark:border-r dark:border-gray-600`}>
+            <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100 dark:bg-black">
+                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative dark:bg-gray-900">
+                    <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg dark:bg-gray-800 dark:border-r dark:border-gray-700`}>
                         <div className="p-4 font-patrick-hand">
                             <h2 className="text-2xl font-bold text-add-idea">My Baking Hub</h2>
                             <div className="text-sm text-app-grey mt-1 mb-4 truncate dark:text-gray-300">{userProfile?.displayName || user.email}</div>
                             <nav className="flex flex-col space-y-2 font-montserrat">
-                                <button onClick={() => navigate('dashboard')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-600">Dashboard</button>
-                                <button onClick={() => navigate('ideapad')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-600">Idea Pad</button>
-                                <button onClick={() => navigate('journal')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-600">My Journal</button>
-                                <button onClick={() => navigate('cookbook')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-600">My Recipes</button>
-                                <button onClick={() => navigate('account')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-600">My Account</button>
+                                <button onClick={() => navigate('dashboard')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-700">Dashboard</button>
+                                <button onClick={() => navigate('ideapad')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-700">Idea Pad</button>
+                                <button onClick={() => navigate('journal')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-700">My Journal</button>
+                                <button onClick={() => navigate('cookbook')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-700">My Recipes</button>
+                                <button onClick={() => navigate('account')} className="text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-700">My Account</button>
                             </nav>
                             <div className="absolute bottom-0 left-0 w-full p-4">
-                                <button onClick={handleSignOut} className="w-full text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-600 font-montserrat">Sign Out</button>
+                                <button onClick={handleSignOut} className="w-full text-left p-2 rounded-lg hover:bg-light-peach dark:hover:bg-gray-700 font-montserrat">Sign Out</button>
                             </div>
                         </div>
                     </div>
@@ -144,7 +144,7 @@ const MainApp = ({ user }) => {
                             <div className="w-8"></div>
                         </nav>
                     </header>
-                    <main className="flex-grow overflow-y-auto bg-app-white dark:bg-gray-800">{renderView()}</main>
+                    <main className="flex-grow overflow-y-auto bg-app-white dark:bg-gray-900">{renderView()}</main>
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                 </div>
