@@ -71,14 +71,14 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     };
 
     return (
-        <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand dark:bg-gray-900">
+        <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand dark:bg-[#070707]">
             <div className="mb-8">
                 <h1 className="text-4xl font-bold text-burnt-orange">My Account</h1>
             </div>
 
             <div className="space-y-10">
                 {/* --- Profile Settings Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-gray-800 dark:border-gray-700">
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-[#2e2e2e] dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Profile Settings</h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-4 font-montserrat">
                         <div>
@@ -102,7 +102,7 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                 </div>
 
                 {/* --- Appearance Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-gray-800 dark:border-gray-700">
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-[#2e2e2e] dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Appearance</h2>
                     <div className="flex justify-between items-center font-montserrat">
                         <label className="text-app-grey font-semibold text-lg dark:text-gray-300">Dark Mode</label>
@@ -119,7 +119,7 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                 </div>
 
                 {/* --- Security Settings Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-gray-800 dark:border-gray-700">
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-[#2e2e2e] dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Change Password</h2>
                     <form onSubmit={handlePasswordUpdate} className="space-y-4 font-montserrat">
                         <div>

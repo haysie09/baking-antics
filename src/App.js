@@ -68,7 +68,6 @@ const MainApp = ({ user }) => {
         }
     }, [userProfile]);
 
-    // --- NEW: Effect to apply the theme ---
     useEffect(() => {
         if (userProfile?.theme === 'dark') {
             document.documentElement.classList.add('dark');
@@ -113,12 +112,12 @@ const MainApp = ({ user }) => {
     };
 
     return (
-        <div className="bg-app-white text-app-grey dark:bg-gray-900 dark:text-gray-300">
+        <div className="bg-app-white text-app-grey dark:bg-[#070707] dark:text-gray-300">
             {showWelcome && <WelcomeModal onStartTour={handleStartTour} onSkip={handleFinishTour} />}
             {showTour && <OnboardingTour onFinish={handleFinishTour} />}
-            <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100 dark:bg-black">
-                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative dark:bg-gray-900">
-                    <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg dark:bg-gray-800 dark:border-r dark:border-gray-700`}>
+            <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100 dark:bg-[#060607]">
+                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative dark:bg-[#070707]">
+                    <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg dark:bg-[#2e2e2e] dark:border-r dark:border-gray-700`}>
                         <div className="p-4 font-patrick-hand">
                             <h2 className="text-2xl font-bold text-add-idea">My Baking Hub</h2>
                             <div className="text-sm text-app-grey mt-1 mb-4 truncate dark:text-gray-300">{userProfile?.displayName || user.email}</div>
@@ -135,7 +134,7 @@ const MainApp = ({ user }) => {
                         </div>
                     </div>
                     {isSidebarOpen && <div onClick={() => setIsSidebarOpen(false)} className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>}
-                    <header className="bg-app-white shadow-md sticky top-0 z-30 font-patrick-hand dark:bg-gray-800 dark:border-b dark:border-gray-700">
+                    <header className="bg-app-white shadow-md sticky top-0 z-30 font-patrick-hand dark:bg-[#2e2e2e] dark:border-b dark:border-gray-700">
                         <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
                             <button onClick={() => setIsSidebarOpen(true)} className="text-add-idea">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
@@ -144,7 +143,7 @@ const MainApp = ({ user }) => {
                             <div className="w-8"></div>
                         </nav>
                     </header>
-                    <main className="flex-grow overflow-y-auto bg-app-white dark:bg-gray-900">{renderView()}</main>
+                    <main className="flex-grow overflow-y-auto bg-app-white dark:bg-[#070707]">{renderView()}</main>
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                 </div>
