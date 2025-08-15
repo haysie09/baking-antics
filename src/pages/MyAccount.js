@@ -12,7 +12,7 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
 
-    // Pre-fill the display name field when the component loads
+    // Pre-fill the display name field when the component loads or when the profile updates
     useEffect(() => {
         if (userProfile?.displayName) {
             setDisplayName(userProfile.displayName);
@@ -78,6 +78,13 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                 <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Profile Settings</h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-4 font-montserrat">
+                        {/* --- NEW: Login Details Display --- */}
+                        <div>
+                            <label className="block text-app-grey font-semibold mb-1 text-lg">Login Email</label>
+                            <p className="w-full p-3 bg-gray-200 text-gray-500 rounded-xl text-base">
+                                {user.email}
+                            </p>
+                        </div>
                         <div>
                             <label className="block text-app-grey font-semibold mb-1 text-lg">Display Name</label>
                             <input 
