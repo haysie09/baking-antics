@@ -31,9 +31,7 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
         }
 
         try {
-            // Update the name in Firebase Auth
             await updateProfile(auth.currentUser, { displayName });
-            // Update the name in our Firestore user profile
             await updateUserProfile({ displayName });
             setProfileMessage('Name updated successfully!');
             setTimeout(() => setProfileMessage(''), 3000);
@@ -62,9 +60,14 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
             setConfirmPassword('');
             setTimeout(() => setPasswordMessage(''), 3000);
         } catch (error) {
-            // This error often happens if the user hasn't logged in recently
             setPasswordMessage(`Error: ${error.message}. You may need to sign out and sign back in.`);
         }
+    };
+
+    // --- NEW: Handler for the theme toggle ---
+    const handleThemeToggle = (e) => {
+        const newTheme = e.target.checked ? 'dark' : 'light';
+        updateUserProfile({ theme: newTheme });
     };
 
     return (
@@ -78,7 +81,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                 <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Profile Settings</h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-4 font-montserrat">
-                        {/* --- NEW: Login Details Display --- */}
                         <div>
                             <label className="block text-app-grey font-semibold mb-1 text-lg">Login Email</label>
                             <p className="w-full p-3 bg-gray-200 text-gray-500 rounded-xl text-base">
@@ -97,6 +99,23 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                         <button type="submit" className="w-full bg-burnt-orange text-light-peach py-2 px-4 rounded-xl text-base font-semibold hover:opacity-90">Save Name</button>
                         {profileMessage && <p className="text-center text-sm mt-2">{profileMessage}</p>}
                     </form>
+                </div>
+
+                {/* --- NEW: Appearance Section --- */}
+                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
+                    <h2 className="text-2xl font-bold text-add-idea mb-4">Appearance</h2>
+                    <div className="flex justify-between items-center font-montserrat">
+                        <label className="text-app-grey font-semibold text-lg">Dark Mode</label>
+                        <label className="relative inline-flex items-center cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                className="sr-only peer"
+                                checked={userProfile?.theme === 'dark'}
+                                onChange={handleThemeToggle}
+                            />
+                            <div className="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-add-idea"></div>
+                        </label>
+                    </div>
                 </div>
 
                 {/* --- Security Settings Section --- */}
