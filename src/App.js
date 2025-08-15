@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
-
-// --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
-
-// --- Pages ---
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import IdeaPad from './pages/IdeaPad';
@@ -15,8 +11,6 @@ import MyCookbook from './pages/MyCookbook';
 import MyAccount from './pages/MyAccount';
 import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
-
-// --- Hooks ---
 import { useAuth } from './hooks/useAuth';
 import { useUser } from './hooks/useUser';
 import { useJournal } from './hooks/useJournal';
@@ -24,7 +18,6 @@ import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 
-// --- Welcome Modal ---
 const WelcomeModal = ({ onStartTour, onSkip }) => (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
         <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4 dark:bg-gray-700">
@@ -40,13 +33,11 @@ const WelcomeModal = ({ onStartTour, onSkip }) => (
     </div>
 );
 
-
 export default function App() {
     const { user, isAuthReady } = useAuth();
     if (!isAuthReady) return <LoadingSpinner />;
     return <>{user ? <MainApp user={user} /> : <AuthPage />}</>;
 }
-
 
 const MainApp = ({ user }) => {
     const [view, setView] = useState('dashboard');

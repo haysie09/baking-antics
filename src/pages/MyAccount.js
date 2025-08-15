@@ -3,16 +3,12 @@ import { updateProfile, updatePassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
 const MyAccount = ({ user, userProfile, updateUserProfile }) => {
-    // State for the profile form
     const [displayName, setDisplayName] = useState('');
     const [profileMessage, setProfileMessage] = useState('');
-
-    // State for the password form
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
 
-    // Pre-fill the display name field when the component loads or when the profile updates
     useEffect(() => {
         if (userProfile?.displayName) {
             setDisplayName(userProfile.displayName);
@@ -24,12 +20,10 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         setProfileMessage('');
-
         if (displayName.trim() === '') {
             setProfileMessage('Name cannot be empty.');
             return;
         }
-
         try {
             await updateProfile(auth.currentUser, { displayName });
             await updateUserProfile({ displayName });
@@ -43,7 +37,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     const handlePasswordUpdate = async (e) => {
         e.preventDefault();
         setPasswordMessage('');
-
         if (newPassword.length < 6) {
             setPasswordMessage('Password must be at least 6 characters long.');
             return;
@@ -52,7 +45,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
             setPasswordMessage('Passwords do not match.');
             return;
         }
-
         try {
             await updatePassword(auth.currentUser, newPassword);
             setPasswordMessage('Password changed successfully!');
@@ -64,7 +56,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
         }
     };
 
-    // --- NEW: Handler for the theme toggle ---
     const handleThemeToggle = (e) => {
         const newTheme = e.target.checked ? 'dark' : 'light';
         updateUserProfile({ theme: newTheme });
@@ -77,7 +68,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
             </div>
 
             <div className="space-y-10">
-                {/* --- Profile Settings Section --- */}
                 <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-[#2e2e2e] dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Profile Settings</h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-4 font-montserrat">
@@ -101,7 +91,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                     </form>
                 </div>
 
-                {/* --- Appearance Section --- */}
                 <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-[#2e2e2e] dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Appearance</h2>
                     <div className="flex justify-between items-center font-montserrat">
@@ -118,7 +107,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                     </div>
                 </div>
 
-                {/* --- Security Settings Section --- */}
                 <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange dark:bg-[#2e2e2e] dark:border-gray-700">
                     <h2 className="text-2xl font-bold text-add-idea mb-4">Change Password</h2>
                     <form onSubmit={handlePasswordUpdate} className="space-y-4 font-montserrat">
