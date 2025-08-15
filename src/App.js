@@ -1,15 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
+
+// --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
+
+// --- Pages ---
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import IdeaPad from './pages/IdeaPad';
 import BakingJournal from './pages/BakingJournal';
 import MyCookbook from './pages/MyCookbook';
+import MyAccount from './pages/MyAccount'; // 1. Import the new page
 import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
+
+// --- Hooks ---
 import { useAuth } from './hooks/useAuth';
 import { useUser } from './hooks/useUser';
 import { useJournal } from './hooks/useJournal';
@@ -17,6 +24,7 @@ import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 
+// --- Welcome Modal ---
 const WelcomeModal = ({ onStartTour, onSkip }) => (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
         <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4">
@@ -32,11 +40,13 @@ const WelcomeModal = ({ onStartTour, onSkip }) => (
     </div>
 );
 
+
 export default function App() {
     const { user, isAuthReady } = useAuth();
     if (!isAuthReady) return <LoadingSpinner />;
     return <>{user ? <MainApp user={user} /> : <AuthPage />}</>;
 }
+
 
 const MainApp = ({ user }) => {
     const [view, setView] = useState('dashboard');
@@ -81,6 +91,8 @@ const MainApp = ({ user }) => {
             case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
+            // 2. Add a new case for the account page
+            case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
                 return <Dashboard 
                     setView={setView} ideaPad={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} userId={user.uid} journal={journal} 
@@ -101,12 +113,14 @@ const MainApp = ({ user }) => {
                     <div className={`fixed inset-y-0 left-0 w-64 bg-info-box z-50 transform transition-transform ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} shadow-lg`}>
                         <div className="p-4 font-patrick-hand">
                             <h2 className="text-2xl font-bold text-add-idea">My Baking Hub</h2>
-                            <div className="text-sm text-app-grey mt-1 mb-4 truncate">{user.displayName || user.email}</div>
+                            <div className="text-sm text-app-grey mt-1 mb-4 truncate">{userProfile?.displayName || user.email}</div>
                             <nav className="flex flex-col space-y-2 font-montserrat">
                                 <button onClick={() => navigate('dashboard')} className="text-left p-2 rounded-lg hover:bg-light-peach">Dashboard</button>
                                 <button onClick={() => navigate('ideapad')} className="text-left p-2 rounded-lg hover:bg-light-peach">Idea Pad</button>
                                 <button onClick={() => navigate('journal')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Journal</button>
                                 <button onClick={() => navigate('cookbook')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Recipes</button>
+                                {/* 3. Add the new link to the sidebar */}
+                                <button onClick={() => navigate('account')} className="text-left p-2 rounded-lg hover:bg-light-peach">My Account</button>
                             </nav>
                             <div className="absolute bottom-0 left-0 w-full p-4">
                                 <button onClick={handleSignOut} className="w-full text-left p-2 rounded-lg hover:bg-light-peach font-montserrat">Sign Out</button>
