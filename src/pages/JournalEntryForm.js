@@ -62,7 +62,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
                     <label className="block text-app-grey font-semibold mb-1">Time Spent</label>
                     <div className="flex gap-4">
                         <input type="number" min="0" placeholder="Hour(s)" value={formData.timeHours} onChange={e => setFormData(p => ({ ...p, timeHours: Number(e.target.value) }))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
-                        <input type="number" min="0" max="59" placeholder="Minute(s)" value={formData.timeMinutes} onChange={e => setFormData(p => ({ ...p, timeMinutes: Number(e.target.value) }))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
+                        <input type="number" min="0" max="59" placeholder="Minute(s)" value={formData.timeMinutes} onChange={(e) => setFormData(p => ({ ...p, timeMinutes: Number(e.target.value) }))} className="w-1/2 p-3 border border-gray-300 rounded-xl text-lg font-montserrat" />
                     </div>
                 </div>
 
@@ -70,7 +70,7 @@ const JournalEntryForm = ({ entry, onSave, onCancel, isNew = false, cookbook }) 
                 <div className="flex justify-between items-center py-2"><label className="text-app-grey font-semibold">Difficulty</label><StarRating rating={formData.difficultyRating} setRating={(r) => setFormData(p => ({ ...p, difficultyRating: r }))} /></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Categories</label><div className="flex flex-wrap gap-2">{journalCategories.map(cat => <button key={cat} onClick={() => handleCategoryToggle(cat)} className={`py-1 px-3 rounded-xl border text-base font-montserrat ${formData.categories && formData.categories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}>{cat}</button>)}</div></div>
                 <div><label className="block text-app-grey font-semibold mb-1">Personal Notes</label><textarea name="personalNotes" value={formData.personalNotes} onChange={(e) => setFormData(p => ({ ...p, personalNotes: e.target.value }))} rows="4" className="w-full p-3 border border-gray-300 rounded-lg text-lg font-montserrat"></textarea></div>
-                <div><label className="block text-app-grey font-semibold mb-1">Photos</label><div className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center text-app-grey/70">Photo upload coming soon!</div></div>
+                
                 <button onClick={() => onSave(formData)} className="w-full bg-burnt-orange text-light-peach py-3 rounded-xl font-semibold hover:opacity-90 transition-opacity text-xl font-montserrat">Save Entry</button>
             </div>
         </Modal>
