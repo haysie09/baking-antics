@@ -23,6 +23,7 @@ import { useJournal } from './hooks/useJournal';
 import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
+import { useCollections } from './hooks/useCollections'; // 1. Import the new hook
 
 // --- Welcome Modal ---
 const WelcomeModal = ({ onStartTour, onSkip }) => (
@@ -59,6 +60,7 @@ const MainApp = ({ user }) => {
     const { ideaPad, addIdea, deleteIdea } = useIdeaPad();
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
+    const { collections, addCollection, updateCollection, deleteCollection } = useCollections(); // 2. Use the new hook
     const [showWelcome, setShowWelcome] = useState(false);
     const [showTour, setShowTour] = useState(false);
 
@@ -90,7 +92,18 @@ const MainApp = ({ user }) => {
         switch (view) {
             case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
-            case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} />;
+            case 'cookbook': 
+                // 3. Pass the new collections data and functions down to the MyCookbook page
+                return <MyCookbook 
+                    cookbook={cookbook} 
+                    addRecipe={addRecipe} 
+                    updateRecipe={updateRecipe} 
+                    deleteRecipe={deleteRecipe}
+                    collections={collections}
+                    addCollection={addCollection}
+                    updateCollection={updateCollection}
+                    deleteCollection={deleteCollection}
+                />;
             case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
                 return <Dashboard 
