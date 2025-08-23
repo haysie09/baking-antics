@@ -18,7 +18,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
         year: 'all'
     });
     
-    // --- NEW: State to manage which months are expanded ---
     const [expandedMonths, setExpandedMonths] = useState({});
 
     const handleSave = async (entryData) => {
@@ -50,7 +49,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
         return entries;
     }, [journal, activeFilters, dateFilter]);
 
-    // --- NEW: Group the filtered journal entries by year and month ---
     const groupedJournal = useMemo(() => {
         const groups = {};
         [...filteredJournal].sort((a, b) => new Date(b.bakingDate) - new Date(a.bakingDate))
@@ -69,7 +67,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
         return groups;
     }, [filteredJournal]);
 
-    // --- NEW: Handler to toggle month visibility ---
     const toggleMonth = (year, month) => {
         const key = `${year}-${month}`;
         setExpandedMonths(prev => ({ ...prev, [key]: !prev[key] }));
@@ -124,7 +121,20 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                                                         </div>
                                                         {expandedJournalId === entry.id && (
                                                             <div className="mt-4 pt-4 border-t border-burnt-orange/20">
-                                                                {/* ... existing expanded entry details ... */}
+                                                                {/* --- THIS SECTION IS NOW RESTORED --- */}
+                                                                <div className="flex justify-between items-start">
+                                                                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-lg">
+                                                                        <div><span className="font-semibold text-app-grey mr-2">Taste:</span><StarRating rating={entry.tasteRating} isEditable={false} /></div>
+                                                                        <div><span className="font-semibold text-app-grey mr-2">Difficulty:</span><StarRating rating={entry.difficultyRating} isEditable={false} /></div>
+                                                                    </div>
+                                                                    <div className="flex space-x-2 text-burnt-orange">
+                                                                        {entry.sourceURL && <a href={entry.sourceURL} target="_blank" rel="noopener noreferrer" className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></a>}
+                                                                        <button onClick={(e) => { e.stopPropagation(); setEditingEntry(entry) }} className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                                                                        <button onClick={(e) => { e.stopPropagation(); setShowConfirmModal(entry.id) }} className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                                                    </div>
+                                                                </div>
+                                                                {entry.categories && entry.categories.length > 0 && <div className="mt-2 flex flex-wrap gap-2">{entry.categories.map(c => <span key={c} className="py-1 px-3 rounded-full text-sm bg-app-white border border-gray-200 text-app-grey font-montserrat">{c}</span>)}</div>}
+                                                                {entry.personalNotes && <p className="mt-4 text-app-grey bg-app-white p-3 rounded-lg text-lg font-montserrat">{entry.personalNotes}</p>}
                                                             </div>
                                                         )}
                                                     </div>
