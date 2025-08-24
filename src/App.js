@@ -23,7 +23,8 @@ import { useJournal } from './hooks/useJournal';
 import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
-import { useCollections } from './hooks/useCollections'; // 1. Import the new hook
+// 1. Import the new hook
+import { useCollections } from './hooks/useCollections';
 
 // --- Welcome Modal ---
 const WelcomeModal = ({ onStartTour, onSkip }) => (
@@ -60,7 +61,8 @@ const MainApp = ({ user }) => {
     const { ideaPad, addIdea, deleteIdea } = useIdeaPad();
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
-    const { collections, addCollection, updateCollection, deleteCollection } = useCollections(); // 2. Use the new hook
+    // 2. Use the new hook to get live collection data
+    const { collections, addCollection, updateCollection, deleteCollection } = useCollections();
     const [showWelcome, setShowWelcome] = useState(false);
     const [showTour, setShowTour] = useState(false);
 
