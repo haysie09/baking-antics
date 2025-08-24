@@ -13,27 +13,17 @@ const FolderIcon = () => (
     </svg>
 );
 
-// --- Collection Form Modal ---
+// --- A simple modal for adding/editing a collection name ---
 const CollectionFormModal = ({ onSave, onCancel, collection = null }) => {
     const [name, setName] = useState(collection ? collection.name : '');
-
     const handleSave = () => {
-        if (name.trim()) {
-            onSave(name);
-        }
+        if (name.trim()) onSave(name);
     };
-
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
             <div className="bg-app-white rounded-2xl p-8 w-full max-w-sm shadow-xl text-center space-y-4">
                 <h2 className="text-3xl text-burnt-orange">{collection ? 'Rename Collection' : 'New Collection'}</h2>
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g., Cakes, Breads..."
-                    className="w-full p-3 border border-gray-300 rounded-xl text-lg font-montserrat"
-                />
+                <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g., Cakes, Breads..." className="w-full p-3 border border-gray-300 rounded-xl text-lg font-montserrat"/>
                 <div className="flex justify-center space-x-4 pt-2">
                     <button onClick={handleSave} className="bg-add-idea text-white py-3 px-8 rounded-xl text-xl font-montserrat">Save</button>
                     <button onClick={onCancel} className="bg-gray-100 text-app-grey py-3 px-8 rounded-xl text-xl font-montserrat">Cancel</button>
@@ -71,14 +61,18 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     // --- Data Memoization ---
     const collectionRecipeCounts = useMemo(() => {
         const counts = { unassigned: 0 };
-        collections.forEach(col => { counts[col.id] = 0; });
-        cookbook.forEach(recipe => {
-            if (recipe.collectionId && counts.hasOwnProperty(recipe.collectionId)) {
-                counts[recipe.collectionId]++;
-            } else {
-                counts.unassigned++;
-            }
-        });
+        if (collections) {
+            collections.forEach(col => { counts[col.id] = 0; });
+        }
+        if (cookbook) {
+            cookbook.forEach(recipe => {
+                if (recipe.collectionId && counts.hasOwnProperty(recipe.collectionId)) {
+                    counts[recipe.collectionId]++;
+                } else {
+                    counts.unassigned++;
+                }
+            });
+        }
         return counts;
     }, [cookbook, collections]);
 
@@ -94,13 +88,18 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
         if (activeFilters.categories.length > 0) {
             recipes = recipes.filter(recipe => activeFilters.categories.every(filterCat => recipe.categories?.includes(filterCat)));
         }
-        if (activeFilters.month !== 'all') {
+        if (activeFilters.month !== 'all' && recipes.length > 0 && recipes[0].createdAt) {
             recipes = recipes.filter(recipe => new Date(recipe.createdAt.toDate()).getMonth() === parseInt(activeFilters.month));
         }
-        if (activeFilters.year !== 'all') {
+        if (activeFilters.year !== 'all' && recipes.length > 0 && recipes[0].createdAt) {
             recipes = recipes.filter(recipe => new Date(recipe.createdAt.toDate()).getFullYear() === parseInt(activeFilters.year));
         }
-        return recipes.sort((a, b) => new Date(b.createdAt.toDate()) - new Date(a.createdAt.toDate()));
+        return recipes.sort((a, b) => {
+            if (a.createdAt && b.createdAt) {
+                return new Date(b.createdAt.toDate()) - new Date(a.createdAt.toDate());
+            }
+            return 0;
+        });
     }, [cookbook, selectedCollection, activeFilters]);
 
     // --- Handlers for Collections ---
@@ -113,14 +112,12 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
         setIsCollectionFormOpen(false);
         setCollectionToEdit(null);
     };
-
     const handleConfirmDeleteCollection = () => {
         if (collectionToDelete) {
             deleteCollection(collectionToDelete.id);
         }
         setCollectionToDelete(null);
     };
-
     const handleViewCollection = (collection) => {
         setSelectedCollection(collection);
         setExpandedCookbookId(null);
@@ -131,6 +128,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     const handleChooseImport = () => { setIsChoiceModalOpen(false); setIsUrlModalOpen(true); };
     const handleChooseManual = () => { setIsChoiceModalOpen(false); setIsCreatingNew(true); };
     const handleImportRecipe = (data) => { setImportedRecipeData(data); setIsUrlModalOpen(false); setIsCreatingNew(true); };
+    
     const handleSaveRecipe = async (recipeData) => {
         if (isCreatingNew || importedRecipeData) {
             await addRecipe({ ...recipeData, createdAt: new Date() });
@@ -140,14 +138,25 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
         }
         setEditingRecipe(null);
         setIsCreatingNew(false);
-        setCurrentView('recipes');
+
+        const targetCollectionId = recipeData.collectionId;
+        let collectionToView = null;
+        if (targetCollectionId) {
+            collectionToView = collections.find(c => c.id === targetCollectionId);
+        } else {
+            collectionToView = { id: 'unassigned', name: 'Unassigned Recipes' };
+        }
+        if (collectionToView) {
+            setSelectedCollection(collectionToView);
+            setCurrentView('recipes');
+        }
     };
+    
     const handleCancelForm = () => {
         setEditingRecipe(null);
         setIsCreatingNew(false);
         setImportedRecipeData(null);
     };
-    
     const handleConfirmDeleteRecipe = () => {
         if (recipeToDelete) {
             deleteRecipe(recipeToDelete.id);
@@ -157,7 +166,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     
     // --- RENDER LOGIC ---
 
-    // RENDER: Recipe Form
     if (isCreatingNew || editingRecipe) {
         return <CookbookForm
             initialData={editingRecipe || importedRecipeData}
@@ -167,7 +175,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
         />;
     }
     
-    // RENDER: Recipe List View (inside a collection)
     if (currentView === 'recipes') {
         return (
             <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
@@ -175,9 +182,8 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
                     Back to Collections
                 </button>
-                <h1 className="text-4xl font-bold text-burnt-orange mb-4">{selectedCollection.name}</h1>
+                <h1 className="text-4xl font-bold text-burnt-orange mb-4">{selectedCollection?.name || 'Collection'}</h1>
                 <FilterComponent categories={recipeCategories} onFilterChange={setActiveFilters} />
-
                 <div className="space-y-4 mt-6">
                     {recipesInView.length > 0 ? recipesInView.map(recipe => (
                         <div key={recipe.id} className="bg-info-box p-4 rounded-xl border border-burnt-orange">
@@ -195,7 +201,9 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                                     <div className="font-montserrat">
                                         <h4 className="font-semibold text-2xl text-burnt-orange font-patrick-hand">Ingredients</h4>
                                         <ul className="list-disc list-inside text-lg text-app-grey">
-                                            {recipe.ingredients && recipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}
+                                            {recipe.ingredients && recipe.ingredients.map((ing, i) => (
+                                                <li key={i}>{ing.quantity} {ing.measurement} {ing.name}</li>
+                                            ))}
                                         </ul>
                                     </div>
                                     <div className="mt-4 font-montserrat">
@@ -205,17 +213,12 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                                 </div>
                             )}
                         </div>
-                    )) : (
-                         <div className="text-center py-16 bg-info-box rounded-xl border border-burnt-orange">
-                            <p className="text-app-grey text-2xl">No recipes here. Add one!</p>
-                        </div>
-                    )}
+                    )) : ( <div className="text-center py-16 bg-info-box rounded-xl border border-burnt-orange"><p className="text-app-grey text-2xl">No recipes here. Add one!</p></div> )}
                 </div>
             </div>
         );
     }
 
-    // RENDER: Main Collections Grid View
     return (
         <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
             <div className="flex justify-between items-center mb-6">
@@ -234,10 +237,10 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                 <div onClick={() => handleViewCollection({ id: 'unassigned', name: 'Unassigned Recipes' })} className="bg-info-box p-4 rounded-2xl border border-burnt-orange/50 aspect-square flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-lg transition-shadow">
                     <FolderIcon />
                     <h2 className="text-lg font-semibold text-app-grey mt-2 break-words">Unassigned Recipes</h2>
-                    <p className="text-sm text-app-grey/70 font-montserrat">{collectionRecipeCounts.unassigned} recipes</p>
+                    <p className="text-sm text-app-grey/70 font-montserrat">{collectionRecipeCounts.unassigned || 0} recipes</p>
                 </div>
                 
-                {collections.map(col => (
+                {collections && collections.map(col => (
                      <div key={col.id} className="relative group">
                         <div onClick={() => handleViewCollection(col)} className="bg-info-box p-4 rounded-2xl border border-burnt-orange/50 aspect-square flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-lg transition-shadow">
                              <FolderIcon />
