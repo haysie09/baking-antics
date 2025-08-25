@@ -34,7 +34,8 @@ const BottomNav = ({ currentView, navigate }) => {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 z-50 w-full h-16 bg-white border-t border-gray-200 font-montserrat">
+        // UPDATED: Removed fixed height (h-16) and added bottom padding (pb-3)
+        <div className="fixed bottom-0 left-0 z-50 w-full bg-white border-t border-gray-200 font-montserrat pb-3">
             <div className="flex h-full max-w-lg mx-auto">
                 <NavButton
                     label="Dashboard"
