@@ -196,8 +196,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                                     <div className="flex justify-end space-x-2 text-burnt-orange mb-2">
                                         {recipe.sourceURL && <a href={recipe.sourceURL} target="_blank" rel="noopener noreferrer" className="hover:opacity-70" onClick={(e) => e.stopPropagation()}><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></a>}
                                         <button onClick={(e) => { e.stopPropagation(); setEditingRecipe(recipe); }} className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
-                                        
-                                        {/* THIS IS THE FIX: Added e.stopPropagation() to the delete button */}
                                         <button onClick={(e) => { e.stopPropagation(); setRecipeToDelete(recipe); }} className="hover:opacity-70"><svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                                     </div>
                                     <div className="font-montserrat">
@@ -217,7 +215,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                         </div>
                     )) : ( <div className="text-center py-16 bg-info-box rounded-xl border border-burnt-orange"><p className="text-app-grey text-2xl">No recipes here. Add one!</p></div> )}
                 </div>
-                {/* The confirmation modal will now correctly appear over this view */}
                 {recipeToDelete && <ConfirmationModal 
                     message={`Are you sure you want to delete "${recipeToDelete.recipeTitle}"?`}
                     onConfirm={handleConfirmDeleteRecipe}
@@ -229,13 +226,19 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
 
     return (
         <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-4xl font-bold text-burnt-orange">My Recipes</h1>
-                <div className="flex gap-2">
-                    <button onClick={() => setIsChoiceModalOpen(true)} className="bg-burnt-orange text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">
+            <div className="mb-6">
+                <h1 className="text-4xl font-bold text-burnt-orange text-center md:text-left">My Recipes</h1>
+                <div className="flex gap-2 mt-4 justify-center md:justify-start">
+                    <button 
+                        onClick={() => setIsChoiceModalOpen(true)} 
+                        className="bg-burnt-orange text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity"
+                    >
                         + Recipe
                     </button>
-                    <button onClick={() => setIsCollectionFormOpen(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">
+                    <button 
+                        onClick={() => setIsCollectionFormOpen(true)} 
+                        className="bg-light-peach text-burnt-orange py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity"
+                    >
                         + Collection
                     </button>
                 </div>
@@ -244,7 +247,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
             <div className="grid grid-cols-2 gap-4">
                 <div onClick={() => handleViewCollection({ id: 'unassigned', name: 'Unassigned Recipes' })} className="bg-info-box p-4 rounded-2xl border border-burnt-orange/50 aspect-square flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-lg transition-shadow">
                     <FolderIcon />
-                    <h2 className="text-lg font-semibold text-app-grey mt-2 break-words">Unassigned Recipes</h2>
+                    <h2 className="text-lg font-semibold text-app-grey mt-2 w-full break-words">Unassigned</h2>
                     <p className="text-sm text-app-grey/70 font-montserrat">{collectionRecipeCounts.unassigned || 0} recipes</p>
                 </div>
                 
@@ -252,7 +255,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                      <div key={col.id} className="relative group">
                         <div onClick={() => handleViewCollection(col)} className="bg-info-box p-4 rounded-2xl border border-burnt-orange/50 aspect-square flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-lg transition-shadow">
                              <FolderIcon />
-                             <h2 className="text-lg font-semibold text-app-grey mt-2 break-words truncate">{col.name}</h2>
+                             <h2 className="text-lg font-semibold text-app-grey mt-2 w-full truncate px-1">{col.name}</h2>
                              <p className="text-sm text-app-grey/70 font-montserrat">{collectionRecipeCounts[col.id] || 0} recipes</p>
                         </div>
                         <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -262,7 +265,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                     </div>
                 ))}
             </div>
-
+            
             {isChoiceModalOpen && <AddRecipeChoiceModal onImport={handleChooseImport} onManual={handleChooseManual} onCancel={() => setIsChoiceModalOpen(false)} />}
             {isUrlModalOpen && <AddFromURLModal onSave={handleImportRecipe} onCancel={() => setIsUrlModalOpen(false)} />}
             {isCollectionFormOpen && <CollectionFormModal collection={collectionToEdit} onSave={handleSaveCollection} onCancel={() => { setIsCollectionFormOpen(false); setCollectionToEdit(null); }} />}

@@ -5,6 +5,7 @@ import { auth } from './firebase/config';
 // --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import OnboardingTour from './components/OnboardingTour';
+import BottomNav from './components/BottomNav'; // 1. Import the new BottomNav component
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -23,7 +24,6 @@ import { useJournal } from './hooks/useJournal';
 import { useIdeaPad } from './hooks/useIdeaPad';
 import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
-// 1. Import the new hook
 import { useCollections } from './hooks/useCollections';
 
 // --- Welcome Modal ---
@@ -61,7 +61,6 @@ const MainApp = ({ user }) => {
     const { ideaPad, addIdea, deleteIdea } = useIdeaPad();
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
-    // 2. Use the new hook to get live collection data
     const { collections, addCollection, updateCollection, deleteCollection } = useCollections();
     const [showWelcome, setShowWelcome] = useState(false);
     const [showTour, setShowTour] = useState(false);
@@ -95,7 +94,6 @@ const MainApp = ({ user }) => {
             case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': 
-                // 3. Pass the new collections data and functions down to the MyCookbook page
                 return <MyCookbook 
                     cookbook={cookbook} 
                     addRecipe={addRecipe} 
@@ -150,9 +148,15 @@ const MainApp = ({ user }) => {
                             <div className="w-8"></div>
                         </nav>
                     </header>
-                    <main className="flex-grow overflow-y-auto bg-app-white">{renderView()}</main>
+                    
+                    {/* 2. Add padding to the bottom of the main content area */}
+                    <main className="flex-grow overflow-y-auto bg-app-white pb-16">{renderView()}</main>
+                    
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
+                    
+                    {/* 3. Add the BottomNav component here */}
+                    <BottomNav currentView={view} navigate={navigate} />
                 </div>
             </div>
         </div>
