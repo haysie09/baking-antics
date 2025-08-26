@@ -184,6 +184,20 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
 
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
+            
+            {/* 1. Upcoming Bakes */}
+            <div id="upcoming-bakes">
+                <UpcomingBakes 
+                    upcomingBakes={upcomingBakes}
+                    addUpcomingBake={addUpcomingBake}
+                    updateUpcomingBake={updateUpcomingBake}
+                    deleteUpcomingBake={deleteUpcomingBake}
+                    cookbook={cookbook}
+                    addJournalEntry={addJournalEntry}
+                />
+            </div>
+
+            {/* 2. "What should I bake?" feature */}
             <div id="generator-box" className="bg-info-box p-6 rounded-2xl space-y-4 border border-burnt-orange">
                 <div className="relative">
                     <select
@@ -199,7 +213,6 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                         <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" /></svg>
                     </div>
                 </div>
-
                 {idea.name && (
                     <div className="text-center bg-app-white p-4 rounded-xl mt-4">
                         <div className="text-burnt-orange text-2xl font-bold font-montserrat mb-4">{idea.name}</div>
@@ -220,125 +233,68 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 {showConfirmation.journal && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">Added to your Journal!</span></div>}
                 {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">New idea added!</span></div>}
             </div>
-
-            <div className="space-y-2">
-                <div id="quick-add-buttons" className="grid grid-cols-2 gap-2">
-                    <button onClick={openAddJournalModal} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+            
+            {/* 3. Quick Add Carousel */}
+            <div className="relative">
+                <h3 className="text-lg font-semibold text-app-grey mb-2">Quick Add</h3>
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2 z-10">
+                    <svg className="h-5 w-5 text-burnt-orange/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                </div>
+                <div id="quick-add-carousel" className="flex overflow-x-auto space-x-2 pb-2 -mx-4 px-4 scrollbar-hide">
+                    <button onClick={openAddJournalModal} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         Bake
                     </button>
-                    <button onClick={openAddIdeaModal} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                    <button onClick={openAddIdeaModal} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         Idea
                     </button>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                     <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         Schedule
                     </button>
-                    <button onClick={() => setIsRecipeChoiceModalOpen(true)} className="w-full bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                    <button onClick={() => setIsRecipeChoiceModalOpen(true)} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
                         Recipe
                     </button>
                 </div>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-10">
+                    <svg className="h-5 w-5 text-burnt-orange/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                </div>
             </div>
-            
-            <div id="upcoming-bakes">
-                <UpcomingBakes 
-                    upcomingBakes={upcomingBakes}
-                    addUpcomingBake={addUpcomingBake}
-                    updateUpcomingBake={updateUpcomingBake}
-                    deleteUpcomingBake={deleteUpcomingBake}
-                    cookbook={cookbook}
-                    addJournalEntry={addJournalEntry}
-                />
-            </div>
-            
-            <div id="stats-box">
-                <DashboardStats 
-                    journal={journal} 
-                    currentCalendarDate={currentCalendarDate} 
-                />
-            </div>
-            
-            <div id="calendar-box">
-                <BakingCalendar 
-                    journal={journal} 
-                    upcomingBakes={upcomingBakes} 
-                    setView={setView} 
-                    setDateFilter={setDateFilter} 
-                    openAddChoiceModal={() => setIsAddChoiceModalOpen(true)}
-                    onViewBake={handleViewBake}
-                    onViewUpcomingBake={handleViewUpcomingBake}
-                    currentDate={currentCalendarDate}
-                    setCurrentDate={setCurrentCalendarDate}
-                />
+
+            {/* 4. Stats & Calendar */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div id="stats-box">
+                    <DashboardStats 
+                        journal={journal} 
+                        currentCalendarDate={currentCalendarDate} 
+                    />
+                </div>
+                <div id="calendar-box">
+                    <BakingCalendar 
+                        journal={journal} 
+                        upcomingBakes={upcomingBakes} 
+                        setView={setView} 
+                        setDateFilter={setDateFilter} 
+                        openAddChoiceModal={() => setIsAddChoiceModalOpen(true)}
+                        onViewBake={handleViewBake}
+                        onViewUpcomingBake={handleViewUpcomingBake}
+                        currentDate={currentCalendarDate}
+                        setCurrentDate={setCurrentCalendarDate}
+                    />
+                </div>
             </div>
             
             {/* --- MODALS --- */}
-            {isRecipeChoiceModalOpen && (
-                <AddRecipeChoiceModal 
-                    onImport={handleOpenImportModal}
-                    onManual={handleOpenManualRecipeForm}
-                    onCancel={() => setIsRecipeChoiceModalOpen(false)}
-                />
-            )}
-            {isUrlModalOpen && (
-                <AddFromURLModal 
-                    onImport={handleImportRecipe}
-                    onCancel={() => setIsUrlModalOpen(false)}
-                />
-            )}
-            {isManualRecipeOpen && (
-                <CookbookForm 
-                    initialData={importedRecipeData}
-                    isNew={true}
-                    onSave={handleSaveNewRecipe}
-                    onCancel={() => {
-                        setIsManualRecipeOpen(false);
-                        setImportedRecipeData(null);
-                    }}
-                    cookbook={cookbook}
-                />
-            )}
-            {isAddChoiceModalOpen && (
-                <AddBakeChoiceModal 
-                    onAddPastBake={handleOpenPastBakeForm}
-                    onScheduleBake={handleOpenUpcomingBakeForm}
-                    onCancel={() => setIsAddChoiceModalOpen(false)}
-                />
-            )}
-            {isAddUpcomingBakeModalOpen && (
-                <UpcomingBakeForm 
-                    onSave={handleSaveUpcomingBake}
-                    onCancel={() => setIsAddUpcomingBakeModalOpen(false)}
-                    cookbook={cookbook}
-                />
-            )}
-            {bakeToView && (
-                <ViewBakeModal 
-                    bake={bakeToView.past}
-                    upcomingBake={bakeToView.upcoming}
-                    onClose={() => setBakeToView(null)}
-                    onEdit={handleEditFromView}
-                />
-            )}
-            {upcomingBakeToView && (
-                <ViewUpcomingBakeModal 
-                    bake={upcomingBakeToView}
-                    onClose={() => setUpcomingBakeToView(null)}
-                    onEdit={handleEditFromUpcomingView}
-                />
-            )}
-            {upcomingBakeToEdit && (
-                <UpcomingBakeForm 
-                    bakeToEdit={upcomingBakeToEdit}
-                    onSave={handleUpdateUpcomingBake}
-                    onCancel={() => setUpcomingBakeToEdit(null)}
-                    cookbook={cookbook}
-                />
-            )}
+            {isRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onImport={handleOpenImportModal} onManual={handleOpenManualRecipeForm} onCancel={() => setIsRecipeChoiceModalOpen(false)} /> )}
+            {isUrlModalOpen && ( <AddFromURLModal onImport={handleImportRecipe} onCancel={() => setIsUrlModalOpen(false)} /> )}
+            {isManualRecipeOpen && ( <CookbookForm initialData={importedRecipeData} isNew={true} onSave={handleSaveNewRecipe} onCancel={() => { setIsManualRecipeOpen(false); setImportedRecipeData(null); }} cookbook={cookbook} /> )}
+            {isAddChoiceModalOpen && ( <AddBakeChoiceModal onAddPastBake={handleOpenPastBakeForm} onScheduleBake={handleOpenUpcomingBakeForm} onCancel={() => setIsAddChoiceModalOpen(false)} /> )}
+            {isAddUpcomingBakeModalOpen && ( <UpcomingBakeForm onSave={handleSaveUpcomingBake} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} /> )}
+            {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={handleEditFromView} /> )}
+            {upcomingBakeToView && ( <ViewUpcomingBakeModal bake={upcomingBakeToView} onClose={() => setUpcomingBakeToView(null)} onEdit={handleEditFromUpcomingView} /> )}
+            {upcomingBakeToEdit && ( <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={handleUpdateUpcomingBake} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} /> )}
         </div>
     );
 };
