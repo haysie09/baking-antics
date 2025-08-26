@@ -67,20 +67,18 @@ const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
     return (
         <div className="p-4 md:p-6 bg-app-white h-full font-patrick-hand">
             
-            {/* UPDATED: Header section to match new style */}
+            {/* UPDATED: Header section to center title */}
             <div className="flex justify-between items-center mb-6">
-                <div className="flex items-center gap-3">
-                    <h1 className="text-4xl font-bold text-burnt-orange">Idea Pad</h1>
-                    <button 
-                        onClick={() => setIsAddIdeaModalOpen(true)} 
-                        className="bg-burnt-orange text-white p-2 rounded-xl hover:opacity-90 transition-opacity"
-                        aria-label="Add new idea"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                        </svg>
-                    </button>
-                </div>
+                <h1 className="text-4xl font-bold text-burnt-orange">Idea Pad</h1>
+                <button 
+                    onClick={() => setIsAddIdeaModalOpen(true)} 
+                    className="bg-burnt-orange text-white p-2 rounded-xl hover:opacity-90 transition-opacity"
+                    aria-label="Add new idea"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
             </div>
 
             {isAddIdeaModalOpen && <IdeaForm onSave={handleAddIdea} onCancel={() => setIsAddIdeaModalOpen(false)} />}
