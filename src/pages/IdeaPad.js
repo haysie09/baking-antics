@@ -1,9 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import ConfirmationModal from '../components/ConfirmationModal';
 import IdeaForm from './IdeaForm';
-import FilterComponent from '../components/FilterComponent'; // Correctly imported
+import FilterComponent from '../components/FilterComponent';
 
-// This constant will be moved to a central config file later
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 
 const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
@@ -12,7 +11,6 @@ const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
     const [showAddConfirm, setShowAddConfirm] = useState(false);
 
-    // 1. Use a single state object for all filters for consistency
     const [activeFilters, setActiveFilters] = useState({
         categories: [],
         month: 'all',
@@ -42,47 +40,52 @@ const IdeaPad = ({ ideas, addIdea, deleteIdea, addJournalEntry }) => {
         setTimeout(() => setShowMoveConfirm(false), 3000);
     };
 
-    // 2. Handler correctly updates the single state object
     const handleFilterChange = (filters) => {
         setActiveFilters(filters);
     };
 
-    // 3. `useMemo` is updated with the correct filtering logic
     const filteredIdeas = useMemo(() => {
         let currentFilteredIdeas = ideas || [];
-
         if (activeFilters.categories.length > 0) {
             currentFilteredIdeas = currentFilteredIdeas.filter(idea =>
                 activeFilters.categories.every(filterCat => idea.categories?.includes(filterCat))
             );
         }
-
         if (activeFilters.month !== 'all') {
             currentFilteredIdeas = currentFilteredIdeas.filter(idea =>
                 idea.createdAt && new Date(idea.createdAt.toDate()).getMonth() === parseInt(activeFilters.month)
             );
         }
-
         if (activeFilters.year !== 'all') {
             currentFilteredIdeas = currentFilteredIdeas.filter(idea =>
                 idea.createdAt && new Date(idea.createdAt.toDate()).getFullYear() === parseInt(activeFilters.year)
             );
         }
-
         return currentFilteredIdeas;
     }, [ideas, activeFilters]);
 
     return (
         <div className="p-4 md:p-6 bg-app-white h-full font-patrick-hand">
+            
+            {/* UPDATED: Header section to match new style */}
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-4xl font-bold text-burnt-orange">Idea Pad</h1>
-                <button onClick={() => setIsAddIdeaModalOpen(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl font-normal font-montserrat hover:opacity-90 transition-opacity">Add Idea</button>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-4xl font-bold text-burnt-orange">Idea Pad</h1>
+                    <button 
+                        onClick={() => setIsAddIdeaModalOpen(true)} 
+                        className="bg-burnt-orange text-white p-2 rounded-xl hover:opacity-90 transition-opacity"
+                        aria-label="Add new idea"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             {isAddIdeaModalOpen && <IdeaForm onSave={handleAddIdea} onCancel={() => setIsAddIdeaModalOpen(false)} />}
             {showAddConfirm && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-2 rounded-xl text-base mb-4" role="alert"><span className="font-montserrat">New idea added!</span></div>}
 
-            {/* 4. FilterComponent now uses the consistent `journalCategories` prop */}
             <FilterComponent
                 categories={journalCategories}
                 onFilterChange={handleFilterChange}

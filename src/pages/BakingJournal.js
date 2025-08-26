@@ -80,9 +80,21 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
 
     return (
         <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
-            <div className="flex justify-between items-center mb-4">
-                <h1 className="text-4xl font-bold text-burnt-orange">Baking Journal</h1>
-                <button onClick={() => setIsCreatingNew(true)} className="bg-add-idea text-white py-2 px-4 rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity">Add Bake</button>
+            
+            <div className="mb-6">
+                <h1 className="text-4xl font-bold text-burnt-orange text-center md:text-left">Journal</h1>
+                <div className="flex gap-2 mt-4 justify-center md:justify-start">
+                    {/* UPDATED: Button is now an icon */}
+                    <button 
+                        onClick={() => setIsCreatingNew(true)} 
+                        className="bg-burnt-orange text-white p-2 rounded-xl hover:opacity-90 transition-opacity"
+                        aria-label="Add new bake"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <FilterComponent 
@@ -121,7 +133,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                                                         </div>
                                                         {expandedJournalId === entry.id && (
                                                             <div className="mt-4 pt-4 border-t border-burnt-orange/20">
-                                                                {/* --- THIS SECTION IS NOW RESTORED --- */}
                                                                 <div className="flex justify-between items-start">
                                                                     <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-lg">
                                                                         <div><span className="font-semibold text-app-grey mr-2">Taste:</span><StarRating rating={entry.tasteRating} isEditable={false} /></div>
