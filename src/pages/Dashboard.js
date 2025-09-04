@@ -185,7 +185,7 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
     return (
         <div className="p-4 md:p-6 space-y-6 h-full font-patrick-hand">
             
-            {/* 1. Upcoming Bakes */}
+            {/* 1. Upcoming Bakes (Now called What's Next) */}
             <div id="upcoming-bakes">
                 <UpcomingBakes 
                     upcomingBakes={upcomingBakes}
@@ -234,36 +234,34 @@ const Dashboard = ({ setView, ideaPad, addJournalEntry, addIdea, deleteIdea, use
                 {showConfirmation.idea && <div className="text-center bg-confirm-bg border border-confirm-text text-confirm-text px-4 py-3 rounded-xl relative mt-4 text-lg" role="alert"><span className="block sm:inline font-montserrat">New idea added!</span></div>}
             </div>
             
-            {/* 3. Quick Add Carousel */}
-            <div className="relative">
-                <h3 className="text-lg font-semibold text-app-grey mb-2">Quick Add</h3>
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-2 z-10">
-                    <svg className="h-5 w-5 text-burnt-orange/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                </div>
-                <div id="quick-add-carousel" className="flex overflow-x-auto space-x-2 pb-2 -mx-4 px-4 scrollbar-hide">
-                    <button onClick={openAddJournalModal} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        Bake
-                    </button>
-                    <button onClick={openAddIdeaModal} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        Idea
-                    </button>
-                    <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        Schedule
-                    </button>
-                    <button onClick={() => setIsRecipeChoiceModalOpen(true)} className="flex-shrink-0 w-24 bg-add-idea text-white py-2 px-2 rounded-xl text-xs font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
-                        Recipe
-                    </button>
-                </div>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2 z-10">
-                    <svg className="h-5 w-5 text-burnt-orange/50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+            {/* 3. Quick Add Floating Action Button (FAB) */}
+            <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange relative">
+                <h3 className="text-lg font-semibold text-app-grey mb-3">Quick Add</h3>
+                <div className="relative">
+                    <div id="quick-add-carousel" className="flex overflow-x-auto space-x-4 pb-2 scrollbar-hide">
+                        <button onClick={openAddJournalModal} className="flex-shrink-0 w-[45%] h-16 bg-add-idea text-white rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            Bake
+                        </button>
+                        <button onClick={openAddIdeaModal} className="flex-shrink-0 w-[45%] h-16 bg-add-idea text-white rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            Idea
+                        </button>
+                        <button onClick={() => setIsAddUpcomingBakeModalOpen(true)} className="flex-shrink-0 w-[45%] h-16 bg-add-idea text-white rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            Schedule
+                        </button>
+                        <button onClick={() => setIsRecipeChoiceModalOpen(true)} className="flex-shrink-0 w-[45%] h-16 bg-add-idea text-white rounded-xl text-sm font-normal font-montserrat hover:opacity-90 transition-opacity flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                            Recipe
+                        </button>
+                    </div>
+                    <div className="pointer-events-none absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-info-box to-transparent"></div>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-info-box to-transparent"></div>
                 </div>
             </div>
 
-            {/* 4. Stats & Calendar */}
+            {/* 4. At-a-Glance Stats & Calendar Snapshot */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div id="stats-box">
                     <DashboardStats 
