@@ -1,10 +1,12 @@
+// Filename: netlify/functions/fetch-recipe.js
+
 const chromium = require('@sparticuz/chromium');
 const puppeteer = require('puppeteer-core');
 const fetch = require('node-fetch');
-const cheerio = require('cheerio'); // <-- ADDED: For parsing HTML
+const cheerio = require('cheerio');
 
 async function callGemini(apiKey, payload) {
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`; // Updated model for potential better performance
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
     const response = await fetch(apiUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -27,7 +29,6 @@ exports.handler = async function(event, context) {
 
     let browser = null;
     try {
-        // --- Step 1: Fetch and Clean HTML ---
         browser = await puppeteer.launch({
             args: chromium.args,
             defaultViewport: chromium.defaultViewport,
@@ -37,18 +38,33 @@ exports.handler = async function(event, context) {
         });
 
         const page = await browser.newPage();
-        // REDUCED TIMEOUT: Prevents serverless function timeout
-        await page.goto(url, { waitUntil: 'networkidle2', timeout: 14000 }); 
+
+        // --- OPTIMIZATIONS ---
+        // 1. Set a realistic User-Agent to mimic a real browser
+        await page.setUserAgent(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        );
+
+        // 2. Block images and CSS to speed up loading
+        await page.setRequestInterception(true);
+        page.on('request', (req) => {
+            if(['image', 'stylesheet', 'font'].includes(req.resourceType())){
+                req.abort();
+            } else {
+                req.continue();
+            }
+        });
+        
+        // 3. Go to the page with an increased timeout
+        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 }); 
         const siteHtml = await page.content();
         if (!siteHtml) throw new Error("Failed to retrieve page content.");
 
-        // ADDED: Pre-process HTML with Cheerio to reduce tokens and improve AI focus
+        // --- PROCESSING (Unchanged) ---
         const $ = cheerio.load(siteHtml);
-        // Try to find a specific recipe container, otherwise fall back to the body's text
         const recipeContent = $('[itemtype*="schema.org/Recipe"]').html() || $('article.recipe').html() || $('body').text();
-        const cleanedText = recipeContent.replace(/\s\s+/g, ' ').trim(); // Remove extra whitespace
+        const cleanedText = recipeContent.replace(/\s\s+/g, ' ').trim();
 
-        // --- Step 2: AI Structuring & Formatting (Single Call) ---
         const payload = {
             contents: [{ 
                 parts: [{ 
@@ -57,7 +73,6 @@ exports.handler = async function(event, context) {
             }],
             generationConfig: {
                 responseMimeType: "application/json",
-                // UPDATED SCHEMA: Gets formatted instructions in one go
                 responseSchema: {
                     type: "OBJECT",
                     properties: {
@@ -87,7 +102,6 @@ exports.handler = async function(event, context) {
         const result = await callGemini(apiKey, payload);
         let recipeData = JSON.parse(result.candidates[0].content.parts[0].text);
 
-        // Convert instructions array to a single string for the textarea
         if (Array.isArray(recipeData.instructions)) {
             recipeData.instructions = recipeData.instructions.join('\n');
         }

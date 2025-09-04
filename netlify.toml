@@ -8,7 +8,7 @@
   status = 200
 
 [functions."fetch-recipe"]
-  timeout = 20
+  timeout = 26
   memory = 1024
   node_bundler = "zisi"
   node_version = "20"
