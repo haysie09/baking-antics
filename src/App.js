@@ -83,18 +83,31 @@ const MainApp = ({ user }) => {
             case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
                 return <Dashboard 
-                    setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={user.uid} journal={journal} setDateFilter={setDateFilter} 
+                    setView={setView} 
+                    ideaPad={ideaPad} 
+                    addJournalEntry={addJournalEntry} 
+                    addIdea={addIdea} 
+                    deleteIdea={deleteIdea} 
+                    journal={journal} 
+                    setDateFilter={setDateFilter} 
                     openAddJournalModal={() => setIsAddJournalModalOpen(true)} 
                     openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
-                    upcomingBakes={upcomingBakes} addUpcomingBake={addUpcomingBake} updateUpcomingBake={updateUpcomingBake} 
-                    deleteUpcomingBake={deleteUpcomingBake} cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe}
+                    openScheduleModal={() => setIsAddUpcomingBakeModalOpen(true)} // THE FIX: This prop was missing
+                    upcomingBakes={upcomingBakes} 
+                    addUpcomingBake={addUpcomingBake} 
+                    updateUpcomingBake={updateUpcomingBake} 
+                    deleteUpcomingBake={deleteUpcomingBake} 
+                    cookbook={cookbook} 
+                    addRecipe={addRecipe} 
+                    updateRecipe={updateRecipe} 
+                    deleteRecipe={deleteRecipe}
                 />;
         }
     };
 
     return (
         <div className="bg-app-white text-app-grey">
-            <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
+            <div className="min-h-screen flex flex-col md-items-center md-justify-center md-py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
                     
                     <header className="bg-app-white shadow-md sticky top-0 z-30 font-patrick-hand">
@@ -111,7 +124,6 @@ const MainApp = ({ user }) => {
                     
                     <main className="flex-grow overflow-y-auto bg-app-white pb-24">{renderView()}</main>
 
-                    {/* All "add" modals are now rendered here at the top level */}
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                     {isAddRecipeModalOpen && <CookbookForm isNew={true} collections={collections} onSave={async (data) => { await addRecipe(data); setIsAddRecipeModalOpen(false);}} onCancel={() => setIsAddRecipeModalOpen(false)} />}
