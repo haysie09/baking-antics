@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 
 // --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import BottomNav from './components/BottomNav';
+import CreateNewModal from './components/CreateNewModal';
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -15,6 +16,8 @@ import MyCookbook from './pages/MyCookbook';
 import MyAccount from './pages/MyAccount';
 import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
+import CookbookForm from './pages/CookbookForm';
+import UpcomingBakeForm from './pages/UpcomingBakeForm';
 
 // --- Hooks ---
 import { useAuth } from './hooks/useAuth';
@@ -25,7 +28,6 @@ import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 import { useCollections } from './hooks/useCollections';
 
-// REMOVED: The WelcomeModal component is no longer needed
 
 export default function App() {
     const { user, isAuthReady } = useAuth();
@@ -37,25 +39,31 @@ export default function App() {
 const MainApp = ({ user }) => {
     const [view, setView] = useState('dashboard');
     const [dateFilter, setDateFilter] = useState(null);
-    const [isAddJournalModalOpen, setIsAddJournalModalOpen] = useState(false);
-    const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
     const { userProfile, updateUserProfile } = useUser();
     const { journal, addJournalEntry, updateJournalEntry, deleteJournalEntry } = useJournal();
     const { ideaPad, addIdea, deleteIdea } = useIdeaPad();
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
     const { collections, addCollection, updateCollection, deleteCollection } = useCollections();
-    
-    // REMOVED: showWelcome and showTour states
 
-    // REMOVED: useEffect for the tour
-    // REMOVED: handleFinishTour and handleStartTour functions
+    // State for all "add" modals is managed here
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isAddJournalModalOpen, setIsAddJournalModalOpen] = useState(false);
+    const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
+    const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = useState(false);
+    const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
 
     const handleSignOut = () => signOut(auth);
 
     const navigate = (newView) => {
         setView(newView);
     };
+
+    // Functions to open each specific modal
+    const openRecipeModal = () => { setIsCreateModalOpen(false); setIsAddRecipeModalOpen(true); };
+    const openIdeaModal = () => { setIsCreateModalOpen(false); setIsAddIdeaModalOpen(true); };
+    const openBakeModal = () => { setIsCreateModalOpen(false); setIsAddJournalModalOpen(true); };
+    const openScheduleModal = () => { setIsCreateModalOpen(false); setIsAddUpcomingBakeModalOpen(true); };
 
     const renderView = () => {
         switch (view) {
@@ -75,9 +83,9 @@ const MainApp = ({ user }) => {
             case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
                 return <Dashboard 
-                    setView={setView} ideaPad={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} userId={user.uid} journal={journal} 
-                    addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} setDateFilter={setDateFilter} 
-                    openAddJournalModal={() => setIsAddJournalModalOpen(true)} openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
+                    setView={setView} ideaPad={ideaPad} addJournalEntry={addJournalEntry} addIdea={addIdea} deleteIdea={deleteIdea} userId={user.uid} journal={journal} setDateFilter={setDateFilter} 
+                    openAddJournalModal={() => setIsAddJournalModalOpen(true)} 
+                    openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
                     upcomingBakes={upcomingBakes} addUpcomingBake={addUpcomingBake} updateUpcomingBake={updateUpcomingBake} 
                     deleteUpcomingBake={deleteUpcomingBake} cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe}
                 />;
@@ -86,7 +94,6 @@ const MainApp = ({ user }) => {
 
     return (
         <div className="bg-app-white text-app-grey">
-            {/* REMOVED: WelcomeModal and OnboardingTour components */}
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
                     
@@ -102,12 +109,23 @@ const MainApp = ({ user }) => {
                         </nav>
                     </header>
                     
-                    <main className="flex-grow overflow-y-auto bg-app-white pb-16">{renderView()}</main>
-                    
+                    <main className="flex-grow overflow-y-auto bg-app-white pb-24">{renderView()}</main>
+
+                    {/* All "add" modals are now rendered here at the top level */}
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
+                    {isAddRecipeModalOpen && <CookbookForm isNew={true} collections={collections} onSave={async (data) => { await addRecipe(data); setIsAddRecipeModalOpen(false);}} onCancel={() => setIsAddRecipeModalOpen(false)} />}
+                    {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
+
+                    {isCreateModalOpen && <CreateNewModal 
+                        onClose={() => setIsCreateModalOpen(false)}
+                        onAddRecipe={openRecipeModal}
+                        onAddIdea={openIdeaModal}
+                        onAddBake={openBakeModal}
+                        onScheduleBake={openScheduleModal}
+                    />}
                     
-                    <BottomNav currentView={view} navigate={navigate} />
+                    <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
                 </div>
             </div>
         </div>
