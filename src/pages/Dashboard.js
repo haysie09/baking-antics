@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import UpcomingBakes from './UpcomingBakes';
 import DashboardStats from './DashboardStats';
 import BakingCalendar from './BakingCalendar';
+import UpcomingBakes from './UpcomingBakes';
 import ViewBakeModal from '../components/ViewBakeModal';
 import ViewUpcomingBakeModal from '../components/ViewUpcomingBakeModal';
 import UpcomingBakeForm from './UpcomingBakeForm';
@@ -15,15 +15,12 @@ const Dashboard = ({
     deleteIdea, 
     journal, 
     setDateFilter, 
+    openScheduleModal,
     upcomingBakes, 
-    addUpcomingBake, 
-    updateUpcomingBake, 
-    deleteUpcomingBake, 
-    cookbook,
-    openScheduleModal
+    updateUpcomingBake,
 }) => {
     
-    // State for viewing/editing modals that are triggered from this page
+    // State for viewing/editing modals that are triggered from THIS page
     const [bakeToView, setBakeToView] = useState(null);
     const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
