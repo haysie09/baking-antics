@@ -16,8 +16,6 @@ const BakingCalendar = ({
     const monthName = currentDate.toLocaleString('default', { month: 'long' });
     const year = currentDate.getFullYear();
 
-    // --- LOGIC FROM YOUR ORIGINAL FILE (PRESERVED) ---
-
     const bakedDaysMap = useMemo(() => {
         const map = new Map();
         if (journal) {
@@ -48,28 +46,19 @@ const BakingCalendar = ({
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
     };
 
-    // THE FIX: This function now has the correct logic
+    // THE FIX: This function now correctly opens the right modal for each case
     const handleDayClick = (day) => {
         const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateString = fullDate.toDateString();
         const pastBake = bakedDaysMap.get(dateString);
         const upcomingBake = upcomingBakeDaysMap.get(dateString);
 
-        if (pastBake && upcomingBake) {
-            // If both exist, show the combined modal
+        if (pastBake || upcomingBake) {
+            // This will open the ViewBakeModal which can show one or both types
             onViewBake({ past: pastBake, upcoming: upcomingBake });
-        } else if (pastBake) {
-            // If only a past bake exists, navigate to the journal
-            setDateFilter(pastBake.bakingDate);
-            setView('journal');
-        } else if (upcomingBake) {
-            // If only an upcoming bake exists, show the upcoming bake modal
-            onViewUpcomingBake(upcomingBake);
         }
     };
     
-    // --- CALENDAR GRID GENERATION (ADAPTED FOR NEW STYLING) ---
-
     const firstDayOfMonth = new Date(year, currentDate.getMonth(), 1).getDay();
     const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
     const today = new Date();
