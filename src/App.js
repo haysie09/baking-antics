@@ -1,14 +1,14 @@
-// Filename: App.js
-
 import React, { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 
-// ... (all other imports remain the same)
+// --- Components ---
 import LoadingSpinner from './components/LoadingSpinner';
 import BottomNav from './components/BottomNav';
 import CreateNewModal from './components/CreateNewModal';
 import MoveToJournalModal from './components/MoveToJournalModal';
+
+// --- Pages ---
 import AuthPage from './pages/AuthPage';
 import Dashboard from './pages/Dashboard';
 import IdeaPad from './pages/IdeaPad';
@@ -21,6 +21,8 @@ import CookbookForm from './pages/CookbookForm';
 import UpcomingBakeForm from './pages/UpcomingBakeForm';
 import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
 import ViewBakeModal from './components/ViewBakeModal';
+
+// --- Hooks ---
 import { useAuth } from './hooks/useAuth';
 import { useUser } from './hooks/useUser';
 import { useJournal } from './hooks/useJournal';
@@ -36,7 +38,6 @@ export default function App() {
 }
 
 const MainApp = ({ user }) => {
-    // ... (all state and hooks remain the same)
     const [view, setView] = useState('dashboard');
     const [dateFilter, setDateFilter] = useState(null);
     const { userProfile, updateUserProfile } = useUser();
@@ -45,6 +46,8 @@ const MainApp = ({ user }) => {
     const { cookbook, addRecipe, updateRecipe, deleteRecipe } = useCookbook();
     const { upcomingBakes, addUpcomingBake, updateUpcomingBake, deleteUpcomingBake } = useUpcomingBakes();
     const { collections, addCollection, updateCollection, deleteCollection } = useCollections();
+
+    // State for ALL modals is managed here
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isAddJournalModalOpen, setIsAddJournalModalOpen] = useState(false);
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
@@ -57,6 +60,7 @@ const MainApp = ({ user }) => {
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
+
     const openRecipeModal = () => { setIsCreateModalOpen(false); setIsAddRecipeModalOpen(true); };
     const openIdeaModal = () => { setIsCreateModalOpen(false); setIsAddIdeaModalOpen(true); };
     const openBakeModal = () => { setIsCreateModalOpen(false); setIsAddJournalModalOpen(true); };
@@ -81,9 +85,12 @@ const MainApp = ({ user }) => {
 
     const renderView = () => {
         switch (view) {
-            // ... (other cases are the same)
+            case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
+            case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
+            case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} collections={collections} addCollection={addCollection} updateCollection={updateCollection} deleteCollection={deleteCollection} />;
+            case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
-                // UPDATED: Pass all necessary props to Dashboard
+                // THE FIX: Added the missing openScheduleModal prop back
                 return <Dashboard 
                     setView={setView} 
                     ideaPad={ideaPad} 
@@ -95,8 +102,8 @@ const MainApp = ({ user }) => {
                     openScheduleModal={openScheduleModal}
                     upcomingBakes={upcomingBakes} 
                     updateUpcomingBake={updateUpcomingBake} 
-                    deleteUpcomingBake={deleteUpcomingBake} // Pass delete function
-                    setBakeToMove={setBakeToMove} // Pass function to trigger move modal
+                    deleteUpcomingBake={deleteUpcomingBake}
+                    setBakeToMove={setBakeToMove}
                     cookbook={cookbook}
                     openAddChoiceModal={openBakeModal}
                     setBakeToView={setBakeToView}
@@ -110,19 +117,16 @@ const MainApp = ({ user }) => {
         <div className="bg-app-white text-app-grey">
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
-                    {/* ... (header and main content are the same) */}
-                    
-                    {/* --- ALL MODALS RENDERED HERE --- */}
-                    {upcomingBakeToView && (
-                        <ViewUpcomingBakeModal 
-                            bake={upcomingBakeToView}
-                            onClose={() => setUpcomingBakeToView(null)}
-                            onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
-                            onDelete={() => { deleteUpcomingBake(upcomingBakeToView.id); setUpcomingBakeToView(null); }}
-                            onMoveToJournal={() => { setBakeToMove(upcomingBakeToView); setUpcomingBakeToView(null); }}
-                        />
-                    )}
+                    {/* ... (header is the same) */}
+                    <main className="flex-grow overflow-y-auto bg-app-white pb-24">{renderView()}</main>
 
+                    {/* --- ALL MODALS RENDERED HERE --- */}
+                    {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
+                    {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
+                    {isAddRecipeModalOpen && <CookbookForm isNew={true} collections={collections} onSave={async (data) => { await addRecipe(data); setIsAddRecipeModalOpen(false);}} onCancel={() => setIsAddRecipeModalOpen(false)} />}
+                    {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
+                    {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
+                    
                     {bakeToView && (
                         <ViewBakeModal
                             bake={bakeToView.past}
@@ -142,6 +146,16 @@ const MainApp = ({ user }) => {
                         />
                     )}
 
+                    {upcomingBakeToView && (
+                        <ViewUpcomingBakeModal 
+                            bake={upcomingBakeToView}
+                            onClose={() => setUpcomingBakeToView(null)}
+                            onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
+                            onDelete={() => { deleteUpcomingBake(upcomingBakeToView.id); setUpcomingBakeToView(null); }}
+                            onMoveToJournal={() => { setBakeToMove(upcomingBakeToView); setUpcomingBakeToView(null); }}
+                        />
+                    )}
+
                     {bakeToMove && (
                         <MoveToJournalModal
                             bake={bakeToMove}
@@ -149,8 +163,14 @@ const MainApp = ({ user }) => {
                             onCancel={() => setBakeToMove(null)}
                         />
                     )}
-                    
-                    {/* ... (other modals are the same) */}
+
+                    {isCreateModalOpen && <CreateNewModal 
+                        onClose={() => setIsCreateModalOpen(false)}
+                        onAddRecipe={openRecipeModal}
+                        onAddIdea={openIdeaModal}
+                        onAddBake={openBakeModal}
+                        onScheduleBake={openScheduleModal}
+                    />}
                     
                     <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
                 </div>
