@@ -18,6 +18,7 @@ const Dashboard = ({
     openScheduleModal,
     upcomingBakes, 
     updateUpcomingBake,
+    cookbook // --- THIS PROP IS THE FIX ---
 }) => {
     
     // State for viewing/editing modals that are triggered from THIS page

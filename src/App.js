@@ -92,7 +92,8 @@ const MainApp = ({ user }) => {
                     setDateFilter={setDateFilter} 
                     openAddJournalModal={() => setIsAddJournalModalOpen(true)} 
                     openAddIdeaModal={() => setIsAddIdeaModalOpen(true)}
-                    openScheduleModal={() => setIsAddUpcomingBakeModalOpen(true)} // THE FIX: This prop was missing
+                    // --- THIS LINE IS THE FIX ---
+                    openScheduleModal={() => setIsAddUpcomingBakeModalOpen(true)} 
                     upcomingBakes={upcomingBakes} 
                     addUpcomingBake={addUpcomingBake} 
                     updateUpcomingBake={updateUpcomingBake} 
