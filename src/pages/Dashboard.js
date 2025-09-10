@@ -7,6 +7,13 @@ import ViewUpcomingBakeModal from '../components/ViewUpcomingBakeModal';
 import UpcomingBakeForm from './UpcomingBakeForm';
 import masterIdeaList from '../data/masterIdeaList';
 
+// NOTE: These imports are no longer needed as the modals are now handled by App.js
+// import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
+// import AddRecipeChoiceModal from '../components/AddRecipeChoiceModal';
+// import AddFromURLModal from '../components/AddFromURLModal';
+// import CookbookForm from './CookbookForm';
+
+
 const Dashboard = ({ 
     setView, 
     ideaPad, 
@@ -19,7 +26,7 @@ const Dashboard = ({
     upcomingBakes, 
     updateUpcomingBake,
     cookbook,
-    openAddChoiceModal 
+    openAddChoiceModal
 }) => {
     
     // State for viewing/editing modals that are triggered from this page
@@ -39,7 +46,7 @@ const Dashboard = ({
     const handleEditFromView = (bake, isUpcoming = false) => { 
         if (isUpcoming) { 
             setUpcomingBakeToEdit(bake); 
-        } else { 
+        } else if (bake) { // Added a check to make sure bake exists
             setDateFilter(bake.bakingDate); 
             setView('journal'); 
         } 
@@ -47,8 +54,10 @@ const Dashboard = ({
     };
     const handleViewUpcomingBake = (bake) => setUpcomingBakeToView(bake);
     const handleEditFromUpcomingView = () => { 
-        setUpcomingBakeToEdit(upcomingBakeToView); 
-        setUpcomingBakeToView(null); 
+        if (upcomingBakeToView) {
+            setUpcomingBakeToEdit(upcomingBakeToView); 
+            setUpcomingBakeToView(null); 
+        }
     };
     const handleUpdateUpcomingBake = async (bakeData) => { 
         if (upcomingBakeToEdit) { 
@@ -186,7 +195,6 @@ const Dashboard = ({
             </section>
             
             <section>
-                {/* REMOVED: The h2 title for the calendar was here */}
                 <BakingCalendar 
                     journal={journal} 
                     upcomingBakes={upcomingBakes} 
