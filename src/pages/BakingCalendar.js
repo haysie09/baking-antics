@@ -48,14 +48,23 @@ const BakingCalendar = ({
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
     };
 
+    // THE FIX: This function now has the correct logic
     const handleDayClick = (day) => {
         const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateString = fullDate.toDateString();
         const pastBake = bakedDaysMap.get(dateString);
         const upcomingBake = upcomingBakeDaysMap.get(dateString);
 
-        if (pastBake || upcomingBake) {
-            onViewBake(pastBake, upcomingBake);
+        if (pastBake && upcomingBake) {
+            // If both exist, show the combined modal
+            onViewBake({ past: pastBake, upcoming: upcomingBake });
+        } else if (pastBake) {
+            // If only a past bake exists, navigate to the journal
+            setDateFilter(pastBake.bakingDate);
+            setView('journal');
+        } else if (upcomingBake) {
+            // If only an upcoming bake exists, show the upcoming bake modal
+            onViewUpcomingBake(upcomingBake);
         }
     };
     
@@ -71,7 +80,6 @@ const BakingCalendar = ({
             <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-[#1b0d10]">My Baking Calendar</h2>
-                    {/* REMOVED: The '+' button was here */}
                 </div>
 
                 <div className="flex items-center justify-between mb-4">
@@ -97,7 +105,11 @@ const BakingCalendar = ({
                         const hasUpcomingBake = upcomingBakeDaysMap.has(dateKey);
                         const isToday = dateObj.toDateString() === today.toDateString();
 
-                        let dayClass = "relative w-8 h-8 flex items-center justify-center rounded-full transition-colors cursor-pointer";
+                        let dayClass = "relative w-8 h-8 flex items-center justify-center rounded-full transition-colors";
+                        if (hasPastBake || hasUpcomingBake) {
+                            dayClass += " cursor-pointer";
+                        }
+                        
                         if (isToday) {
                             dayClass += " bg-[#f0425f] text-white";
                         } else if (hasPastBake && !hasUpcomingBake) {
@@ -105,12 +117,12 @@ const BakingCalendar = ({
                         } else if (hasUpcomingBake) {
                             dayClass += " border-2 border-[#f0425f] text-[#1b0d10] hover:bg-pink-50";
                         } else {
-                            dayClass += " hover:bg-gray-100";
+                            dayClass += " text-gray-400"; // Day with no bakes
                         }
 
                         return (
                             <div key={dateNum} className="flex justify-center">
-                                <button className={dayClass} onClick={() => handleDayClick(dateNum)}>
+                                <button className={dayClass} onClick={() => handleDayClick(dateNum)} disabled={!hasPastBake && !hasUpcomingBake}>
                                     {dateNum}
                                 </button>
                             </div>
