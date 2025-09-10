@@ -15,10 +15,10 @@ const Dashboard = ({
     deleteIdea, 
     journal, 
     setDateFilter, 
-    openScheduleModal,
     upcomingBakes, 
     updateUpcomingBake,
-    cookbook
+    cookbook,
+    openScheduleModal // This prop is now correctly passed from App.js for the UpcomingBakes empty state
 }) => {
     
     // State for viewing/editing modals that are triggered from this page
@@ -69,23 +69,12 @@ const Dashboard = ({
             setInspiredBy('ideaPad'); 
             return;
         }
-        if (ideaPad.length === 1 && idea.name === ideaPad[0].ideaName) {
-            setIdea({ name: "You’ve used up all your ideas", id: null });
-            setInspiredBy('ideaPad'); 
-            return;
-        }
         let newIdea = idea.name;
-        let newIdeaId = idea.id;
         while (newIdea === idea.name && ideaPad.length > 1) {
             const randomIndex = Math.floor(Math.random() * ideaPad.length);
             newIdea = ideaPad[randomIndex].ideaName;
-            newIdeaId = ideaPad[randomIndex].id;
         }
-        if (ideaPad.length === 1) {
-            newIdea = ideaPad[0].ideaName;
-            newIdeaId = ideaPad[0].id;
-        }
-        setIdea({ name: newIdea, id: newIdeaId });
+        setIdea({ name: newIdea, id: ideaPad.find(i => i.ideaName === newIdea)?.id });
         setShowConfirmation({ journal: false, idea: false });
         setInspiredBy('ideaPad');
     }, [ideaPad, idea]);
@@ -161,7 +150,7 @@ const Dashboard = ({
                                     <button onClick={handleFindRecipe} className="w-full sm:w-auto border-2 border-[#f0425f] text-[#f0425f] bg-transparent py-1.5 px-4 rounded-full font-semibold hover:bg-pink-50 transition text-sm">Find a Recipe</button>
                                     {inspiredBy === 'inspireMe' && <button onClick={handleAddToIdeaPad} className="w-full sm:w-auto bg-[#f8a5b3] text-white py-1.5 px-4 rounded-full font-semibold hover:opacity-90 transition text-sm">Add to my idea pad</button>}
                                     <button onClick={inspiredBy === 'inspireMe' ? inspireMe : generateFromMyIdeas} className="text-[#f0425f] p-2 rounded-full hover:bg-pink-50 transition" title="Try another">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"><path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
                                     </button>
                                 </div>
                             )}

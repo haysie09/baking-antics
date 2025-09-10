@@ -90,10 +90,15 @@ const MainApp = ({ user }) => {
                     deleteIdea={deleteIdea} 
                     journal={journal} 
                     setDateFilter={setDateFilter} 
-                    openScheduleModal={openScheduleModal}
+                    openScheduleModal={openScheduleModal} 
                     upcomingBakes={upcomingBakes} 
+                    addUpcomingBake={addUpcomingBake} 
                     updateUpcomingBake={updateUpcomingBake} 
+                    deleteUpcomingBake={deleteUpcomingBake} 
                     cookbook={cookbook} 
+                    addRecipe={addRecipe} 
+                    updateRecipe={updateRecipe} 
+                    deleteRecipe={deleteRecipe}
                 />;
         }
     };
