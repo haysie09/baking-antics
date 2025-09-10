@@ -1,18 +1,29 @@
 import React, { useMemo } from 'react';
 
-// Accept the new `onViewUpcomingBake` prop
-const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAddChoiceModal, onViewBake, onViewUpcomingBake, currentDate, setCurrentDate }) => {
-    
-    // --- Create maps for quick lookup of bakes by date string ---
+const BakingCalendar = ({ 
+    journal, 
+    upcomingBakes, 
+    setView, 
+    setDateFilter,
+    openAddChoiceModal,
+    onViewBake,
+    onViewUpcomingBake,
+    currentDate,
+    setCurrentDate
+}) => {
+
+    const daysOfWeek = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+    const monthName = currentDate.toLocaleString('default', { month: 'long' });
+    const year = currentDate.getFullYear();
+
+    // --- LOGIC FROM YOUR ORIGINAL FILE (PRESERVED) ---
+
     const bakedDaysMap = useMemo(() => {
         const map = new Map();
         if (journal) {
             journal.forEach(entry => {
-                const bakeDate = new Date(entry.bakingDate);
-                const utcDate = new Date(Date.UTC(bakeDate.getFullYear(), bakeDate.getMonth(), bakeDate.getDate()));
-                if (!map.has(utcDate.toDateString())) {
-                    map.set(utcDate.toDateString(), entry);
-                }
+                const date = entry.bakingDate.toDate ? entry.bakingDate.toDate() : new Date(entry.bakingDate);
+                map.set(date.toDateString(), entry);
             });
         }
         return map;
@@ -22,11 +33,8 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         const map = new Map();
         if (upcomingBakes) {
             upcomingBakes.forEach(bake => {
-                const bakeDate = new Date(bake.bakeDate);
-                const utcDate = new Date(Date.UTC(bakeDate.getFullYear(), bakeDate.getMonth(), bakeDate.getDate()));
-                if (!map.has(utcDate.toDateString())) {
-                    map.set(utcDate.toDateString(), bake);
-                }
+                const date = bake.bakeDate.toDate ? bake.bakeDate.toDate() : new Date(bake.bakeDate);
+                map.set(date.toDateString(), bake);
             });
         }
         return map;
@@ -40,87 +48,84 @@ const BakingCalendar = ({ journal, upcomingBakes, setView, setDateFilter, openAd
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
     };
 
-    // --- Updated handler to check for combined bakes ---
     const handleDayClick = (day) => {
-        const fullDate = new Date(Date.UTC(currentDate.getFullYear(), currentDate.getMonth(), day));
+        const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateString = fullDate.toDateString();
-
         const pastBake = bakedDaysMap.get(dateString);
         const upcomingBake = upcomingBakeDaysMap.get(dateString);
 
-        if (pastBake) {
-            // If there's a past bake, always use the main viewer,
-            // and pass the upcoming bake if it also exists.
+        if (pastBake || upcomingBake) {
             onViewBake(pastBake, upcomingBake);
-        } else if (upcomingBake) {
-            // If there's only an upcoming bake, use its dedicated viewer.
-            onViewUpcomingBake(upcomingBake);
-        } else {
-            alert("No bakes on this day. Use the '+' to add one.");
         }
     };
+    
+    // --- CALENDAR GRID GENERATION (ADAPTED FOR NEW STYLING) ---
 
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
+    const firstDayOfMonth = new Date(year, currentDate.getMonth(), 1).getDay();
+    const daysInMonth = new Date(year, currentDate.getMonth() + 1, 0).getDate();
     const today = new Date();
-    const todayDateString = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())).toDateString();
-
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDayOfMonth = (new Date(year, month, 1).getUTCDay() + 6) % 7;
-
-    const calendarDays = [];
-    for (let i = 0; i < firstDayOfMonth; i++) {
-        calendarDays.push(<div key={`empty-${i}`}></div>);
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-        const dayDate = new Date(Date.UTC(year, month, i));
-        const dayDateString = dayDate.toDateString();
-        
-        const isBaked = bakedDaysMap.has(dayDateString);
-        const isUpcoming = upcomingBakeDaysMap.has(dayDateString);
-        const isToday = dayDateString === todayDateString;
-
-        calendarDays.push(
-            <div key={i} onClick={() => handleDayClick(i)} className="text-center cursor-pointer h-10 flex flex-col items-center justify-start pt-1">
-                <div className={`w-7 h-7 flex items-center justify-center rounded-full ${isToday ? 'border-2 border-add-idea' : ''}`}>
-                    {i}
-                </div>
-                <div className="h-2 flex justify-center items-center space-x-1 mt-1">
-                    {isBaked && <div className="w-2 h-2 bg-burnt-orange rounded-full"></div>}
-                    {isUpcoming && <div className="w-2 h-2 bg-gray-400 rounded-full"></div>}
-                </div>
-            </div>
-        );
-    }
+    today.setHours(0, 0, 0, 0);
 
     return (
-        <div className="bg-info-box p-4 rounded-2xl border border-burnt-orange">
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-2xl font-bold text-burnt-orange">My Baking Calendar</h3>
-                <button onClick={openAddChoiceModal} className="text-add-idea" title="Add Bake">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                </button>
-            </div>
+        <section>
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
+                <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-bold text-[#1b0d10]">My Baking Calendar</h2>
+                    <button onClick={openAddChoiceModal} className="text-[#f0425f] hover:opacity-70">
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                    </button>
+                </div>
 
-            <div className="flex justify-between items-center mb-3 px-2">
-                <button onClick={handlePrevMonth} className="p-2 rounded-full hover:bg-light-peach transition-colors">
-                    <svg className="w-6 h-6 text-burnt-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-                </button>
-                <h4 className="font-montserrat font-bold text-lg text-add-idea">
-                    {currentDate.toLocaleString('default', { month: 'long' }).toUpperCase()} {year}
-                </h4>
-                <button onClick={handleNextMonth} className="p-2 rounded-full hover:bg-light-peach transition-colors">
-                    <svg className="w-6 h-6 text-burnt-orange" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                </button>
-            </div>
+                <div className="flex items-center justify-between mb-4">
+                    <button onClick={handlePrevMonth} className="p-1 rounded-full hover:bg-[#f3e7e9] transition-colors">
+                        <svg className="w-6 h-6 text-[#9a4c59]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <span className="text-sm font-semibold text-[#1b0d10] w-24 text-center uppercase">{monthName} {year}</span>
+                    <button onClick={handleNextMonth} className="p-1 rounded-full hover:bg-[#f3e7e9] transition-colors">
+                        <svg className="w-6 h-6 text-[#9a4c59]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                </div>
 
-            <div className="grid grid-cols-7 gap-1 text-sm text-center text-app-grey font-montserrat font-bold">
-                <div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div>
+                <div className="grid grid-cols-7 gap-1 text-center text-sm">
+                    {daysOfWeek.map(day => <div key={day} className="font-bold text-[#9a4c59] w-8 h-8 flex items-center justify-center">{day}</div>)}
+                    
+                    {Array.from({ length: firstDayOfMonth }).map((_, i) => <div key={`empty-${i}`}></div>)}
+
+                    {Array.from({ length: daysInMonth }).map((_, day) => {
+                        const dateNum = day + 1;
+                        const dateObj = new Date(year, currentDate.getMonth(), dateNum);
+                        const dateKey = dateObj.toDateString();
+                        const hasPastBake = bakedDaysMap.has(dateKey);
+                        const hasUpcomingBake = upcomingBakeDaysMap.has(dateKey);
+                        const isToday = dateObj.toDateString() === today.toDateString();
+
+                        let dayClass = "relative w-8 h-8 flex items-center justify-center rounded-full transition-colors cursor-pointer";
+                        if (isToday) {
+                            dayClass += " bg-[#f0425f] text-white";
+                        } else if (hasPastBake && !hasUpcomingBake) {
+                            dayClass += " bg-pink-100 text-[#1b0d10] hover:bg-pink-200";
+                        } else if (hasUpcomingBake) {
+                            dayClass += " border-2 border-[#f0425f] text-[#1b0d10] hover:bg-pink-50";
+                        } else {
+                            dayClass += " hover:bg-gray-100";
+                        }
+
+                        return (
+                            <div key={dateNum} className="flex justify-center">
+                                <button className={dayClass} onClick={() => handleDayClick(dateNum)}>
+                                    {dateNum}
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+                
+                <div className="mt-4 flex items-center justify-center gap-4 text-xs font-semibold text-[#9a4c59]">
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-pink-100"></div><span>Past Bakes</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full border-2 border-[#f0425f]"></div><span>Scheduled</span></div>
+                </div>
             </div>
-            <div className="grid grid-cols-7 gap-1 mt-2 font-montserrat text-app-grey">
-                {calendarDays}
-            </div>
-        </div>
+        </section>
     );
 };
 

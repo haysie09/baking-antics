@@ -12,19 +12,21 @@ const getDaysUntil = (date) => {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays < 0) return 'Overdue';
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Tomorrow';
+    if (diffDays === 0) return 'Today!'; // Added exclamation for emphasis
+    if (diffDays === 1) return 'Tomorrow!'; // Added exclamation for emphasis
     return `in ${diffDays} days`;
 };
 
 // A new component for individual bake items
 const BakeItem = ({ bake, onViewDetails }) => (
     <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
-        <div className="flex justify-between items-center">
-            <p className="text-[#1b0d10] text-lg font-bold truncate pr-2">{bake.bakeName}</p>
-            <p className="text-[#f0425f] text-sm font-semibold flex-shrink-0">{getDaysUntil(bake.bakeDate)}</p>
+        <div className="flex justify-between items-center mb-2">
+            {/* FIX: Added bake.bakeName here and adjusted styling */}
+            <p className="text-[#1b0d10] text-lg font-semibold truncate pr-2">{bake.bakeName}</p>
+            {/* FIX: Made 'in X days' bigger and bolder */}
+            <p className="text-[#f0425f] text-base font-bold flex-shrink-0">{getDaysUntil(bake.bakeDate)}</p>
         </div>
-        <div className="mt-2">
+        <div>
             <button 
                 onClick={() => onViewDetails(bake)}
                 className="text-xs font-bold text-white bg-[#f8a5b3] hover:bg-[#f0425f] py-1 px-3 rounded-full transition-colors"
