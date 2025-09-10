@@ -7,13 +7,6 @@ import ViewUpcomingBakeModal from '../components/ViewUpcomingBakeModal';
 import UpcomingBakeForm from './UpcomingBakeForm';
 import masterIdeaList from '../data/masterIdeaList';
 
-// NOTE: These imports are no longer needed as the modals are now handled by App.js
-// import AddBakeChoiceModal from '../components/AddBakeChoiceModal';
-// import AddRecipeChoiceModal from '../components/AddRecipeChoiceModal';
-// import AddFromURLModal from '../components/AddFromURLModal';
-// import CookbookForm from './CookbookForm';
-
-
 const Dashboard = ({ 
     setView, 
     ideaPad, 
@@ -26,13 +19,16 @@ const Dashboard = ({
     upcomingBakes, 
     updateUpcomingBake,
     cookbook,
-    openAddChoiceModal
+    openAddChoiceModal,
+    setBakeToView,
+    setUpcomingBakeToView,
+    setUpcomingBakeToEdit
 }) => {
     
     // State for viewing/editing modals that are triggered from this page
-    const [bakeToView, setBakeToView] = useState(null);
-    const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
-    const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
+    const [bakeToView, setLocalBakeToView] = useState(null);
+    const [upcomingBakeToView, setLocalUpcomingBakeToView] = useState(null);
+    const [upcomingBakeToEdit, setLocalUpcomingBakeToEdit] = useState(null);
     const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
     // State for the generator
@@ -46,24 +42,24 @@ const Dashboard = ({
     const handleEditFromView = (bake, isUpcoming = false) => { 
         if (isUpcoming) { 
             setUpcomingBakeToEdit(bake); 
-        } else if (bake) { // Added a check to make sure bake exists
+        } else if (bake) {
             setDateFilter(bake.bakingDate); 
             setView('journal'); 
         } 
-        setBakeToView(null); 
+        setLocalBakeToView(null); 
     };
-    const handleViewUpcomingBake = (bake) => setUpcomingBakeToView(bake);
+    const handleViewUpcomingBake = (bake) => setLocalUpcomingBakeToView(bake);
     const handleEditFromUpcomingView = () => { 
         if (upcomingBakeToView) {
             setUpcomingBakeToEdit(upcomingBakeToView); 
-            setUpcomingBakeToView(null); 
+            setLocalUpcomingBakeToView(null); 
         }
     };
     const handleUpdateUpcomingBake = async (bakeData) => { 
         if (upcomingBakeToEdit) { 
             await updateUpcomingBake(upcomingBakeToEdit.id, bakeData); 
         } 
-        setUpcomingBakeToEdit(null); 
+        setLocalUpcomingBakeToEdit(null); 
     };
     
     const inspireMe = useCallback(() => {
@@ -144,7 +140,7 @@ const Dashboard = ({
             <UpcomingBakes 
                 upcomingBakes={upcomingBakes}
                 openScheduleModal={openScheduleModal}
-                onViewDetails={handleViewUpcomingBake}
+                onViewDetails={setUpcomingBakeToView}
             />
 
             <section>
@@ -187,7 +183,6 @@ const Dashboard = ({
             </section>
             
             <section>
-                <h2 className="text-[#1b0d10] text-2xl font-bold mb-4">Your Progress ✨</h2>
                 <DashboardStats 
                     journal={journal} 
                     currentCalendarDate={currentCalendarDate} 
@@ -201,7 +196,7 @@ const Dashboard = ({
                     setView={setView} 
                     setDateFilter={setDateFilter}
                     onViewBake={handleViewBake}
-                    onViewUpcomingBake={handleViewUpcomingBake}
+                    onViewUpcomingBake={setUpcomingBakeToView}
                     currentDate={currentCalendarDate}
                     setCurrentDate={setCurrentCalendarDate}
                     openAddChoiceModal={openAddChoiceModal}
@@ -209,9 +204,9 @@ const Dashboard = ({
             </section>
             
             {/* --- MODALS --- */}
-            {upcomingBakeToEdit && ( <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={handleUpdateUpcomingBake} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} /> )}
-            {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={handleEditFromView} /> )}
-            {upcomingBakeToView && ( <ViewUpcomingBakeModal bake={upcomingBakeToView} onClose={() => setUpcomingBakeToView(null)} onEdit={handleEditFromUpcomingView} /> )}
+            {upcomingBakeToEdit && ( <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={handleUpdateUpcomingBake} onCancel={() => setLocalUpcomingBakeToEdit(null)} cookbook={cookbook} /> )}
+            {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setLocalBakeToView(null)} onEdit={handleEditFromView} /> )}
+            {upcomingBakeToView && ( <ViewUpcomingBakeModal bake={upcomingBakeToView} onClose={() => setLocalUpcomingBakeToView(null)} onEdit={handleEditFromUpcomingView} /> )}
         </div>
     );
 };
