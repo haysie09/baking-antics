@@ -1,4 +1,4 @@
-import React, 'useState', useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import JournalEntryForm from './JournalEntryForm';
 import ConfirmationModal from '../components/ConfirmationModal';
 import StarRating from '../components/StarRating';
@@ -20,29 +20,53 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
     
     const [expandedMonths, setExpandedMonths] = useState({});
 
-    // All handler functions are preserved
     const handleSave = async (entryData) => { if (isCreatingNew) await addJournalEntry({ ...entryData, createdAt: new Date() }); else await updateJournalEntry(editingEntry.id, entryData); setEditingEntry(null); setIsCreatingNew(false); };
     const handleFilterChange = (filters) => { setActiveFilters(filters); };
     const toggleMonth = (year, month) => { const key = `${year}-${month}`; setExpandedMonths(prev => ({ ...prev, [key]: !prev[key] })); };
     
     useEffect(() => { return () => { setDateFilter(null); } }, [setDateFilter]);
 
-    // All data processing logic is preserved
+    const safeGetDate = (entryDate) => {
+        return new Date(entryDate.toDate ? entryDate.toDate() : entryDate);
+    };
+
     const filteredJournal = useMemo(() => {
         let entries = journal || [];
-        // ... filtering logic
+        if (dateFilter) {
+            return entries.filter(entry => entry.bakingDate === dateFilter);
+        }
+        if (activeFilters.categories.length > 0) {
+            entries = entries.filter(entry => 
+                activeFilters.categories.every(filterCat => entry.categories?.includes(filterCat))
+            );
+        }
+        // FIX: Used safeGetDate to handle Firestore Timestamps
+        if (activeFilters.month !== 'all') {
+            entries = entries.filter(entry => safeGetDate(entry.bakingDate).getMonth() === parseInt(activeFilters.month));
+        }
+        if (activeFilters.year !== 'all') {
+            entries = entries.filter(entry => safeGetDate(entry.bakingDate).getFullYear() === parseInt(activeFilters.year));
+        }
         return entries;
     }, [journal, activeFilters, dateFilter]);
 
     const groupedJournal = useMemo(() => {
         const groups = {};
-        // ... grouping logic
+        // FIX: Used safeGetDate to handle Firestore Timestamps
+        [...filteredJournal].sort((a, b) => safeGetDate(b.bakingDate) - safeGetDate(a.bakingDate))
+            .forEach(entry => {
+                const date = safeGetDate(entry.bakingDate);
+                const year = date.getFullYear();
+                const month = date.getMonth();
+                if (!groups[year]) groups[year] = {};
+                if (!groups[year][month]) groups[year][month] = [];
+                groups[year][month].push(entry);
+            });
         return groups;
     }, [filteredJournal]);
 
     return (
         <div className="p-4 bg-[#fcf8f9] min-h-full font-sans">
-            
             <div className="flex justify-between items-center mb-6">
                 <h1 className="text-3xl font-bold text-[#1b0d10]">Journal</h1>
                 <button 
@@ -86,7 +110,8 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                                                         <div className="flex justify-between items-start cursor-pointer" onClick={() => setExpandedJournalId(expandedJournalId === entry.id ? null : entry.id)}>
                                                             <div>
                                                                 <h3 className="text-lg font-bold text-[#1b0d10]">{entry.entryTitle}</h3>
-                                                                <p className="text-sm text-gray-500">{new Date(entry.bakingDate).toLocaleDateString('en-GB')}</p>
+                                                                {/* FIX: Used safeGetDate to handle Firestore Timestamps */}
+                                                                <p className="text-sm text-gray-500">{safeGetDate(entry.bakingDate).toLocaleDateString('en-GB')}</p>
                                                             </div>
                                                             <span className={`transform transition-transform text-[#f0425f] ${expandedJournalId === entry.id ? 'rotate-180' : ''}`}>▼</span>
                                                         </div>
