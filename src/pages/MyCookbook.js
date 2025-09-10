@@ -2,9 +2,7 @@ import React, { useState, useMemo } from 'react';
 import CookbookForm from './CookbookForm';
 import ConfirmationModal from '../components/ConfirmationModal';
 import AddFromURLModal from '../components/AddFromURLModal';
-import FilterComponent from '../components/FilterComponent';
 import AddRecipeChoiceModal from '../components/AddRecipeChoiceModal';
-import StarRating from '../components/StarRating';
 
 // A new, cleaner folder icon
 const FolderIcon = () => (
@@ -36,7 +34,7 @@ const CollectionFormModal = ({ onSave, onCancel, collection = null }) => {
 
 // --- Main MyCookbook Component ---
 const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collections, addCollection, updateCollection, deleteCollection }) => {
-    // All original state and handlers are preserved
+    // State and handlers
     const [currentView, setCurrentView] = useState('collections');
     const [selectedCollection, setSelectedCollection] = useState(null);
     const [isCollectionFormOpen, setIsCollectionFormOpen] = useState(false);
@@ -49,8 +47,8 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     const [recipeToDelete, setRecipeToDelete] = useState(null);
     const [importedRecipeData, setImportedRecipeData] = useState(null);
     const [expandedCookbookId, setExpandedCookbookId] = useState(null);
-    const [activeFilters, setActiveFilters] = useState({ categories: [], month: 'all', year: 'all' });
-    const recipeCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
+
+    // REMOVED: State and constants for the filter
 
     const collectionRecipeCounts = useMemo(() => {
         const counts = { unassigned: 0 };
@@ -68,10 +66,11 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                 recipes = recipes.filter(recipe => recipe.collectionId === selectedCollection.id);
             }
         }
-        // ... filtering logic ...
-        return recipes;
-    }, [cookbook, selectedCollection, activeFilters]);
+        // REMOVED: Filtering logic from useMemo
+        return recipes.sort((a, b) => (b.createdAt?.toDate() || 0) - (a.createdAt?.toDate() || 0));
+    }, [cookbook, selectedCollection]);
 
+    // All handler functions are preserved
     const handleSaveCollection = (name) => { if (collectionToEdit) { updateCollection(collectionToEdit.id, name); } else { addCollection(name); } setIsCollectionFormOpen(false); setCollectionToEdit(null); };
     const handleConfirmDeleteCollection = () => { if (collectionToDelete) { deleteCollection(collectionToDelete.id); } setCollectionToDelete(null); };
     const handleViewCollection = (collection) => { setSelectedCollection(collection); setExpandedCookbookId(null); setCurrentView('recipes'); };
@@ -99,7 +98,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                     Back to Collections
                 </button>
                 <h1 className="text-3xl font-bold text-[#1b0d10] mb-4">{selectedCollection?.name || 'Collection'}</h1>
-                <FilterComponent categories={recipeCategories} onFilterChange={setActiveFilters} />
+                {/* REMOVED: Filter component */}
                 <div className="space-y-4 mt-6">
                     {recipesInView.length > 0 ? recipesInView.map(recipe => (
                         <div key={recipe.id} className="bg-white p-4 rounded-xl border border-pink-100 shadow-sm">
@@ -115,8 +114,6 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     return (
         <div className="p-4 bg-[#fcf8f9] min-h-full font-sans">
             <h1 className="text-3xl font-bold text-[#1b0d10] mb-4">My Recipes</h1>
-            
-            {/* ADDED BACK: The +Recipe and +Collection buttons */}
             <div className="flex gap-2 mb-6">
                 <button onClick={() => setIsChoiceModalOpen(true)} className="flex-1 h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-sm shadow-md hover:opacity-90">
                     + Recipe
@@ -126,7 +123,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                 </button>
             </div>
             
-            <FilterComponent categories={recipeCategories} onFilterChange={setActiveFilters} />
+            {/* REMOVED: Filter component */}
 
             <div className="grid grid-cols-2 gap-4 mt-6">
                 <div onClick={() => handleViewCollection({ id: 'unassigned', name: 'Unassigned Recipes' })} className="bg-white p-4 rounded-xl border border-pink-100 shadow-sm flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-lg transition-shadow aspect-square">
