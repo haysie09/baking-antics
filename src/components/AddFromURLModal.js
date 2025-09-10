@@ -13,22 +13,23 @@ const AddFromURLModal = ({ onImport, onCancel }) => {
         setError('');
         setIsLoading(true);
 
-        // We will pass the import logic function 'onImport' from the parent.
-        // This keeps the AI logic separate from this simple UI component.
         try {
             await onImport(url);
-            // The parent component will handle closing this modal on success.
+            // Parent component will handle closing the modal on success
         } catch (err) {
-            setError(err.message || 'Failed to import recipe. Please try another link.');
-            setIsLoading(false); // Stop loading on error
+            // Use a more user-friendly generic error message
+            setError("We couldn't import that recipe. Please try another or add it manually.");
+            console.error(err); // Log the technical error for debugging
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4 font-patrick-hand">
-            <div className="bg-app-white rounded-2xl p-8 w-full max-w-md shadow-xl text-center space-y-4">
-                <h2 className="text-3xl text-burnt-orange">Import Recipe from Website</h2>
-                <p className="font-montserrat text-app-grey/80 text-base">
+        <div className="fixed inset-0 bg-black/30 z-50 flex items-center justify-center p-4 font-sans">
+            <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-xl text-center space-y-4">
+                <h2 className="text-xl font-bold text-[#1b0d10]">Import Recipe from Website</h2>
+                <p className="text-sm text-gray-500">
                     Paste the URL of a recipe and we'll try to import it for you!
                 </p>
                 
@@ -36,18 +37,18 @@ const AddFromURLModal = ({ onImport, onCancel }) => {
                     type="url"
                     value={url}
                     onChange={(e) => setUrl(e.target.value)}
-                    placeholder="https://your-favorite-recipe-site.com/..."
-                    className="w-full p-3 border border-gray-300 rounded-xl text-lg focus:ring-2 focus:ring-burnt-orange focus:outline-none font-montserrat"
+                    placeholder="https://..."
+                    className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
                     disabled={isLoading}
                 />
 
-                {error && <p className="text-red-500 text-sm font-montserrat">{error}</p>}
+                {error && <p className="text-red-500 text-sm">{error}</p>}
 
-                <div className="flex justify-center space-x-4 pt-2">
+                <div className="flex justify-center space-x-2 pt-2">
                     <button 
                         onClick={handleImportClick}
                         disabled={isLoading}
-                        className="bg-add-idea text-white py-3 px-8 rounded-xl hover:opacity-90 transition-opacity text-xl font-montserrat disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center justify-center"
+                        className="h-12 px-8 rounded-full bg-[#f0425f] text-white font-bold flex items-center justify-center disabled:opacity-50"
                     >
                         {isLoading ? (
                             <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
@@ -58,7 +59,7 @@ const AddFromURLModal = ({ onImport, onCancel }) => {
                     <button 
                         onClick={onCancel} 
                         disabled={isLoading}
-                        className="bg-gray-100 text-app-grey py-3 px-8 rounded-xl hover:bg-gray-200 transition-colors text-xl font-montserrat"
+                        className="h-12 px-8 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200"
                     >
                         Cancel
                     </button>
