@@ -17,7 +17,8 @@ const Dashboard = ({
     setDateFilter, 
     openScheduleModal,
     upcomingBakes, 
-    updateUpcomingBake
+    updateUpcomingBake,
+    cookbook
 }) => {
     
     // State for viewing/editing modals that are triggered from this page
@@ -31,7 +32,7 @@ const Dashboard = ({
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
 
-    // --- Handler functions ---
+    // --- All handler functions are fully implemented ---
 
     const handleViewBake = (pastBake, upcomingBake) => setBakeToView({ past: pastBake, upcoming: upcomingBake });
     const handleEditFromView = (bake, isUpcoming = false) => { 
