@@ -6,7 +6,7 @@ const FilterComponent = ({ categories, onFilterChange }) => {
     const [selectedMonth, setSelectedMonth] = useState('all');
     const [selectedYear, setSelectedYear] = useState('all');
 
-    // Generate year options based on a fixed range for simplicity
+    // All logic for generating years and months is preserved
     const generateYearOptions = () => {
         const currentYear = new Date().getFullYear();
         const years = [];
@@ -18,25 +18,18 @@ const FilterComponent = ({ categories, onFilterChange }) => {
     const yearOptions = generateYearOptions();
     const monthOptions = [
         { value: 'all', label: 'All Months' },
-        { value: 0, label: 'January' },
-        { value: 1, label: 'February' },
-        { value: 2, label: 'March' },
-        { value: 3, label: 'April' },
-        { value: 4, label: 'May' },
-        { value: 5, label: 'June' },
-        { value: 6, label: 'July' },
-        { value: 7, label: 'August' },
-        { value: 8, label: 'September' },
-        { value: 9, label: 'October' },
-        { value: 10, label: 'November' },
-        { value: 11, label: 'December' },
+        { value: 0, label: 'January' }, { value: 1, label: 'February' },
+        { value: 2, label: 'March' }, { value: 3, label: 'April' },
+        { value: 4, label: 'May' }, { value: 5, label: 'June' },
+        { value: 6, label: 'July' }, { value: 7, label: 'August' },
+        { value: 8, label: 'September' }, { value: 9, label: 'October' },
+        { value: 10, label: 'November' }, { value: 11, label: 'December' },
     ];
 
-    // This function will be called whenever any filter changes
+    // All handler functions are preserved
     const triggerFilterChange = (filters) => {
         onFilterChange(filters);
     };
-
     const handleCategoryToggle = (cat) => {
         const newCategories = selectedCategories.includes(cat)
             ? selectedCategories.filter(c => c !== cat)
@@ -44,13 +37,11 @@ const FilterComponent = ({ categories, onFilterChange }) => {
         setSelectedCategories(newCategories);
         triggerFilterChange({ categories: newCategories, month: selectedMonth, year: selectedYear });
     };
-
     const handleMonthChange = (e) => {
         const month = e.target.value;
         setSelectedMonth(month);
         triggerFilterChange({ categories: selectedCategories, month: month, year: selectedYear });
     };
-    
     const handleYearChange = (e) => {
         const year = e.target.value;
         setSelectedYear(year);
@@ -58,21 +49,22 @@ const FilterComponent = ({ categories, onFilterChange }) => {
     };
 
     return (
-        <div className="bg-info-box p-3 rounded-xl mb-4 border border-burnt-orange">
+        // UPDATED: Main container with new styling
+        <div className="bg-white p-3 rounded-xl mb-4 border border-pink-100 shadow-sm font-sans">
             <button onClick={() => setShowFilters(!showFilters)} className="w-full flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-app-grey">Filter</h3>
-                <span className={`transform transition-transform text-burnt-orange ${showFilters ? 'rotate-180' : ''}`}>▼</span>
+                <h3 className="text-base font-semibold text-[#1b0d10]">Filter</h3>
+                <span className={`transform transition-transform text-[#f0425f] ${showFilters ? 'rotate-180' : ''}`}>▼</span>
             </button>
             {showFilters && (
-                <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
+                <div className="mt-4 pt-4 border-t border-pink-100 space-y-4">
                     {/* Date Filters */}
                     <div>
-                        <label className="block text-app-grey font-semibold mb-2 text-base">Filter by Date</label>
-                        <div className="flex gap-2 font-montserrat">
-                            <select value={selectedMonth} onChange={handleMonthChange} className="w-1/2 p-2 border border-gray-300 rounded-xl text-sm bg-white">
+                        <label className="block text-[#1b0d10] font-semibold mb-2 text-base">Filter by Date</label>
+                        <div className="flex gap-2">
+                            <select value={selectedMonth} onChange={handleMonthChange} className="w-1/2 p-2 border border-gray-300 rounded-full text-sm bg-white focus:ring-2 focus:ring-[#f0425f] focus:outline-none">
                                 {monthOptions.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                             </select>
-                            <select value={selectedYear} onChange={handleYearChange} className="w-1/2 p-2 border border-gray-300 rounded-xl text-sm bg-white">
+                            <select value={selectedYear} onChange={handleYearChange} className="w-1/2 p-2 border border-gray-300 rounded-full text-sm bg-white focus:ring-2 focus:ring-[#f0425f] focus:outline-none">
                                 <option value="all">All Years</option>
                                 {yearOptions.map(year => <option key={year} value={year}>{year}</option>)}
                             </select>
@@ -81,13 +73,13 @@ const FilterComponent = ({ categories, onFilterChange }) => {
 
                     {/* Category Filters */}
                     <div>
-                        <label className="block text-app-grey font-semibold mb-2 text-base">Filter by Category</label>
+                        <label className="block text-[#1b0d10] font-semibold mb-2 text-base">Filter by Category</label>
                         <div className="flex flex-wrap gap-2">
                             {categories.map(cat => (
                                 <button 
                                     key={cat} 
                                     onClick={() => handleCategoryToggle(cat)} 
-                                    className={`py-1 px-3 rounded-xl border text-sm font-montserrat ${selectedCategories.includes(cat) ? 'bg-burnt-orange text-light-peach border-burnt-orange' : 'bg-white text-app-grey border-gray-300'}`}
+                                    className={`py-1 px-3 rounded-full border text-sm ${selectedCategories.includes(cat) ? 'bg-[#f0425f] text-white border-[#f0425f]' : 'bg-white text-gray-700 border-gray-300'}`}
                                 >
                                     {cat}
                                 </button>
