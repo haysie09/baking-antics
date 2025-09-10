@@ -18,7 +18,8 @@ const Dashboard = ({
     openScheduleModal,
     upcomingBakes, 
     updateUpcomingBake,
-    cookbook
+    cookbook,
+    openAddChoiceModal 
 }) => {
     
     // State for viewing/editing modals that are triggered from this page
@@ -177,7 +178,7 @@ const Dashboard = ({
             </section>
             
             <section>
-                <h2 className="text-[#1b0d10] text-2xl font-bold mb-4">How's it going?</h2>
+                <h2 className="text-[#1b0d10] text-2xl font-bold mb-4">Your Progress ✨</h2>
                 <DashboardStats 
                     journal={journal} 
                     currentCalendarDate={currentCalendarDate} 
@@ -185,7 +186,7 @@ const Dashboard = ({
             </section>
             
             <section>
-                <h2 className="text-[#1b0d10] text-2xl font-bold mb-4">My Baking Calendar</h2>
+                {/* REMOVED: The h2 title for the calendar was here */}
                 <BakingCalendar 
                     journal={journal} 
                     upcomingBakes={upcomingBakes} 
@@ -195,6 +196,7 @@ const Dashboard = ({
                     onViewUpcomingBake={handleViewUpcomingBake}
                     currentDate={currentCalendarDate}
                     setCurrentDate={setCurrentCalendarDate}
+                    openAddChoiceModal={openAddChoiceModal}
                 />
             </section>
             
