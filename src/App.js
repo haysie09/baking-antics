@@ -6,7 +6,7 @@ import { auth } from './firebase/config';
 import LoadingSpinner from './components/LoadingSpinner';
 import BottomNav from './components/BottomNav';
 import CreateNewModal from './components/CreateNewModal';
-import MoveToJournalModal from './components/MoveToJournalModal'; // Import new modal
+import MoveToJournalModal from './components/MoveToJournalModal'; // Import the modal
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -19,7 +19,7 @@ import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
 import CookbookForm from './pages/CookbookForm';
 import UpcomingBakeForm from './pages/UpcomingBakeForm';
-import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal'; // Ensure this is imported
+import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
 
 // --- Hooks ---
 import { useAuth } from './hooks/useAuth';
@@ -54,9 +54,9 @@ const MainApp = ({ user }) => {
     const [isAddIdeaModalOpen, setIsAddIdeaModalOpen] = useState(false);
     const [isAddRecipeModalOpen, setIsAddRecipeModalOpen] = useState(false);
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
-    const [bakeToMove, setBakeToMove] = useState(null); // State for the new modal
     const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
+    const [bakeToMove, setBakeToMove] = useState(null); // ADDED BACK: State for the new modal
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
@@ -67,7 +67,7 @@ const MainApp = ({ user }) => {
     const openBakeModal = () => { setIsCreateModalOpen(false); setIsAddJournalModalOpen(true); };
     const openScheduleModal = () => { setIsCreateModalOpen(false); setIsAddUpcomingBakeModalOpen(true); };
 
-    // Function to handle moving a bake to the journal
+    // ADDED BACK: Function to handle moving a bake to the journal
     const handleConfirmMoveToJournal = async () => {
         if (!bakeToMove) return;
         const newEntry = {
@@ -89,7 +89,18 @@ const MainApp = ({ user }) => {
             // ... other cases
             default:
                 return <Dashboard 
-                    // ... other props
+                    setView={setView}
+                    ideaPad={ideaPad}
+                    addJournalEntry={addJournalEntry}
+                    addIdea={addIdea}
+                    deleteIdea={deleteIdea}
+                    journal={journal}
+                    setDateFilter={setDateFilter}
+                    openScheduleModal={openScheduleModal}
+                    upcomingBakes={upcomingBakes}
+                    updateUpcomingBake={updateUpcomingBake}
+                    cookbook={cookbook}
+                    // ADDED BACK: Pass handlers to Dashboard
                     setUpcomingBakeToView={setUpcomingBakeToView}
                     setUpcomingBakeToEdit={setUpcomingBakeToEdit}
                 />;
@@ -107,7 +118,7 @@ const MainApp = ({ user }) => {
                     {isAddJournalModalOpen && <JournalEntryForm /* ... */ />}
                     {isAddIdeaModalOpen && <IdeaForm /* ... */ />}
                     {isAddRecipeModalOpen && <CookbookForm /* ... */ />}
-                    {isAddUpcomingBakeModalOpen && <UpcomingBakeForm /* ... */ />}
+                    {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
                     {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
 
                     {upcomingBakeToView && (
@@ -116,10 +127,11 @@ const MainApp = ({ user }) => {
                             onClose={() => setUpcomingBakeToView(null)}
                             onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
                             onDelete={() => { deleteUpcomingBake(upcomingBakeToView.id); setUpcomingBakeToView(null); }}
-                            onMoveToJournal={() => setBakeToMove(upcomingBakeToView)}
+                            onMoveToJournal={() => setBakeToMove(upcomingBakeToView)} // ADDED BACK
                         />
                     )}
 
+                    {/* ADDED BACK: Render the new modal */}
                     {bakeToMove && (
                         <MoveToJournalModal
                             bake={bakeToMove}
