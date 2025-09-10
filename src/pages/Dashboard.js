@@ -15,10 +15,10 @@ const Dashboard = ({
     deleteIdea, 
     journal, 
     setDateFilter, 
+    openScheduleModal,
     upcomingBakes, 
     updateUpcomingBake,
-    cookbook,
-    openScheduleModal // This prop is now correctly passed from App.js for the UpcomingBakes empty state
+    cookbook
 }) => {
     
     // State for viewing/editing modals that are triggered from this page
@@ -69,12 +69,23 @@ const Dashboard = ({
             setInspiredBy('ideaPad'); 
             return;
         }
+        if (ideaPad.length === 1 && idea.name === ideaPad[0].ideaName) {
+            setIdea({ name: "You’ve used up all your ideas", id: null });
+            setInspiredBy('ideaPad'); 
+            return;
+        }
         let newIdea = idea.name;
+        let newIdeaId = idea.id;
         while (newIdea === idea.name && ideaPad.length > 1) {
             const randomIndex = Math.floor(Math.random() * ideaPad.length);
             newIdea = ideaPad[randomIndex].ideaName;
+            newIdeaId = ideaPad[randomIndex].id;
         }
-        setIdea({ name: newIdea, id: ideaPad.find(i => i.ideaName === newIdea)?.id });
+        if (ideaPad.length === 1) {
+            newIdea = ideaPad[0].ideaName;
+            newIdeaId = ideaPad[0].id;
+        }
+        setIdea({ name: newIdea, id: newIdeaId });
         setShowConfirmation({ journal: false, idea: false });
         setInspiredBy('ideaPad');
     }, [ideaPad, idea]);

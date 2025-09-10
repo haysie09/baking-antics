@@ -90,15 +90,10 @@ const MainApp = ({ user }) => {
                     deleteIdea={deleteIdea} 
                     journal={journal} 
                     setDateFilter={setDateFilter} 
-                    openScheduleModal={openScheduleModal} 
+                    openScheduleModal={openScheduleModal}
                     upcomingBakes={upcomingBakes} 
-                    addUpcomingBake={addUpcomingBake} 
                     updateUpcomingBake={updateUpcomingBake} 
-                    deleteUpcomingBake={deleteUpcomingBake} 
                     cookbook={cookbook} 
-                    addRecipe={addRecipe} 
-                    updateRecipe={updateRecipe} 
-                    deleteRecipe={deleteRecipe}
                 />;
         }
     };
@@ -126,8 +121,6 @@ const MainApp = ({ user }) => {
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                     {isAddRecipeModalOpen && <CookbookForm isNew={true} collections={collections} onSave={async (data) => { await addRecipe(data); setIsAddRecipeModalOpen(false);}} onCancel={() => setIsAddRecipeModalOpen(false)} />}
-                    
-                    {/* THE FIX: Added the 'cookbook' prop here */}
                     {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
 
                     {isCreateModalOpen && <CreateNewModal 
