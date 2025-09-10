@@ -71,9 +71,7 @@ const BakingCalendar = ({
             <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
                 <div className="flex items-center justify-between mb-4">
                     <h2 className="text-lg font-bold text-[#1b0d10]">My Baking Calendar</h2>
-                    <button onClick={openAddChoiceModal} className="text-[#f0425f] hover:opacity-70">
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                    </button>
+                    {/* REMOVED: The '+' button was here */}
                 </div>
 
                 <div className="flex items-center justify-between mb-4">

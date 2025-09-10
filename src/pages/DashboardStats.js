@@ -120,37 +120,36 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
     }, [journal, filter, currentCalendarDate]);
 
     return (
-        <section>
-            <h2 className="text-[#1b0d10] text-2xl font-bold mb-4">How's it going?</h2>
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
-                <div className="text-center mb-4 relative">
-                    <select 
-                        value={filter} 
-                        onChange={(e) => setFilter(e.target.value)}
-                        className="appearance-none bg-white border border-pink-200 text-pink-500 text-xs font-semibold px-4 py-1.5 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400"
-                    >
-                        <option value="month">{currentCalendarDate.toLocaleString('default', { month: 'long' })}</option>
-                        <option value="week">This Week</option>
-                        <option value="last-week">Last Week</option>
-                        <option value="all">All Time</option>
-                    </select>
-                </div>
-                <div className="flex justify-around items-center">
-                    <StatCircle 
-                        value={stats.totalBakes} 
-                        label="Bakes" 
-                        subLabel={stats.dateSubLabel || stats.dateLabel}
-                        percentage={(stats.totalBakes / 10) * 100} // Example goal: 10 bakes
-                    />
-                    <StatCircle 
-                        value={stats.totalHours} 
-                        label="Hours Spent" 
-                        subLabel={stats.dateSubLabel || stats.dateLabel}
-                        percentage={(stats.totalHours / 20) * 100} // Example goal: 20 hours
-                    />
-                </div>
+        // The <section> and <h2> wrapper were removed from here.
+        // The parent Dashboard.js now provides the title.
+        <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
+            <div className="text-center mb-4 relative">
+                <select 
+                    value={filter} 
+                    onChange={(e) => setFilter(e.target.value)}
+                    className="appearance-none bg-white border border-pink-200 text-pink-500 text-xs font-semibold px-4 py-1.5 rounded-full focus:outline-none focus:ring-2 focus:ring-pink-400"
+                >
+                    <option value="month">{currentCalendarDate.toLocaleString('default', { month: 'long' })}</option>
+                    <option value="week">This Week</option>
+                    <option value="last-week">Last Week</option>
+                    <option value="all">All Time</option>
+                </select>
             </div>
-        </section>
+            <div className="flex justify-around items-center">
+                <StatCircle 
+                    value={stats.totalBakes} 
+                    label="Bakes" 
+                    subLabel={stats.dateSubLabel || stats.dateLabel}
+                    percentage={(stats.totalBakes / 10) * 100} // Example goal: 10 bakes
+                />
+                <StatCircle 
+                    value={stats.totalHours} 
+                    label="Hours Spent" 
+                    subLabel={stats.dateSubLabel || stats.dateLabel}
+                    percentage={(stats.totalHours / 20) * 100} // Example goal: 20 hours
+                />
+            </div>
+        </div>
     );
 };
 
