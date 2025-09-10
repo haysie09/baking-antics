@@ -1,4 +1,4 @@
-import React, 'useState } from 'react';
+import React, { useState } from 'react';
 import Modal from '../components/Modal';
 
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
@@ -23,7 +23,7 @@ const IdeaForm = ({ onSave, onCancel }) => {
 
     return (
         <Modal onClose={onCancel} size="md">
-            {/* UPDATED: Main container with new font and styling */}
+            {/* UPDATED: The styling inside the modal is now updated */}
             <div className="space-y-4 font-sans">
                 <h2 className="text-xl font-bold text-center text-[#1b0d10]">Add New Idea</h2>
                 
@@ -56,7 +56,6 @@ const IdeaForm = ({ onSave, onCancel }) => {
                             <button 
                                 key={cat} 
                                 onClick={() => handleCategoryToggle(cat)} 
-                                // UPDATED: Category button styling
                                 className={`py-1 px-3 rounded-full border text-sm ${newIdea.categories.includes(cat) ? 'bg-[#f0425f] text-white border-[#f0425f]' : 'bg-white text-gray-700 border-gray-300'}`}
                             >
                                 {cat}
@@ -65,7 +64,6 @@ const IdeaForm = ({ onSave, onCancel }) => {
                     </div>
                 </div>
                 
-                {/* UPDATED: Main action button styling */}
                 <button 
                     onClick={handleAdd} 
                     className="w-full h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-base hover:opacity-90 transition-opacity"
