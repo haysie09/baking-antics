@@ -20,10 +20,12 @@ const getDaysUntil = (date) => {
 
 const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
     
+    // Safely sort bakes only if the array exists
     const sortedBakes = upcomingBakes && upcomingBakes.length > 0
         ? [...upcomingBakes].sort((a, b) => 
-            new Date(a.date.toDate ? a.date.toDate() : a.date) - 
-            new Date(b.date.toDate ? b.date.toDate() : b.date)
+            // THE FIX: Changed a.date and b.date to a.bakeDate and b.bakeDate
+            new Date(a.bakeDate.toDate ? a.bakeDate.toDate() : a.bakeDate) - 
+            new Date(b.bakeDate.toDate ? b.bakeDate.toDate() : b.bakeDate)
           )
         : [];
 
@@ -33,13 +35,14 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
         <section>
             <h2 className="text-[#1b0d10] text-2xl font-bold mb-4">What's Next?</h2>
             <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-pink-200 px-6 py-10 bg-white shadow-sm">
-                {nextBake ? (
+                {/* THE FIX: Changed nextBake.date to nextBake.bakeDate */}
+                {nextBake && nextBake.bakeDate ? (
                     <>
-                        <p className="text-[#f0425f] text-sm font-bold tracking-wide uppercase">Up Next ({getDaysUntil(nextBake.date)})</p>
+                        <p className="text-[#f0425f] text-sm font-bold tracking-wide uppercase">Up Next ({getDaysUntil(nextBake.bakeDate)})</p>
                         <p className="text-[#1b0d10] text-xl font-bold text-center">{nextBake.bakeName}</p>
-                        <p className="text-[#9a4c59] text-sm">{new Date(nextBake.date.toDate ? nextBake.date.toDate() : nextBake.date).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                        {/* THE FIX: Changed nextBake.date to nextBake.bakeDate */}
+                        <p className="text-[#9a4c59] text-sm">{new Date(nextBake.bakeDate.toDate ? nextBake.bakeDate.toDate() : nextBake.bakeDate).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                         
-                        {/* UPDATED: Added View Details button */}
                         <button 
                             onClick={() => onViewDetails(nextBake)}
                             className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-[#f0425f] text-white text-sm font-bold shadow-md hover:bg-opacity-90 mt-2"
