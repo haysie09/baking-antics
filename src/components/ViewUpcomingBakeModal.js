@@ -1,7 +1,7 @@
 import React from 'react';
 import Modal from './Modal';
 
-const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJournal }) => {
+const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJournal, onViewRecipe }) => {
     if (!bake) return null;
 
     const safeGetDate = (entryDate) => {
@@ -24,11 +24,17 @@ const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJourna
                         <h2 className="text-2xl font-bold">{bake.bakeName}</h2>
                         <p className="text-sm text-gray-500 mt-1">{safeGetDate(bake.bakeDate)}</p>
                     </div>
-                    {/* Action icons are now in a dedicated container */}
                     <div className="flex items-center space-x-3 text-gray-500">
-                        <button onClick={onEdit} title="Edit Upcoming Bake" className="hover:text-[#f0425f]">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                        </button>
+                        {bake.link && (
+                            <a href={bake.link} target="_blank" rel="noopener noreferrer" title="View Source URL" className="hover:text-[#f0425f]">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                            </a>
+                        )}
+                        {!isPastOrToday && (
+                             <button onClick={onEdit} title="Edit Upcoming Bake" className="hover:text-[#f0425f]">
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                            </button>
+                        )}
                         {isPastOrToday && (
                              <button onClick={onMoveToJournal} title="Move to Journal" className="hover:text-[#f0425f]">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
@@ -47,7 +53,14 @@ const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJourna
                     </div>
                 )}
                  
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-between items-center pt-4">
+                    <div>
+                        {bake.recipeId && (
+                            <button onClick={onViewRecipe} className="h-12 px-6 rounded-full bg-pink-100 text-[#1b0d10] font-bold hover:bg-pink-200 text-sm">
+                                View Recipe
+                            </button>
+                        )}
+                    </div>
                     <button 
                         onClick={onClose} 
                         className="h-12 px-8 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200"

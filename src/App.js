@@ -7,6 +7,8 @@ import LoadingSpinner from './components/LoadingSpinner';
 import BottomNav from './components/BottomNav';
 import CreateNewModal from './components/CreateNewModal';
 import MoveToJournalModal from './components/MoveToJournalModal';
+import ViewBakeModal from './components/ViewBakeModal';
+import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -19,8 +21,6 @@ import JournalEntryForm from './pages/JournalEntryForm';
 import IdeaForm from './pages/IdeaForm';
 import CookbookForm from './pages/CookbookForm';
 import UpcomingBakeForm from './pages/UpcomingBakeForm';
-import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
-import ViewBakeModal from './components/ViewBakeModal';
 
 // --- Hooks ---
 import { useAuth } from './hooks/useAuth';
@@ -31,11 +31,13 @@ import { useCookbook } from './hooks/useCookbook';
 import { useUpcomingBakes } from './hooks/useUpcomingBakes';
 import { useCollections } from './hooks/useCollections';
 
+
 export default function App() {
     const { user, isAuthReady } = useAuth();
     if (!isAuthReady) return <LoadingSpinner />;
     return <>{user ? <MainApp user={user} /> : <AuthPage />}</>;
 }
+
 
 const MainApp = ({ user }) => {
     const [view, setView] = useState('dashboard');
@@ -57,6 +59,7 @@ const MainApp = ({ user }) => {
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
     const [bakeToMove, setBakeToMove] = useState(null);
     const [bakeToView, setBakeToView] = useState(null);
+    const [entryToEdit, setEntryToEdit] = useState(null);
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
@@ -68,7 +71,7 @@ const MainApp = ({ user }) => {
 
     const handleConfirmMoveToJournal = async (bake) => {
         if (!bake) return;
-        const newEntry = {
+        const newEntryData = {
             entryTitle: bake.bakeName || bake.title,
             bakingDate: bake.bakeDate,
             personalNotes: bake.notes || '',
@@ -76,11 +79,20 @@ const MainApp = ({ user }) => {
             createdAt: new Date(),
             tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: [],
         };
-        await addJournalEntry(newEntry);
+        const newEntry = await addJournalEntry(newEntryData);
         await deleteUpcomingBake(bake.id);
+        
         setBakeToMove(null);
         setUpcomingBakeToView(null);
         setBakeToView(null);
+        if (newEntry) {
+            setEntryToEdit(newEntry);
+        }
+    };
+
+    const handleUpdateJournalAndClose = async (id, data) => {
+        await updateJournalEntry(id, data);
+        setEntryToEdit(null);
     };
 
     const renderView = () => {
@@ -90,7 +102,6 @@ const MainApp = ({ user }) => {
             case 'cookbook': return <MyCookbook cookbook={cookbook} addRecipe={addRecipe} updateRecipe={updateRecipe} deleteRecipe={deleteRecipe} collections={collections} addCollection={addCollection} updateCollection={updateCollection} deleteCollection={deleteCollection} />;
             case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
-                // THE FIX: Added the missing openScheduleModal prop back
                 return <Dashboard 
                     setView={setView} 
                     ideaPad={ideaPad} 
@@ -117,7 +128,17 @@ const MainApp = ({ user }) => {
         <div className="bg-app-white text-app-grey">
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
-                    {/* ... (header is the same) */}
+                    {view === 'dashboard' && (
+                        <header className="bg-[#fcf8f9] sticky top-0 z-30">
+                            <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
+                                <button onClick={() => navigate('account')} className="text-[#1b0d10] hover:text-[#f0425f]">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                </button>
+                                <div className="text-3xl font-bold text-[#f0425f] font-patrick-hand" style={{ WebkitTextStroke: '1px #4d3232' }}>Baking Antics</div>
+                                <div className="w-8"></div>
+                            </nav>
+                        </header>
+                    )}
                     <main className="flex-grow overflow-y-auto bg-app-white pb-24">{renderView()}</main>
 
                     {/* --- ALL MODALS RENDERED HERE --- */}
@@ -136,8 +157,7 @@ const MainApp = ({ user }) => {
                                 if (isUpcoming) {
                                     setUpcomingBakeToEdit(bake);
                                 } else {
-                                    setView('journal');
-                                    setDateFilter(bake.bakingDate);
+                                    setEntryToEdit(bake);
                                 }
                                 setBakeToView(null);
                             }}
@@ -161,6 +181,15 @@ const MainApp = ({ user }) => {
                             bake={bakeToMove}
                             onConfirm={() => handleConfirmMoveToJournal(bakeToMove)}
                             onCancel={() => setBakeToMove(null)}
+                        />
+                    )}
+
+                    {entryToEdit && (
+                        <JournalEntryForm
+                            entry={entryToEdit}
+                            onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)}
+                            onCancel={() => setEntryToEdit(null)}
+                            cookbook={cookbook}
                         />
                     )}
 
