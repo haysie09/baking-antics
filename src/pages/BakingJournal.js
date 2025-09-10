@@ -40,7 +40,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                 activeFilters.categories.every(filterCat => entry.categories?.includes(filterCat))
             );
         }
-        // FIX: Used safeGetDate to handle Firestore Timestamps
         if (activeFilters.month !== 'all') {
             entries = entries.filter(entry => safeGetDate(entry.bakingDate).getMonth() === parseInt(activeFilters.month));
         }
@@ -52,7 +51,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
 
     const groupedJournal = useMemo(() => {
         const groups = {};
-        // FIX: Used safeGetDate to handle Firestore Timestamps
         [...filteredJournal].sort((a, b) => safeGetDate(b.bakingDate) - safeGetDate(a.bakingDate))
             .forEach(entry => {
                 const date = safeGetDate(entry.bakingDate);
@@ -99,7 +97,7 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                                 const isMonthExpanded = expandedMonths[monthKey];
                                 return (
                                     <div key={monthKey} className="mb-4">
-                                        <button onClick={() => toggleMonth(year, month)} className="w-full flex justify-between items-center bg-white p-4 rounded-xl border border-pink-100 shadow-sm">
+                                        <button onClick={() => toggleMonth(year, month)} className="w-full flex justify-between items-center bg-[#fff2f4] p-4 rounded-xl border border-pink-100 shadow-sm">
                                             <h3 className="text-lg font-semibold text-[#1b0d10]">{monthNames[month]}</h3>
                                             <span className={`transform transition-transform text-[#f0425f] ${isMonthExpanded ? 'rotate-180' : ''}`}>▼</span>
                                         </button>
@@ -109,8 +107,8 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                                                     <div key={entry.id} className="bg-white p-4 rounded-xl border border-pink-100 shadow-sm ml-4">
                                                         <div className="flex justify-between items-start cursor-pointer" onClick={() => setExpandedJournalId(expandedJournalId === entry.id ? null : entry.id)}>
                                                             <div>
-                                                                <h3 className="text-lg font-bold text-[#1b0d10]">{entry.entryTitle}</h3>
-                                                                {/* FIX: Used safeGetDate to handle Firestore Timestamps */}
+                                                                {/* Removed font-bold for cleaner look */}
+                                                                <h3 className="text-lg text-[#1b0d10]">{entry.entryTitle}</h3> 
                                                                 <p className="text-sm text-gray-500">{safeGetDate(entry.bakingDate).toLocaleDateString('en-GB')}</p>
                                                             </div>
                                                             <span className={`transform transition-transform text-[#f0425f] ${expandedJournalId === entry.id ? 'rotate-180' : ''}`}>▼</span>
