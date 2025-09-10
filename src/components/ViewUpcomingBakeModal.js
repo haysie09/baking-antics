@@ -10,7 +10,6 @@ const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJourna
         return date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     };
 
-    // This logic checks if the bake's date is today or in the past
     const bakeDate = new Date(bake.bakeDate.toDate ? bake.bakeDate.toDate() : bake.bakeDate);
     bakeDate.setHours(0,0,0,0);
     const today = new Date();
@@ -25,13 +24,11 @@ const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJourna
                         <h2 className="text-2xl font-bold">{bake.bakeName}</h2>
                         <p className="text-sm text-gray-500 mt-1">{safeGetDate(bake.bakeDate)}</p>
                     </div>
-                    {/* The Edit, Delete, and Move buttons are now in a single container */}
+                    {/* Action icons are now in a dedicated container */}
                     <div className="flex items-center space-x-3 text-gray-500">
-                        {!isPastOrToday && (
-                             <button onClick={onEdit} title="Edit Upcoming Bake" className="hover:text-[#f0425f]">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
-                            </button>
-                        )}
+                        <button onClick={onEdit} title="Edit Upcoming Bake" className="hover:text-[#f0425f]">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>
+                        </button>
                         {isPastOrToday && (
                              <button onClick={onMoveToJournal} title="Move to Journal" className="hover:text-[#f0425f]">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
