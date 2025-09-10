@@ -12,7 +12,7 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
 
-    // Pre-fill the display name field when the component loads or when the profile updates
+    // All logic is preserved
     useEffect(() => {
         if (userProfile?.displayName) {
             setDisplayName(userProfile.displayName);
@@ -24,12 +24,10 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     const handleProfileUpdate = async (e) => {
         e.preventDefault();
         setProfileMessage('');
-
         if (displayName.trim() === '') {
             setProfileMessage('Name cannot be empty.');
             return;
         }
-
         try {
             await updateProfile(auth.currentUser, { displayName });
             await updateUserProfile({ displayName });
@@ -43,7 +41,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     const handlePasswordUpdate = async (e) => {
         e.preventDefault();
         setPasswordMessage('');
-
         if (newPassword.length < 6) {
             setPasswordMessage('Password must be at least 6 characters long.');
             return;
@@ -52,7 +49,6 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
             setPasswordMessage('Passwords do not match.');
             return;
         }
-
         try {
             await updatePassword(auth.currentUser, newPassword);
             setPasswordMessage('Password changed successfully!');
@@ -65,62 +61,60 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     };
 
     return (
-        <div className="p-4 md:p-6 bg-app-white min-h-full font-patrick-hand">
-            <div className="mb-8">
-                <h1 className="text-4xl font-bold text-burnt-orange">My Account</h1>
-            </div>
+        <div className="p-4 bg-[#fcf8f9] min-h-full font-sans">
+            <h1 className="text-3xl font-bold text-[#1b0d10] mb-6">My Account</h1>
 
-            <div className="space-y-10">
+            <div className="space-y-8">
                 {/* --- Profile Settings Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
-                    <h2 className="text-2xl font-bold text-add-idea mb-4">Profile Settings</h2>
-                    <form onSubmit={handleProfileUpdate} className="space-y-4 font-montserrat">
+                <section className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
+                    <h2 className="text-xl font-bold text-[#1b0d10] mb-4">Profile Settings</h2>
+                    <form onSubmit={handleProfileUpdate} className="space-y-4">
                         <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">Login Email</label>
-                            <p className="w-full p-3 bg-gray-200 text-gray-500 rounded-xl text-base">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Login Email</label>
+                            <p className="w-full h-12 px-4 flex items-center bg-gray-100 text-gray-500 rounded-full text-base">
                                 {user.email}
                             </p>
                         </div>
                         <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">Display Name</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Display Name</label>
                             <input 
                                 type="text"
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-xl text-base"
+                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
                             />
                         </div>
-                        <button type="submit" className="w-full bg-burnt-orange text-light-peach py-2 px-4 rounded-xl text-base font-semibold hover:opacity-90">Save Name</button>
-                        {profileMessage && <p className="text-center text-sm mt-2">{profileMessage}</p>}
+                        <button type="submit" className="w-full h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-base hover:opacity-90">Save Name</button>
+                        {profileMessage && <p className="text-center text-sm mt-2 text-gray-600">{profileMessage}</p>}
                     </form>
-                </div>
+                </section>
 
                 {/* --- Security Settings Section --- */}
-                <div className="bg-info-box p-6 rounded-2xl border border-burnt-orange">
-                    <h2 className="text-2xl font-bold text-add-idea mb-4">Change Password</h2>
-                    <form onSubmit={handlePasswordUpdate} className="space-y-4 font-montserrat">
+                <section className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
+                    <h2 className="text-xl font-bold text-[#1b0d10] mb-4">Change Password</h2>
+                    <form onSubmit={handlePasswordUpdate} className="space-y-4">
                         <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">New Password</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
                             <input 
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-xl text-base"
+                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
                             />
                         </div>
                          <div>
-                            <label className="block text-app-grey font-semibold mb-1 text-lg">Confirm New Password</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
                             <input 
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full p-3 border border-gray-300 rounded-xl text-base"
+                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
                             />
                         </div>
-                        <button type="submit" className="w-full bg-burnt-orange text-light-peach py-2 px-4 rounded-xl text-base font-semibold hover:opacity-90">Update Password</button>
-                        {passwordMessage && <p className="text-center text-sm mt-2">{passwordMessage}</p>}
+                        <button type="submit" className="w-full h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-base hover:opacity-90">Update Password</button>
+                        {passwordMessage && <p className="text-center text-sm mt-2 text-gray-600">{passwordMessage}</p>}
                     </form>
-                </div>
+                </section>
             </div>
         </div>
     );
