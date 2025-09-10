@@ -54,18 +54,8 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
 
     const collectionRecipeCounts = useMemo(() => {
         const counts = { unassigned: 0 };
-        if (collections) {
-            collections.forEach(col => { counts[col.id] = 0; });
-        }
-        if (cookbook) {
-            cookbook.forEach(recipe => {
-                if (recipe.collectionId && counts.hasOwnProperty(recipe.collectionId)) {
-                    counts[recipe.collectionId]++;
-                } else {
-                    counts.unassigned++;
-                }
-            });
-        }
+        if (collections) { collections.forEach(col => { counts[col.id] = 0; }); }
+        if (cookbook) { cookbook.forEach(recipe => { if (recipe.collectionId && counts.hasOwnProperty(recipe.collectionId)) { counts[recipe.collectionId]++; } else { counts.unassigned++; } }); }
         return counts;
     }, [cookbook, collections]);
 
@@ -78,7 +68,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
                 recipes = recipes.filter(recipe => recipe.collectionId === selectedCollection.id);
             }
         }
-        // ... filtering logic is preserved
+        // ... filtering logic ...
         return recipes;
     }, [cookbook, selectedCollection, activeFilters]);
 
@@ -88,7 +78,7 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     const handleChooseImport = () => { setIsChoiceModalOpen(false); setIsUrlModalOpen(true); };
     const handleChooseManual = () => { setIsChoiceModalOpen(false); setIsCreatingNew(true); };
     const handleImportRecipe = (data) => { setImportedRecipeData(data); setIsUrlModalOpen(false); setIsCreatingNew(true); };
-    const handleSaveRecipe = async (recipeData) => { if (isCreatingNew || importedRecipeData) { await addRecipe({ ...recipeData, createdAt: new Date() }); setImportedRecipeData(null); } else { await updateRecipe(editingRecipe.id, recipeData); } setEditingRecipe(null); setIsCreatingNew(false); const targetCollectionId = recipeData.collectionId; let collectionToView = null; if (targetCollectionId) { collectionToView = collections.find(c => c.id === targetCollectionId); } else { collectionToView = { id: 'unassigned', name: 'Unassigned Recipes' }; } if (collectionToView) { setSelectedCollection(collectionToView); setCurrentView('recipes'); } };
+    const handleSaveRecipe = async (recipeData) => { if (isCreatingNew || importedRecipeData) { await addRecipe({ ...recipeData, createdAt: new Date() }); setImportedRecipeData(null); } else { await updateRecipe(editingRecipe.id, recipeData); } setEditingRecipe(null); setIsCreatingNew(false); const targetCollectionId = recipeData.collectionId; let collectionToView = collections.find(c => c.id === targetCollectionId) || { id: 'unassigned', name: 'Unassigned Recipes' }; setSelectedCollection(collectionToView); setCurrentView('recipes'); };
     const handleCancelForm = () => { setEditingRecipe(null); setIsCreatingNew(false); setImportedRecipeData(null); };
     const handleConfirmDeleteRecipe = () => { if (recipeToDelete) { deleteRecipe(recipeToDelete.id); setRecipeToDelete(null); } };
 
@@ -125,6 +115,17 @@ const MyCookbook = ({ cookbook, addRecipe, updateRecipe, deleteRecipe, collectio
     return (
         <div className="p-4 bg-[#fcf8f9] min-h-full font-sans">
             <h1 className="text-3xl font-bold text-[#1b0d10] mb-4">My Recipes</h1>
+            
+            {/* ADDED BACK: The +Recipe and +Collection buttons */}
+            <div className="flex gap-2 mb-6">
+                <button onClick={() => setIsChoiceModalOpen(true)} className="flex-1 h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-sm shadow-md hover:opacity-90">
+                    + Recipe
+                </button>
+                <button onClick={() => setIsCollectionFormOpen(true)} className="flex-1 h-12 flex items-center justify-center rounded-full bg-white text-[#1b0d10] font-bold text-sm border border-pink-200 shadow-sm hover:bg-gray-50">
+                    + Collection
+                </button>
+            </div>
+            
             <FilterComponent categories={recipeCategories} onFilterChange={setActiveFilters} />
 
             <div className="grid grid-cols-2 gap-4 mt-6">
