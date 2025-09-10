@@ -46,7 +46,7 @@ const BakingCalendar = ({
         setCurrentDate(prevDate => new Date(prevDate.getFullYear(), prevDate.getMonth() + 1, 1));
     };
 
-    // THE FIX: This function now has the correct logic
+    // THE FIX: This function now correctly opens the right modal for each case
     const handleDayClick = (day) => {
         const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
         const dateString = fullDate.toDateString();
@@ -54,10 +54,10 @@ const BakingCalendar = ({
         const upcomingBake = upcomingBakeDaysMap.get(dateString);
 
         if (pastBake) {
-            // If a past bake exists (even if there's also an upcoming one), show the combined/past bake modal
+            // If a past bake exists, always open the detailed ViewBakeModal
             onViewBake({ past: pastBake, upcoming: upcomingBake });
         } else if (upcomingBake) {
-            // If ONLY an upcoming bake exists, show the upcoming bake modal
+            // If ONLY an upcoming bake exists, open the simple ViewUpcomingBakeModal
             onViewUpcomingBake(upcomingBake);
         }
     };
