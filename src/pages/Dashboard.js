@@ -17,11 +17,10 @@ const Dashboard = ({
     setDateFilter, 
     openScheduleModal,
     upcomingBakes, 
-    updateUpcomingBake,
-    cookbook // --- THIS PROP IS THE FIX ---
+    updateUpcomingBake
 }) => {
     
-    // State for viewing/editing modals that are triggered from THIS page
+    // State for viewing/editing modals that are triggered from this page
     const [bakeToView, setBakeToView] = useState(null);
     const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
@@ -32,7 +31,7 @@ const Dashboard = ({
     const [showConfirmation, setShowConfirmation] = useState({ journal: false, idea: false });
     const [inspiredBy, setInspiredBy] = useState('');
 
-    // --- All handler functions are fully implemented ---
+    // --- Handler functions ---
 
     const handleViewBake = (pastBake, upcomingBake) => setBakeToView({ past: pastBake, upcoming: upcomingBake });
     const handleEditFromView = (bake, isUpcoming = false) => { 
