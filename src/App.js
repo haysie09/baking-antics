@@ -128,17 +128,24 @@ const MainApp = ({ user }) => {
         <div className="bg-app-white text-app-grey">
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
+                    
+                    {/* UPDATED: Header is now styled with the new theme */}
                     {view === 'dashboard' && (
-                        <header className="bg-[#fcf8f9] sticky top-0 z-30">
+                        <header className="bg-[#fcf8f9] sticky top-0 z-30 font-sans border-b border-pink-100">
                             <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
                                 <button onClick={() => navigate('account')} className="text-[#1b0d10] hover:text-[#f0425f]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                    </svg>
                                 </button>
-                                <div className="text-3xl font-bold text-[#f0425f] font-patrick-hand" style={{ WebkitTextStroke: '1px #4d3232' }}>Baking Antics</div>
-                                <div className="w-8"></div>
+                                <div className="text-xl font-bold text-[#f0425f]">
+                                    Baking Antics
+                                </div>
+                                <div className="w-7"></div>
                             </nav>
                         </header>
                     )}
+                    
                     <main className="flex-grow overflow-y-auto bg-app-white pb-24">{renderView()}</main>
 
                     {/* --- ALL MODALS RENDERED HERE --- */}
