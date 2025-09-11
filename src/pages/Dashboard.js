@@ -102,7 +102,8 @@ const Dashboard = ({
                 openScheduleModal={openScheduleModal}
             />
 
-            <div className="p-4 space-y-8">
+            {/* --- STYLING UPDATED --- */}
+            <div className="p-4 space-y-8 bg-[var(--background-color)] -mt-4 rounded-t-2xl relative z-0">
                 <section>
                     <h2 className="text-[var(--text-primary)] text-2xl font-bold mb-4">What Should I Bake?</h2>
                     <div className="rounded-xl bg-white shadow-sm overflow-hidden p-4">
@@ -166,3 +167,4 @@ const Dashboard = ({
 };
 
 export default Dashboard;
+
