@@ -6,7 +6,6 @@ import { auth } from './firebase/config';
 import LoadingSpinner from './components/LoadingSpinner';
 import BottomNav from './components/BottomNav';
 import CreateNewModal from './components/CreateNewModal';
-// import MoveToJournalModal from './components/MoveToJournalModal'; // <-- 1. REMOVED old modal import
 import ViewBakeModal from './components/ViewBakeModal';
 import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
 import ConfirmationModal from './components/ConfirmationModal';
@@ -58,12 +57,9 @@ const MainApp = ({ user }) => {
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
     const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
-    // const [bakeToMove, setBakeToMove] = useState(null); // <-- 2. REMOVED old state
     const [bakeToView, setBakeToView] = useState(null);
     const [entryToEdit, setEntryToEdit] = useState(null);
     const [bakeToDelete, setBakeToDelete] = useState(null);
-    
-    // <-- 3. ADD new state for opening the journal form with bake data
     const [bakeToJournal, setBakeToJournal] = useState(null);
 
     const handleSignOut = () => signOut(auth);
@@ -73,8 +69,6 @@ const MainApp = ({ user }) => {
     const openIdeaModal = () => { setIsCreateModalOpen(false); setIsAddIdeaModalOpen(true); };
     const openBakeModal = () => { setIsCreateModalOpen(false); setIsAddJournalModalOpen(true); };
     const openScheduleModal = () => { setIsCreateModalOpen(false); setIsAddUpcomingBakeModalOpen(true); };
-
-    // const handleConfirmMoveToJournal = async (bake) => { ... }; // <-- 4. REMOVED old handler function
 
     const handleUpdateJournalAndClose = async (id, data) => {
         await updateJournalEntry(id, data);
@@ -97,18 +91,14 @@ const MainApp = ({ user }) => {
         setBakeToDelete(null); 
     };
 
-    // <-- 5. ADD new handlers for the "Move to Journal" workflow
     const handleMoveToJournalInitiate = (bake) => {
         setBakeToJournal(bake);
-        setUpcomingBakeToView(null); // Close the details modal
+        setUpcomingBakeToView(null);
     };
 
     const handleSaveBakeToJournal = async (journalData) => {
-        // First, add the new journal entry
         await addJournalEntry(journalData);
-        // Then, delete the original upcoming bake
         await deleteUpcomingBake(bakeToJournal.id);
-        // Finally, close the form
         setBakeToJournal(null);
     };
 
@@ -121,7 +111,6 @@ const MainApp = ({ user }) => {
             case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
                 return <Dashboard 
-                    // ... other props are unchanged
                     setView={setView} 
                     ideaPad={ideaPad} 
                     addJournalEntry={addJournalEntry} 
@@ -133,7 +122,6 @@ const MainApp = ({ user }) => {
                     upcomingBakes={upcomingBakes} 
                     updateUpcomingBake={updateUpcomingBake} 
                     deleteUpcomingBake={deleteUpcomingBake}
-                    // setBakeToMove={setBakeToMove} // This prop is no longer needed
                     cookbook={cookbook}
                     openAddChoiceModal={openBakeModal}
                     setBakeToView={setBakeToView}
@@ -150,7 +138,6 @@ const MainApp = ({ user }) => {
                     
                     {view === 'dashboard' && (
                         <header className="bg-[#fcf8f9] sticky top-0 z-30 font-sans border-b border-pink-100">
-                           {/* Header content is unchanged */}
                             <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
                                 <button onClick={() => navigate('account')} className="text-[#1b0d10] hover:text-[#f0425f]">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -182,27 +169,24 @@ const MainApp = ({ user }) => {
                             onClose={() => setUpcomingBakeToView(null)}
                             onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
                             onDelete={() => handleDeleteInitiate(upcomingBakeToView)}
-                            // <-- 6. UPDATE this line to call the new "initiate" function
                             onMoveToJournal={() => handleMoveToJournalInitiate(upcomingBakeToView)}
                         />
                     )}
-
-                    {/* {bakeToMove && ( ... )} */} {/* <-- 7. REMOVED the old MoveToJournalModal */}
 
                     {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
                     
                     {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
 
-                    {/* <-- 8. ADD the new JournalEntryForm render logic */}
                     {bakeToJournal && (() => {
-                        // This function transforms the bake data into the format the journal form expects
+                        // This robustly creates a JS Date object regardless of the source format
+                        const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate);
+
                         const journalEntryData = {
                             entryTitle: bakeToJournal.bakeName || '',
-                            // Convert Firestore Timestamp to YYYY-MM-DD string for the date input
-                            bakingDate: new Date(bakeToJournal.bakeDate.toDate()).toISOString().split('T')[0],
+                            // <-- THE FIX: Use the safe bakeDateObject for conversion
+                            bakingDate: bakeDateObject.toISOString().split('T')[0],
                             personalNotes: bakeToJournal.personalNotes || '',
                             sourceURL: bakeToJournal.link || '',
-                            // Default values for new ratings
                             tasteRating: 0,
                             difficultyRating: 0,
                             photoURLs: [],
@@ -215,7 +199,7 @@ const MainApp = ({ user }) => {
                                 onSave={handleSaveBakeToJournal}
                                 onCancel={() => setBakeToJournal(null)}
                                 cookbook={cookbook}
-                                isNew={true} // Treat this as a new entry
+                                isNew={true}
                             />
                         );
                     })()}
