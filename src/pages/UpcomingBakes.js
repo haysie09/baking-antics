@@ -48,7 +48,8 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
     const displayedBakes = isListExpanded ? sortedBakes : sortedBakes.slice(0, 3);
 
     return (
-        <section className="bg-[var(--upcoming-bg)] p-4 pt-0">
+        /* --- THIS IS THE ONLY LINE THAT CHANGED --- */
+        <section className="bg-[var(--upcoming-bg)] p-4 pt-0 pb-8">
             <h2 className="text-white text-2xl font-bold mb-4">Upcoming Bakes</h2>
             
             {sortedBakes.length > 0 ? (
@@ -82,3 +83,4 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
 };
 
 export default UpcomingBakes;
+
