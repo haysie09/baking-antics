@@ -6,16 +6,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // --- NEW COLORS FROM YOUR DESIGN ---
-        'primary-color': '#f0425f',
-        'secondary-color': '#f3e7e9',
-        'text-primary': '#1b0d10',
-        'text-secondary': '#9a4c59',
-        'background-color': '#fcf8f9',
-        'upcoming-bg': '#f8b4c0',
-        'upcoming-card-bg': '#fde0e5',
-
-        // --- Existing colors are kept ---
         'app-white': '#FFFFFF',
         'info-box': '#fff7f5',
         'app-grey': '#333333',

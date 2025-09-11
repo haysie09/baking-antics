@@ -19,13 +19,13 @@ const getDaysUntil = (date) => {
 const BakeItem = ({ bake, onViewDetails }) => (
     <div className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
         <div className="flex justify-between items-center mb-2">
-            <p className="text-text-primary text-lg font-semibold truncate pr-4">{bake.bakeName}</p>
-            <p className="text-primary-color text-base font-bold flex-shrink-0">{getDaysUntil(bake.bakeDate)}</p>
+            <p className="text-[var(--text-primary)] text-lg font-semibold truncate pr-4">{bake.bakeName}</p>
+            <p className="text-[var(--primary-color)] text-base font-bold flex-shrink-0">{getDaysUntil(bake.bakeDate)}</p>
         </div>
         <div>
             <button 
                 onClick={() => onViewDetails(bake)}
-                className="text-xs font-bold text-white bg-[#f8a5b3] hover:bg-primary-color py-1 px-3 rounded-full transition-colors"
+                className="text-xs font-bold text-white bg-[#f8a5b3] hover:bg-[var(--primary-color)] py-1 px-3 rounded-full transition-colors"
             >
                 View Details
             </button>
@@ -48,7 +48,7 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
     const displayedBakes = isListExpanded ? sortedBakes : sortedBakes.slice(0, 3);
 
     return (
-        <section className="bg-upcoming-bg p-4 pt-0">
+        <section className="bg-[var(--upcoming-bg)] p-4 pt-0">
             <h2 className="text-white text-2xl font-bold mb-4">Upcoming Bakes</h2>
             
             {sortedBakes.length > 0 ? (
@@ -66,12 +66,12 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
                     )}
                 </div>
             ) : (
-                <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-pink-200 px-6 py-14 bg-upcoming-card-bg shadow-sm">
-                    <p className="text-text-primary text-lg font-bold">No upcoming bakes</p>
-                    <p className="text-text-secondary text-sm font-normal">Schedule your next bake to see it here.</p>
+                <div className="flex flex-col items-center gap-4 rounded-xl border-2 border-dashed border-pink-200 px-6 py-14 bg-[var(--upcoming-card-bg)] shadow-sm">
+                    <p className="text-[var(--text-primary)] text-lg font-bold">No upcoming bakes</p>
+                    <p className="text-[var(--text-secondary)] text-sm font-normal">Schedule your next bake to see it here.</p>
                     <button 
                         onClick={openScheduleModal}
-                        className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-primary-color text-white text-sm font-bold shadow-md hover:bg-opacity-90 transition-all"
+                        className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-[var(--primary-color)] text-white text-sm font-bold shadow-md hover:bg-opacity-90 transition-all"
                     >
                         Schedule Bake
                     </button>
