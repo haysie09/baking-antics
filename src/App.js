@@ -6,10 +6,10 @@ import { auth } from './firebase/config';
 import LoadingSpinner from './components/LoadingSpinner';
 import BottomNav from './components/BottomNav';
 import CreateNewModal from './components/CreateNewModal';
-import MoveToJournalModal from './components/MoveToJournalModal';
+// import MoveToJournalModal from './components/MoveToJournalModal'; // <-- 1. REMOVED old modal import
 import ViewBakeModal from './components/ViewBakeModal';
 import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
-import ConfirmationModal from './components/ConfirmationModal'; // <-- 1. IMPORT a new component
+import ConfirmationModal from './components/ConfirmationModal';
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -58,12 +58,13 @@ const MainApp = ({ user }) => {
     const [isAddUpcomingBakeModalOpen, setIsAddUpcomingBakeModalOpen] = useState(false);
     const [upcomingBakeToView, setUpcomingBakeToView] = useState(null);
     const [upcomingBakeToEdit, setUpcomingBakeToEdit] = useState(null);
-    const [bakeToMove, setBakeToMove] = useState(null);
+    // const [bakeToMove, setBakeToMove] = useState(null); // <-- 2. REMOVED old state
     const [bakeToView, setBakeToView] = useState(null);
     const [entryToEdit, setEntryToEdit] = useState(null);
-    
-    // <-- 2. ADD new state for the delete confirmation
     const [bakeToDelete, setBakeToDelete] = useState(null);
+    
+    // <-- 3. ADD new state for opening the journal form with bake data
+    const [bakeToJournal, setBakeToJournal] = useState(null);
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
@@ -73,33 +74,13 @@ const MainApp = ({ user }) => {
     const openBakeModal = () => { setIsCreateModalOpen(false); setIsAddJournalModalOpen(true); };
     const openScheduleModal = () => { setIsCreateModalOpen(false); setIsAddUpcomingBakeModalOpen(true); };
 
-    const handleConfirmMoveToJournal = async (bake) => {
-        if (!bake) return;
-        const newEntryData = {
-            entryTitle: bake.bakeName || bake.title,
-            bakingDate: bake.bakeDate,
-            personalNotes: bake.notes || '',
-            sourceURL: bake.link || '',
-            createdAt: new Date(),
-            tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: [],
-        };
-        const newEntry = await addJournalEntry(newEntryData);
-        await deleteUpcomingBake(bake.id);
-        
-        setBakeToMove(null);
-        setUpcomingBakeToView(null);
-        setBakeToView(null);
-        if (newEntry) {
-            setEntryToEdit(newEntry);
-        }
-    };
+    // const handleConfirmMoveToJournal = async (bake) => { ... }; // <-- 4. REMOVED old handler function
 
     const handleUpdateJournalAndClose = async (id, data) => {
         await updateJournalEntry(id, data);
         setEntryToEdit(null);
     };
 
-    // <-- 3. ADD three new handler functions for the delete workflow
     const handleDeleteInitiate = (bake) => {
         setBakeToDelete(bake);
     };
@@ -108,13 +89,29 @@ const MainApp = ({ user }) => {
         if (bakeToDelete) {
             await deleteUpcomingBake(bakeToDelete.id);
             setBakeToDelete(null);
-            setUpcomingBakeToView(null); // Close the details modal as well
+            setUpcomingBakeToView(null); 
         }
     };
 
     const handleDeleteCancel = () => {
-        setBakeToDelete(null); // Just close the confirmation
+        setBakeToDelete(null); 
     };
+
+    // <-- 5. ADD new handlers for the "Move to Journal" workflow
+    const handleMoveToJournalInitiate = (bake) => {
+        setBakeToJournal(bake);
+        setUpcomingBakeToView(null); // Close the details modal
+    };
+
+    const handleSaveBakeToJournal = async (journalData) => {
+        // First, add the new journal entry
+        await addJournalEntry(journalData);
+        // Then, delete the original upcoming bake
+        await deleteUpcomingBake(bakeToJournal.id);
+        // Finally, close the form
+        setBakeToJournal(null);
+    };
+
 
     const renderView = () => {
         switch (view) {
@@ -124,6 +121,7 @@ const MainApp = ({ user }) => {
             case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
             default:
                 return <Dashboard 
+                    // ... other props are unchanged
                     setView={setView} 
                     ideaPad={ideaPad} 
                     addJournalEntry={addJournalEntry} 
@@ -135,7 +133,7 @@ const MainApp = ({ user }) => {
                     upcomingBakes={upcomingBakes} 
                     updateUpcomingBake={updateUpcomingBake} 
                     deleteUpcomingBake={deleteUpcomingBake}
-                    setBakeToMove={setBakeToMove}
+                    // setBakeToMove={setBakeToMove} // This prop is no longer needed
                     cookbook={cookbook}
                     openAddChoiceModal={openBakeModal}
                     setBakeToView={setBakeToView}
@@ -152,6 +150,7 @@ const MainApp = ({ user }) => {
                     
                     {view === 'dashboard' && (
                         <header className="bg-[#fcf8f9] sticky top-0 z-30 font-sans border-b border-pink-100">
+                           {/* Header content is unchanged */}
                             <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
                                 <button onClick={() => navigate('account')} className="text-[#1b0d10] hover:text-[#f0425f]">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,68 +174,53 @@ const MainApp = ({ user }) => {
                     {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
                     {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
                     
-                    {bakeToView && (
-                        <ViewBakeModal
-                            bake={bakeToView.past}
-                            upcomingBake={bakeToView.upcoming}
-                            onClose={() => setBakeToView(null)}
-                            onEdit={(bake, isUpcoming) => {
-                                if (isUpcoming) {
-                                    setUpcomingBakeToEdit(bake);
-                                } else {
-                                    setEntryToEdit(bake);
-                                }
-                                setBakeToView(null);
-                            }}
-                            onDeleteUpcoming={(bakeId) => { deleteUpcomingBake(bakeId); setBakeToView(null); }}
-                            onMoveToJournal={(bake) => { setBakeToMove(bake); setBakeToView(null); }}
-                        />
-                    )}
+                    {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={(bake, isUpcoming) => { if (isUpcoming) { setUpcomingBakeToEdit(bake); } else { setEntryToEdit(bake); } setBakeToView(null); }} onDeleteUpcoming={(bakeId) => { deleteUpcomingBake(bakeId); setBakeToView(null); }} onMoveToJournal={(bake) => { handleMoveToJournalInitiate(bake); setBakeToView(null); }} /> )}
 
                     {upcomingBakeToView && (
                         <ViewUpcomingBakeModal 
                             bake={upcomingBakeToView}
                             onClose={() => setUpcomingBakeToView(null)}
                             onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
-                            // <-- 4. UPDATE this line to call the new confirmation function
                             onDelete={() => handleDeleteInitiate(upcomingBakeToView)}
-                            onMoveToJournal={() => { setBakeToMove(upcomingBakeToView); setUpcomingBakeToView(null); }}
+                            // <-- 6. UPDATE this line to call the new "initiate" function
+                            onMoveToJournal={() => handleMoveToJournalInitiate(upcomingBakeToView)}
                         />
                     )}
 
-                    {bakeToMove && (
-                        <MoveToJournalModal
-                            bake={bakeToMove}
-                            onConfirm={() => handleConfirmMoveToJournal(bakeToMove)}
-                            onCancel={() => setBakeToMove(null)}
-                        />
-                    )}
+                    {/* {bakeToMove && ( ... )} */} {/* <-- 7. REMOVED the old MoveToJournalModal */}
 
-                    {entryToEdit && (
-                        <JournalEntryForm
-                            entry={entryToEdit}
-                            onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)}
-                            onCancel={() => setEntryToEdit(null)}
-                            cookbook={cookbook}
-                        />
-                    )}
+                    {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
                     
-                    {/* <-- 5. ADD the ConfirmationModal to the JSX */}
-                    {bakeToDelete && (
-                        <ConfirmationModal
-                            message={`Delete "${bakeToDelete.bakeName}"?`}
-                            onConfirm={handleDeleteConfirm}
-                            onCancel={handleDeleteCancel}
-                        />
-                    )}
+                    {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
 
-                    {isCreateModalOpen && <CreateNewModal 
-                        onClose={() => setIsCreateModalOpen(false)}
-                        onAddRecipe={openRecipeModal}
-                        onAddIdea={openIdeaModal}
-                        onAddBake={openBakeModal}
-                        onScheduleBake={openScheduleModal}
-                    />}
+                    {/* <-- 8. ADD the new JournalEntryForm render logic */}
+                    {bakeToJournal && (() => {
+                        // This function transforms the bake data into the format the journal form expects
+                        const journalEntryData = {
+                            entryTitle: bakeToJournal.bakeName || '',
+                            // Convert Firestore Timestamp to YYYY-MM-DD string for the date input
+                            bakingDate: new Date(bakeToJournal.bakeDate.toDate()).toISOString().split('T')[0],
+                            personalNotes: bakeToJournal.personalNotes || '',
+                            sourceURL: bakeToJournal.link || '',
+                            // Default values for new ratings
+                            tasteRating: 0,
+                            difficultyRating: 0,
+                            photoURLs: [],
+                            categories: bakeToJournal.categories || [],
+                        };
+
+                        return (
+                            <JournalEntryForm
+                                entry={journalEntryData}
+                                onSave={handleSaveBakeToJournal}
+                                onCancel={() => setBakeToJournal(null)}
+                                cookbook={cookbook}
+                                isNew={true} // Treat this as a new entry
+                            />
+                        );
+                    })()}
+
+                    {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openRecipeModal} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
                     
                     <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
                 </div>
