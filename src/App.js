@@ -67,14 +67,13 @@ const MainApp = ({ user }) => {
     const [bakeToJournal, setBakeToJournal] = useState(null);
     const [isAddRecipeChoiceModalOpen, setIsAddRecipeChoiceModalOpen] = useState(false);
     const [isAddFromURLModalOpen, setIsAddFromURLModalOpen] = useState(false);
-    const [recipeToEdit, setRecipeToEdit] = useState(null); // New state for editing recipes
+    const [recipeToEdit, setRecipeToEdit] = useState(null); 
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
     
-    // This is the main function to start the add recipe flow
     const openAddRecipeFlow = () => {
-        setIsCreateModalOpen(false); // Ensure create modal is closed if open
+        setIsCreateModalOpen(false);
         setIsAddRecipeChoiceModalOpen(true);
     };
 
@@ -84,7 +83,7 @@ const MainApp = ({ user }) => {
 
     const handleOpenManualRecipeForm = () => {
         setIsAddRecipeChoiceModalOpen(false);
-        setRecipeToEdit(null); // Ensure we're not in edit mode
+        setRecipeToEdit(null);
         setIsAddRecipeModalOpen(true);
     };
 
@@ -93,9 +92,18 @@ const MainApp = ({ user }) => {
         setIsAddFromURLModalOpen(true);
     };
     
+    // <-- UPDATED: This function now opens the edit form after import
     const handleSaveFromURL = async (recipeData) => {
-        await addRecipe(recipeData);
+        // Add the recipe to the database and get the newly created document back
+        const newRecipe = await addRecipe(recipeData);
+        // Close the URL import modal
         setIsAddFromURLModalOpen(false);
+
+        // If the recipe was created successfully, open it in the edit form
+        if (newRecipe) {
+            setRecipeToEdit(newRecipe); // Set the new recipe as the one to edit
+            setIsAddRecipeModalOpen(true); // Open the CookbookForm
+        }
     };
 
     const handleEditRecipe = (recipe) => {
@@ -112,8 +120,7 @@ const MainApp = ({ user }) => {
         setIsAddRecipeModalOpen(false);
         setRecipeToEdit(null);
     };
-
-    // --- Other handlers remain unchanged ---
+    
     const handleUpdateJournalAndClose = async (id, data) => { await updateJournalEntry(id, data); setEntryToEdit(null); };
     const handleDeleteInitiate = (bake) => { setBakeToDelete(bake); };
     const handleDeleteConfirm = async () => { if (bakeToDelete) { await deleteUpcomingBake(bakeToDelete.id); setBakeToDelete(null); setUpcomingBakeToView(null); } };
@@ -135,7 +142,6 @@ const MainApp = ({ user }) => {
                     addCollection={addCollection} 
                     updateCollection={updateCollection} 
                     deleteCollection={deleteCollection} 
-                    // Pass the new global functions as props
                     onAddRecipe={openAddRecipeFlow}
                     onEditRecipe={handleEditRecipe}
                 />;
@@ -160,16 +166,7 @@ const MainApp = ({ user }) => {
                     {/* --- ALL MODALS RENDERED HERE --- */}
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                     {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
-                    
-                    {/* Updated CookbookForm to handle both New and Edit states */}
-                    {isAddRecipeModalOpen && <CookbookForm 
-                        isNew={!recipeToEdit}
-                        initialData={recipeToEdit}
-                        collections={collections} 
-                        onSave={handleSaveRecipe}
-                        onCancel={() => { setIsAddRecipeModalOpen(false); setRecipeToEdit(null); }} 
-                    />}
-
+                    {isAddRecipeModalOpen && <CookbookForm isNew={!recipeToEdit} initialData={recipeToEdit} collections={collections} onSave={handleSaveRecipe} onCancel={() => { setIsAddRecipeModalOpen(false); setRecipeToEdit(null); }} />}
                     {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
                     {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
                     {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={(bake, isUpcoming) => { if (isUpcoming) { setUpcomingBakeToEdit(bake); } else { setEntryToEdit(bake); } setBakeToView(null); }} onDeleteUpcoming={(bakeId) => { deleteUpcomingBake(bakeId); setBakeToView(null); }} onMoveToJournal={(bake) => { handleMoveToJournalInitiate(bake); setBakeToView(null); }} /> )}
@@ -177,11 +174,9 @@ const MainApp = ({ user }) => {
                     {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
                     {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
                     {bakeToJournal && (() => { const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate); const journalEntryData = { entryTitle: bakeToJournal.bakeName || '', bakingDate: bakeDateObject.toISOString().split('T')[0], personalNotes: bakeToJournal.personalNotes || '', sourceURL: bakeToJournal.link || '', tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: bakeToJournal.categories || [], }; return ( <JournalEntryForm entry={journalEntryData} onSave={handleSaveBakeToJournal} onCancel={() => setBakeToJournal(null)} cookbook={cookbook} isNew={true} /> ); })()}
-                    
                     {isAddRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onManual={handleOpenManualRecipeForm} onImport={handleOpenURLImportModal} onCancel={() => setIsAddRecipeChoiceModalOpen(false)} /> )}
-                    {isAddFromURLModalOpen && ( <AddFromURLModal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
+                    {isAddFromURLModalOpen && ( <AddFromURL-Modal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
                     {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openAddRecipeFlow} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
-                    
                     <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
                 </div>
             </div>
