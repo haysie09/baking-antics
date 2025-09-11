@@ -9,6 +9,8 @@ import CreateNewModal from './components/CreateNewModal';
 import ViewBakeModal from './components/ViewBakeModal';
 import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
 import ConfirmationModal from './components/ConfirmationModal';
+import AddRecipeChoiceModal from './components/AddRecipeChoiceModal'; // <-- 1. IMPORT new modals
+import AddFromURLModal from './components/AddFromURLModal';       // <-- 1. IMPORT new modals
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -62,23 +64,46 @@ const MainApp = ({ user }) => {
     const [bakeToDelete, setBakeToDelete] = useState(null);
     const [bakeToJournal, setBakeToJournal] = useState(null);
 
+    // <-- 2. ADD state for new modals
+    const [isAddRecipeChoiceModalOpen, setIsAddRecipeChoiceModalOpen] = useState(false);
+    const [isAddFromURLModalOpen, setIsAddFromURLModalOpen] = useState(false);
+
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
+    
+    // <-- 3. UPDATE this function to open the new choice modal
+    const openRecipeModal = () => { 
+        setIsCreateModalOpen(false); 
+        setIsAddRecipeChoiceModalOpen(true); 
+    };
 
-    const openRecipeModal = () => { setIsCreateModalOpen(false); setIsAddRecipeModalOpen(true); };
     const openIdeaModal = () => { setIsCreateModalOpen(false); setIsAddIdeaModalOpen(true); };
     const openBakeModal = () => { setIsCreateModalOpen(false); setIsAddJournalModalOpen(true); };
     const openScheduleModal = () => { setIsCreateModalOpen(false); setIsAddUpcomingBakeModalOpen(true); };
 
+    // <-- 4. ADD new handlers for the choice modal's buttons
+    const handleOpenManualRecipeForm = () => {
+        setIsAddRecipeChoiceModalOpen(false);
+        setIsAddRecipeModalOpen(true); // This opens the existing CookbookForm
+    };
+
+    const handleOpenURLImportModal = () => {
+        setIsAddRecipeChoiceModalOpen(false);
+        setIsAddFromURLModalOpen(true);
+    };
+    
+    // This handler saves the recipe after it's been fetched from a URL
+    const handleSaveFromURL = async (recipeData) => {
+        await addRecipe(recipeData);
+        setIsAddFromURLModalOpen(false);
+    };
+
+    // --- All other handlers are unchanged ---
     const handleUpdateJournalAndClose = async (id, data) => {
         await updateJournalEntry(id, data);
         setEntryToEdit(null);
     };
-
-    const handleDeleteInitiate = (bake) => {
-        setBakeToDelete(bake);
-    };
-
+    const handleDeleteInitiate = (bake) => { setBakeToDelete(bake); };
     const handleDeleteConfirm = async () => {
         if (bakeToDelete) {
             await deleteUpcomingBake(bakeToDelete.id);
@@ -86,16 +111,11 @@ const MainApp = ({ user }) => {
             setUpcomingBakeToView(null); 
         }
     };
-
-    const handleDeleteCancel = () => {
-        setBakeToDelete(null); 
-    };
-
+    const handleDeleteCancel = () => { setBakeToDelete(null); };
     const handleMoveToJournalInitiate = (bake) => {
         setBakeToJournal(bake);
         setUpcomingBakeToView(null);
     };
-
     const handleSaveBakeToJournal = async (journalData) => {
         await addJournalEntry(journalData);
         await deleteUpcomingBake(bakeToJournal.id);
@@ -104,6 +124,7 @@ const MainApp = ({ user }) => {
 
 
     const renderView = () => {
+        // ... switch statement is unchanged
         switch (view) {
             case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
@@ -135,22 +156,8 @@ const MainApp = ({ user }) => {
         <div className="bg-app-white text-app-grey">
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
-                    
-                    {view === 'dashboard' && (
-                        <header className="bg-[#fcf8f9] sticky top-0 z-30 font-sans border-b border-pink-100">
-                            <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
-                                <button onClick={() => navigate('account')} className="text-[#1b0d10] hover:text-[#f0425f]">
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                                    </svg>
-                                </button>
-                                <div className="text-xl font-bold text-[#f0425f]">
-                                    Baking Antics
-                                </div>
-                                <div className="w-7"></div>
-                            </nav>
-                        </header>
-                    )}
+                    {/* Header is unchanged */}
+                    {view === 'dashboard' && ( <header className="bg-[#fcf8f9] sticky top-0 z-30 font-sans border-b border-pink-100"> <nav className="container mx-auto px-4 py-3 flex justify-between items-center"> <button onClick={() => navigate('account')} className="text-[#1b0d10] hover:text-[#f0425f]"> <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"> <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /> </svg> </button> <div className="text-xl font-bold text-[#f0425f]"> Baking Antics </div> <div className="w-7"></div> </nav> </header> )}
                     
                     <main className="flex-grow overflow-y-auto bg-app-white pb-24">{renderView()}</main>
 
@@ -160,49 +167,26 @@ const MainApp = ({ user }) => {
                     {isAddRecipeModalOpen && <CookbookForm isNew={true} collections={collections} onSave={async (data) => { await addRecipe(data); setIsAddRecipeModalOpen(false);}} onCancel={() => setIsAddRecipeModalOpen(false)} />}
                     {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
                     {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
-                    
                     {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={(bake, isUpcoming) => { if (isUpcoming) { setUpcomingBakeToEdit(bake); } else { setEntryToEdit(bake); } setBakeToView(null); }} onDeleteUpcoming={(bakeId) => { deleteUpcomingBake(bakeId); setBakeToView(null); }} onMoveToJournal={(bake) => { handleMoveToJournalInitiate(bake); setBakeToView(null); }} /> )}
+                    {upcomingBakeToView && ( <ViewUpcomingBakeModal  bake={upcomingBakeToView} onClose={() => setUpcomingBakeToView(null)} onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }} onDelete={() => handleDeleteInitiate(upcomingBakeToView)} onMoveToJournal={() => handleMoveToJournalInitiate(upcomingBakeToView)} /> )}
+                    {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
+                    {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
+                    {bakeToJournal && (() => { const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate); const journalEntryData = { entryTitle: bakeToJournal.bakeName || '', bakingDate: bakeDateObject.toISOString().split('T')[0], personalNotes: bakeToJournal.personalNotes || '', sourceURL: bakeToJournal.link || '', tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: bakeToJournal.categories || [], }; return ( <JournalEntryForm entry={journalEntryData} onSave={handleSaveBakeToJournal} onCancel={() => setBakeToJournal(null)} cookbook={cookbook} isNew={true} /> ); })()}
 
-                    {upcomingBakeToView && (
-                        <ViewUpcomingBakeModal 
-                            bake={upcomingBakeToView}
-                            onClose={() => setUpcomingBakeToView(null)}
-                            onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
-                            onDelete={() => handleDeleteInitiate(upcomingBakeToView)}
-                            onMoveToJournal={() => handleMoveToJournalInitiate(upcomingBakeToView)}
+                    {/* <-- 5. RENDER the new modals in the JSX */}
+                    {isAddRecipeChoiceModalOpen && (
+                        <AddRecipeChoiceModal
+                            onManual={handleOpenManualRecipeForm}
+                            onImport={handleOpenURLImportModal}
+                            onCancel={() => setIsAddRecipeChoiceModalOpen(false)}
                         />
                     )}
-
-                    {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
-                    
-                    {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
-
-                    {bakeToJournal && (() => {
-                        // This robustly creates a JS Date object regardless of the source format
-                        const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate);
-
-                        const journalEntryData = {
-                            entryTitle: bakeToJournal.bakeName || '',
-                            // <-- THE FIX: Use the safe bakeDateObject for conversion
-                            bakingDate: bakeDateObject.toISOString().split('T')[0],
-                            personalNotes: bakeToJournal.personalNotes || '',
-                            sourceURL: bakeToJournal.link || '',
-                            tasteRating: 0,
-                            difficultyRating: 0,
-                            photoURLs: [],
-                            categories: bakeToJournal.categories || [],
-                        };
-
-                        return (
-                            <JournalEntryForm
-                                entry={journalEntryData}
-                                onSave={handleSaveBakeToJournal}
-                                onCancel={() => setBakeToJournal(null)}
-                                cookbook={cookbook}
-                                isNew={true}
-                            />
-                        );
-                    })()}
+                    {isAddFromURLModalOpen && (
+                        <AddFromURLModal
+                            onSave={handleSaveFromURL}
+                            onCancel={() => setIsAddFromURLModalOpen(false)}
+                        />
+                    )}
 
                     {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openRecipeModal} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
                     
