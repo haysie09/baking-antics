@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const AddFromURLModal = ({ onImport, onCancel }) => {
+const AddFromURLModal = ({ onSave, onCancel }) => {
     const [url, setUrl] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
@@ -14,11 +14,20 @@ const AddFromURLModal = ({ onImport, onCancel }) => {
         setIsLoading(true);
 
         try {
-            await onImport(url);
-            // Parent component will handle closing the modal on success
+            // This calls the Netlify function directly
+            const response = await fetch(`/.netlify/functions/fetch-recipe?url=${encodeURIComponent(url)}`);
+            if (!response.ok) {
+                // This will catch errors from the function itself (e.g., 404, 500)
+                throw new Error('Server responded with an error.');
+            }
+            const recipeData = await response.json();
+            
+            // Pass the successfully fetched data up to App.js to be saved
+            onSave({ ...recipeData, sourceURL: url });
+            
         } catch (err) {
-            // Use a more user-friendly generic error message
-            setError("We couldn't import that recipe. Please try another or add it manually.");
+            // The new friendly error message is here
+            setError("Sorry, we were unable to import from that website. Feel free to add the recipe manually and include the link for reference.");
             console.error(err); // Log the technical error for debugging
         } finally {
             setIsLoading(false);
