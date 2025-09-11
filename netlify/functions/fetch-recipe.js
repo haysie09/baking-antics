@@ -38,14 +38,9 @@ exports.handler = async function(event, context) {
         });
 
         const page = await browser.newPage();
-
-        // --- OPTIMIZATIONS ---
-        // 1. Set a realistic User-Agent to mimic a real browser
         await page.setUserAgent(
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         );
-
-        // 2. Block images and CSS to speed up loading
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if(['image', 'stylesheet', 'font'].includes(req.resourceType())){
@@ -55,20 +50,41 @@ exports.handler = async function(event, context) {
             }
         });
         
-        // 3. Go to the page with an increased timeout
         await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 25000 }); 
         const siteHtml = await page.content();
         if (!siteHtml) throw new Error("Failed to retrieve page content.");
 
-        // --- PROCESSING (Unchanged) ---
+        // <-- 1. START: Improved Scraping Logic
         const $ = cheerio.load(siteHtml);
-        const recipeContent = $('[itemtype*="schema.org/Recipe"]').html() || $('article.recipe').html() || $('body').text();
+
+        // Find the most relevant content by targeting specific classes
+        // These selectors are tailored for sites like Edmonds Cooking
+        const title = $('.recipe__header h1').text().trim();
+        const ingredients = $('.recipe__ingredients').text().trim();
+        const instructions = $('.recipe__instructions').text().trim();
+        
+        let recipeContent;
+
+        // Check if we found specific parts, otherwise fall back to a broader search
+        if (title && ingredients && instructions) {
+            recipeContent = `Title: ${title}\n\nIngredients:\n${ingredients}\n\nInstructions:\n${instructions}`;
+        } else {
+             // Fallback for other sites, try to find a main recipe container
+            recipeContent = $('[itemtype*="schema.org/Recipe"]').text() || $('article.recipe').text() || $('.recipe-container').text();
+            if (!recipeContent) {
+                // If all else fails, throw an error before calling the AI
+                 throw new Error("Could not find a valid recipe container on the page.");
+            }
+        }
+        
         const cleanedText = recipeContent.replace(/\s\s+/g, ' ').trim();
+        // <-- END: Improved Scraping Logic
 
         const payload = {
             contents: [{ 
                 parts: [{ 
-                    text: `From the following text, extract the recipe. Ensure the instructions are a simple array of strings, with each string being one step. Text: "${cleanedText}"` 
+                    // <-- 2. UPDATE: Slightly improved prompt for the AI
+                    text: `From the following text, extract the recipe title, ingredients, and instructions. Format the instructions as a simple array of strings, where each string is a single step. Here is the text: "${cleanedText}"` 
                 }] 
             }],
             generationConfig: {
@@ -101,7 +117,8 @@ exports.handler = async function(event, context) {
 
         const result = await callGemini(apiKey, payload);
         let recipeData = JSON.parse(result.candidates[0].content.parts[0].text);
-
+        
+        // Convert instructions array to a single string with newlines
         if (Array.isArray(recipeData.instructions)) {
             recipeData.instructions = recipeData.instructions.join('\n');
         }
