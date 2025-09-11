@@ -9,6 +9,7 @@ import CreateNewModal from './components/CreateNewModal';
 import MoveToJournalModal from './components/MoveToJournalModal';
 import ViewBakeModal from './components/ViewBakeModal';
 import ViewUpcomingBakeModal from './components/ViewUpcomingBakeModal';
+import ConfirmationModal from './components/ConfirmationModal'; // <-- 1. IMPORT a new component
 
 // --- Pages ---
 import AuthPage from './pages/AuthPage';
@@ -60,6 +61,9 @@ const MainApp = ({ user }) => {
     const [bakeToMove, setBakeToMove] = useState(null);
     const [bakeToView, setBakeToView] = useState(null);
     const [entryToEdit, setEntryToEdit] = useState(null);
+    
+    // <-- 2. ADD new state for the delete confirmation
+    const [bakeToDelete, setBakeToDelete] = useState(null);
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
@@ -93,6 +97,23 @@ const MainApp = ({ user }) => {
     const handleUpdateJournalAndClose = async (id, data) => {
         await updateJournalEntry(id, data);
         setEntryToEdit(null);
+    };
+
+    // <-- 3. ADD three new handler functions for the delete workflow
+    const handleDeleteInitiate = (bake) => {
+        setBakeToDelete(bake);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (bakeToDelete) {
+            await deleteUpcomingBake(bakeToDelete.id);
+            setBakeToDelete(null);
+            setUpcomingBakeToView(null); // Close the details modal as well
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setBakeToDelete(null); // Just close the confirmation
     };
 
     const renderView = () => {
@@ -129,7 +150,6 @@ const MainApp = ({ user }) => {
             <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                 <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
                     
-                    {/* UPDATED: Header is now styled with the new theme */}
                     {view === 'dashboard' && (
                         <header className="bg-[#fcf8f9] sticky top-0 z-30 font-sans border-b border-pink-100">
                             <nav className="container mx-auto px-4 py-3 flex justify-between items-center">
@@ -178,7 +198,8 @@ const MainApp = ({ user }) => {
                             bake={upcomingBakeToView}
                             onClose={() => setUpcomingBakeToView(null)}
                             onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }}
-                            onDelete={() => { deleteUpcomingBake(upcomingBakeToView.id); setUpcomingBakeToView(null); }}
+                            // <-- 4. UPDATE this line to call the new confirmation function
+                            onDelete={() => handleDeleteInitiate(upcomingBakeToView)}
                             onMoveToJournal={() => { setBakeToMove(upcomingBakeToView); setUpcomingBakeToView(null); }}
                         />
                     )}
@@ -197,6 +218,15 @@ const MainApp = ({ user }) => {
                             onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)}
                             onCancel={() => setEntryToEdit(null)}
                             cookbook={cookbook}
+                        />
+                    )}
+                    
+                    {/* <-- 5. ADD the ConfirmationModal to the JSX */}
+                    {bakeToDelete && (
+                        <ConfirmationModal
+                            message={`Delete "${bakeToDelete.bakeName}"?`}
+                            onConfirm={handleDeleteConfirm}
+                            onCancel={handleDeleteCancel}
                         />
                     )}
 
