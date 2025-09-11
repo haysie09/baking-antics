@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'; // Added useMemo
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { db, auth } from '../firebase/config';
 import { collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore';
 
@@ -22,8 +22,17 @@ export const useCookbook = () => {
         return () => unsub();
     }, [cookbookCol]);
 
+    // <-- UPDATED THIS FUNCTION -->
     const addRecipe = useCallback(async (recipe) => {
-        if (cookbookCol) await addDoc(cookbookCol, recipe);
+        if (cookbookCol) {
+            // Get the reference to the new document from the database
+            const docRef = await addDoc(cookbookCol, recipe);
+            // Create the full recipe object, including the new ID
+            const newRecipe = { id: docRef.id, ...recipe };
+            // Return the new recipe so App.js can use it
+            return newRecipe;
+        }
+        return null; // Return null if the operation fails
     }, [cookbookCol]);
 
     const updateRecipe = useCallback(async (id, recipe) => {
