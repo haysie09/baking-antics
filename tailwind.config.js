@@ -9,7 +9,7 @@ module.exports = {
         'app-white': '#FFFFFF',
         'info-box': '#fff7f5',
         'app-grey': '#333333',
-        'burnt-orange': '#ec967a',
+        'burnt-orange': '#f8b4c0',
         'light-peach': '#ffe9dd',
         'star-gold': '#ffca00',
         'confirm-bg': '#c7ebff',
