@@ -1,6 +1,4 @@
-// Filename: App.js
-
-import React, { useState, useEffect } from 'react';
+import React, 'useState', useEffect } from 'react';
 import { signOut } from 'firebase/auth';
 import { auth } from './firebase/config';
 
@@ -92,17 +90,12 @@ const MainApp = ({ user }) => {
         setIsAddFromURLModalOpen(true);
     };
     
-    // <-- UPDATED: This function now opens the edit form after import
     const handleSaveFromURL = async (recipeData) => {
-        // Add the recipe to the database and get the newly created document back
         const newRecipe = await addRecipe(recipeData);
-        // Close the URL import modal
         setIsAddFromURLModalOpen(false);
-
-        // If the recipe was created successfully, open it in the edit form
         if (newRecipe) {
-            setRecipeToEdit(newRecipe); // Set the new recipe as the one to edit
-            setIsAddRecipeModalOpen(true); // Open the CookbookForm
+            setRecipeToEdit(newRecipe);
+            setIsAddRecipeModalOpen(true);
         }
     };
 
@@ -175,7 +168,10 @@ const MainApp = ({ user }) => {
                     {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
                     {bakeToJournal && (() => { const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate); const journalEntryData = { entryTitle: bakeToJournal.bakeName || '', bakingDate: bakeDateObject.toISOString().split('T')[0], personalNotes: bakeToJournal.personalNotes || '', sourceURL: bakeToJournal.link || '', tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: bakeToJournal.categories || [], }; return ( <JournalEntryForm entry={journalEntryData} onSave={handleSaveBakeToJournal} onCancel={() => setBakeToJournal(null)} cookbook={cookbook} isNew={true} /> ); })()}
                     {isAddRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onManual={handleOpenManualRecipeForm} onImport={handleOpenURLImportModal} onCancel={() => setIsAddRecipeChoiceModalOpen(false)} /> )}
-                    {isAddFromURLModalOpen && ( <AddFromURL-Modal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
+                    
+                    {/* <-- FIXED: Removed hyphen from component name --> */}
+                    {isAddFromURLModalOpen && ( <AddFromURLModal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
+
                     {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openAddRecipeFlow} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
                     <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
                 </div>
