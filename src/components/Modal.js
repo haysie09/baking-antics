@@ -1,5 +1,3 @@
-// Filename: src/components/Modal.js
-
 import React from 'react';
 
 const Modal = ({ children, onClose, size = 'md', showFooter = true }) => {
@@ -14,12 +12,17 @@ const Modal = ({ children, onClose, size = 'md', showFooter = true }) => {
             {/* Clickaway closes the modal */}
             <div onClick={onClose} className="absolute inset-0"></div>
 
-            <div className={`relative bg-white rounded-2xl p-6 w-full ${sizeClasses[size]} shadow-xl`}>
-                {children}
+            {/* Modal Panel: Now a flex column with a max height, preventing it from growing off-screen */}
+            <div className={`relative bg-white rounded-2xl shadow-xl w-full ${sizeClasses[size]} flex flex-col max-h-[90vh]`}>
+                
+                {/* Content Area: This new div will grow and scroll if content overflows */}
+                <div className="overflow-y-auto p-6">
+                    {children}
+                </div>
 
-                {/* THE FIX: The footer and its Close button are now conditional */}
+                {/* Footer Area: This stays at the bottom and does not scroll */}
                 {showFooter && (
-                    <div className="flex justify-center pt-4">
+                    <div className="flex-shrink-0 flex justify-center p-4 border-t border-gray-200">
                         <button 
                             onClick={onClose} 
                             className="h-12 px-8 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200"
