@@ -51,11 +51,12 @@ export default function App() {
                     --upcoming-bg: #f8b4c0;
                     --upcoming-card-bg: #fde0e5;
 
-                    /* --- NEW MATCHA GREEN THEME --- */
+                    /* --- MATCHA GREEN THEME --- */
                     --progress-highlight: #b3db86;
                     --progress-bg: #d8e8c5;
                     --progress-card-bg: #f1f6eb;
                     --progress-text: #4a5c36;
+                    --progress-past-bake: #a7d37f; /* <-- NEW COLOR ADDED */
                 }
             `}</style>
             {user ? <MainApp user={user} /> : <AuthPage />}

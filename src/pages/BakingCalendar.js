@@ -99,10 +99,11 @@ const BakingCalendar = ({
                             dayClass += " cursor-pointer";
                         }
                         
+                        // --- UPDATED COLORS ---
                         if (isToday) {
                             dayClass += " bg-[var(--progress-highlight)] text-white";
                         } else if (hasPastBake && !hasUpcomingBake) {
-                            dayClass += " bg-green-200 text-[var(--progress-text)] hover:bg-green-300";
+                            dayClass += " bg-[var(--progress-past-bake)] text-white hover:opacity-80";
                         } else if (hasUpcomingBake) {
                             dayClass += " border-2 border-[var(--progress-highlight)] text-[var(--progress-text)] hover:bg-green-100";
                         } else {
@@ -120,7 +121,7 @@ const BakingCalendar = ({
                 </div>
                 
                 <div className="mt-4 flex items-center justify-center gap-4 text-xs font-semibold text-[var(--progress-text)] opacity-80">
-                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-200"></div><span>Past Bakes</span></div>
+                    <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-[var(--progress-past-bake)]"></div><span>Past Bakes</span></div>
                     <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full border-2 border-[var(--progress-highlight)]"></div><span>Scheduled</span></div>
                 </div>
             </div>
