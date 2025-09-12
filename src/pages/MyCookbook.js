@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import ConfirmationModal from '../components/ConfirmationModal';
-import FilterComponent from '../components/FilterComponent';
+import RecipeFilterBar from '../components/RecipeFilterBar'; // <-- IMPORT the new filter bar
 
 // --- STYLING UPDATED ---
 const FolderIcon = () => (
@@ -45,7 +45,9 @@ const MyCookbook = ({
     const [collectionToDelete, setCollectionToDelete] = useState(null);
     const [recipeToDelete, setRecipeToDelete] = useState(null);
     const [expandedCookbookId, setExpandedCookbookId] = useState(null);
-    const [activeFilters, setActiveFilters] = useState({ categories: [], month: 'all', year: 'all' });
+    
+    // --- STATE SIMPLIFIED ---
+    const [activeCategory, setActiveCategory] = useState('All');
     const recipeCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 
     const collectionRecipeCounts = useMemo(() => {
@@ -57,32 +59,49 @@ const MyCookbook = ({
 
     const recipesInView = useMemo(() => {
         let recipes = cookbook || [];
+        // First, get only the recipes for the currently selected collection
         if (selectedCollection) {
             recipes = selectedCollection.id === 'unassigned'
                 ? recipes.filter(recipe => !recipe.collectionId)
                 : recipes.filter(recipe => recipe.collectionId === selectedCollection.id);
         }
-        if (activeFilters.categories.length > 0) {
-            recipes = recipes.filter(recipe => activeFilters.categories.every(filterCat => recipe.categories?.includes(filterCat)));
+        
+        // Then, filter those recipes by the active category
+        if (activeCategory !== 'All') {
+            recipes = recipes.filter(recipe => recipe.categories?.includes(activeCategory));
         }
+
         return recipes.sort((a, b) => (a.createdAt && b.createdAt) ? new Date(b.createdAt.toDate()) - new Date(a.createdAt.toDate()) : 0);
-    }, [cookbook, selectedCollection, activeFilters]);
+    }, [cookbook, selectedCollection, activeCategory]);
 
     const handleSaveCollection = (name) => { if (collectionToEdit) { updateCollection(collectionToEdit.id, name); } else { addCollection(name); } setIsCollectionFormOpen(false); setCollectionToEdit(null); };
     const handleConfirmDeleteCollection = () => { if (collectionToDelete) { deleteCollection(collectionToDelete.id); } setCollectionToDelete(null); };
-    const handleViewCollection = (collection) => { setSelectedCollection(collection); setExpandedCookbookId(null); setCurrentView('recipes'); };
+    const handleViewCollection = (collection) => { setActiveCategory('All'); setSelectedCollection(collection); setExpandedCookbookId(null); setCurrentView('recipes'); };
     const handleConfirmDeleteRecipe = () => { if (recipeToDelete) { deleteRecipe(recipeToDelete.id); setRecipeToDelete(null); } };
 
     if (currentView === 'recipes') {
         return (
-            <div className="p-4 bg-[var(--background-color)] min-h-full font-sans">
-                <button onClick={() => setCurrentView('collections')} className="flex items-center gap-1 text-sm font-bold text-[var(--primary-color)] mb-4">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
-                    Back to Collections
-                </button>
-                <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-4">{selectedCollection?.name || 'Collection'}</h1>
-                <FilterComponent categories={recipeCategories} onFilterChange={setActiveFilters} />
-                <div className="space-y-4 mt-6">
+            <div className="bg-[var(--background-color)] min-h-full font-sans">
+                {/* --- NEW HEADER SECTION --- */}
+                <div className="bg-[var(--upcoming-bg)]">
+                    <div className="p-4 pb-0">
+                        <button onClick={() => setCurrentView('collections')} className="flex items-center gap-1 text-sm font-bold text-white mb-2">
+                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                            Back to Collections
+                        </button>
+                        <h1 className="text-3xl font-bold text-white">{selectedCollection?.name || 'Collection'}</h1>
+                    </div>
+                     <div className="py-2">
+                        <RecipeFilterBar 
+                            categories={recipeCategories}
+                            activeCategory={activeCategory}
+                            onCategorySelect={setActiveCategory}
+                        />
+                    </div>
+                </div>
+
+                {/* --- MAIN CONTENT SECTION --- */}
+                <div className="p-4 space-y-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl">
                     {recipesInView.length > 0 ? recipesInView.map(recipe => (
                         <div key={recipe.id} className="bg-white p-4 rounded-xl border border-pink-100 shadow-sm">
                            <div className="flex justify-between items-start cursor-pointer" onClick={() => setExpandedCookbookId(expandedCookbookId === recipe.id ? null : recipe.id)}>
@@ -107,7 +126,7 @@ const MyCookbook = ({
                                 </div>
                             )}
                         </div>
-                    )) : ( <div className="text-center py-16 bg-white rounded-xl border border-pink-100"><p className="text-gray-500">No recipes here. Add one!</p></div> )}
+                    )) : ( <div className="text-center py-16 bg-white rounded-xl border border-pink-100"><p className="text-gray-500">No recipes in this collection match your filter.</p></div> )}
                 </div>
                 {recipeToDelete && <ConfirmationModal message={`Delete "${recipeToDelete.recipeTitle}"?`} onConfirm={handleConfirmDeleteRecipe} onCancel={() => setRecipeToDelete(null)} />}
             </div>
@@ -116,7 +135,6 @@ const MyCookbook = ({
 
     return (
         <div className="bg-[var(--background-color)] min-h-full font-sans">
-            {/* --- NEW HEADER SECTION --- */}
             <div className="bg-[var(--upcoming-bg)] p-4 pb-8">
                 <h1 className="text-3xl font-bold text-white text-center mb-4">My Recipes</h1>
                 <div className="flex gap-2 justify-center">
@@ -129,7 +147,6 @@ const MyCookbook = ({
                 </div>
             </div>
             
-            {/* --- MAIN CONTENT SECTION --- */}
             <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl">
                  <div className="grid grid-cols-2 gap-4">
                      <div onClick={() => handleViewCollection({ id: 'unassigned', name: 'Unassigned Recipes' })} className="bg-white p-4 rounded-xl border border-pink-100 shadow-sm flex flex-col justify-center items-center text-center cursor-pointer hover:shadow-lg transition-shadow aspect-square">
@@ -161,3 +178,4 @@ const MyCookbook = ({
 };
 
 export default MyCookbook;
+
