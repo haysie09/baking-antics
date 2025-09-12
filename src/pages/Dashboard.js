@@ -102,8 +102,8 @@ const Dashboard = ({
                 openScheduleModal={openScheduleModal}
             />
 
-            {/* This single container holds all the content below the pink header */}
-            <div className="p-4 pt-6 space-y-8 bg-[var(--background-color)] -mt-4 rounded-t-2xl relative z-0">
+            {/* Main content area with top rounded corners */}
+            <div className="p-4 pt-6 space-y-8 bg-[var(--background-color)] -mt-4 rounded-t-2xl relative z-10">
                 <section>
                     <h2 className="text-[var(--text-primary)] text-2xl font-bold mb-4">What Should I Bake?</h2>
                     <div className="rounded-xl bg-white shadow-sm overflow-hidden p-4">
@@ -140,39 +140,35 @@ const Dashboard = ({
                         )}
                     </div>
                 </section>
-                
-                {/* --- The green section is now correctly nested inside the main content flow --- */}
-                <div>
-                    <section className="bg-[var(--progress-bg)] p-4 pt-6 pb-8 -mx-4 rounded-2xl">
-                         <div className="flex justify-between items-start">
-                            <h2 className="text-white text-2xl font-bold">Your Progress</h2>
-                            <img src="/icon-brand-green.svg" alt="Baking Progress Icon" className="w-20 h-20 -mt-10" />
-                        </div>
-                    </section>
-                    
-                    <div className="space-y-8 -mt-6 relative z-0">
-                         <section>
-                            <DashboardStats 
-                                journal={journal} 
-                                currentCalendarDate={currentCalendarDate} 
-                            />
-                        </section>
-                        
-                        <section>
-                            <BakingCalendar 
-                                journal={journal} 
-                                upcomingBakes={upcomingBakes} 
-                                setView={setView} 
-                                setDateFilter={setDateFilter}
-                                onViewBake={setBakeToView}
-                                onViewUpcomingBake={setUpcomingBakeToView}
-                                currentDate={currentCalendarDate}
-                                setCurrentDate={setCurrentCalendarDate}
-                            />
-                        </section>
-                    </div>
+            </div>
+            
+            <section className="bg-[var(--progress-bg)] p-4 pt-6 pb-8">
+                 <div className="flex justify-between items-start">
+                    <h2 className="text-white text-2xl font-bold">Your Progress</h2>
+                    <img src="/icon-brand-green.svg" alt="Baking Progress Icon" className="w-20 h-20 -mt-10" />
                 </div>
-
+            </section>
+            
+            <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl relative z-10 space-y-8">
+                 <section className="-mt-2">
+                    <DashboardStats 
+                        journal={journal} 
+                        currentCalendarDate={currentCalendarDate} 
+                    />
+                </section>
+                
+                <section>
+                    <BakingCalendar 
+                        journal={journal} 
+                        upcomingBakes={upcomingBakes} 
+                        setView={setView} 
+                        setDateFilter={setDateFilter}
+                        onViewBake={setBakeToView}
+                        onViewUpcomingBake={setUpcomingBakeToView}
+                        currentDate={currentCalendarDate}
+                        setCurrentDate={setCurrentCalendarDate}
+                    />
+                </section>
             </div>
         </div>
     );

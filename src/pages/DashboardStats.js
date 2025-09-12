@@ -1,17 +1,14 @@
 import React, { useState, useMemo, useEffect } from 'react';
 
-// A reusable component for the circular stat display
 const StatCircle = ({ value, label, subLabel, percentage }) => {
-    const circumference = 2 * Math.PI * 40; // a circle with radius 40
+    const circumference = 2 * Math.PI * 40;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     return (
         <div className="flex flex-col items-center text-center">
             <div className="relative w-24 h-24">
                 <svg className="w-full h-full" viewBox="0 0 100 100">
-                    {/* Background circle */}
                     <circle className="text-[var(--progress-bg)]" strokeWidth="10" stroke="currentColor" fill="transparent" r="40" cx="50" cy="50" />
-                    {/* Progress circle */}
                     <circle
                         className="text-[var(--progress-highlight)]"
                         strokeWidth="10"
@@ -55,19 +52,53 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
         
         switch (filter) {
             case 'week': {
-                // ... (logic is unchanged)
+                const startOfWeek = new Date(now);
+                const day = startOfWeek.getDay();
+                const diff = startOfWeek.getDate() - day + (day === 0 ? -6 : 1);
+                startOfWeek.setDate(diff);
+                startOfWeek.setHours(0, 0, 0, 0);
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                endOfWeek.setHours(23, 59, 59, 999);
+                dateLabel = 'This Week';
+                dateSubLabel = `(${startOfWeek.getDate()}/${startOfWeek.getMonth() + 1} - ${endOfWeek.getDate()}/${endOfWeek.getMonth() + 1})`;
+                filteredEntries = journal.filter(entry => {
+                    const entryDate = entry.bakingDate.toDate ? entry.bakingDate.toDate() : new Date(entry.bakingDate);
+                    return entryDate >= startOfWeek && entryDate <= endOfWeek;
+                });
                 break;
             }
             case 'last-week': {
-                // ... (logic is unchanged)
+                const startOfThisWeek = new Date();
+                const day = startOfThisWeek.getDay();
+                const diffToMonday = startOfThisWeek.getDate() - day + (day === 0 ? -6 : 1);
+                startOfThisWeek.setDate(diffToMonday);
+                startOfThisWeek.setHours(0, 0, 0, 0);
+                const endOfLastWeek = new Date(startOfThisWeek.getTime() - 1);
+                const startOfLastWeek = new Date(endOfLastWeek);
+                startOfLastWeek.setDate(endOfLastWeek.getDate() - 6);
+                dateLabel = 'Last Week';
+                dateSubLabel = `(${startOfLastWeek.getDate()}/${startOfLastWeek.getMonth() + 1} - ${endOfLastWeek.getDate()}/${endOfLastWeek.getMonth() + 1})`;
+                filteredEntries = journal.filter(entry => {
+                    const entryDate = entry.bakingDate.toDate ? entry.bakingDate.toDate() : new Date(entry.bakingDate);
+                    return entryDate >= startOfLastWeek && entryDate <= endOfLastWeek;
+                });
                 break;
             }
             case 'all':
-                // ... (logic is unchanged)
+                dateLabel = 'All Time';
+                filteredEntries = journal;
                 break;
             case 'month':
             default: {
-                // ... (logic is unchanged)
+                const displayDate = currentCalendarDate || new Date();
+                const month = displayDate.getMonth();
+                const year = displayDate.getFullYear();
+                dateLabel = displayDate.toLocaleString('default', { month: 'long' });
+                filteredEntries = journal.filter(entry => {
+                    const entryDate = entry.bakingDate.toDate ? entry.bakingDate.toDate() : new Date(entry.bakingDate);
+                    return entryDate.getMonth() === month && entryDate.getFullYear() === year;
+                });
                 break;
             }
         }
@@ -102,13 +133,13 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
                     value={stats.totalBakes} 
                     label="Bakes" 
                     subLabel={stats.dateSubLabel || stats.dateLabel}
-                    percentage={(stats.totalBakes / 10) * 100} // Example goal: 10 bakes
+                    percentage={(stats.totalBakes / 10) * 100}
                 />
                 <StatCircle 
                     value={stats.totalHours} 
                     label="Hours Spent" 
                     subLabel={stats.dateSubLabel || stats.dateLabel}
-                    percentage={(stats.totalHours / 20) * 100} // Example goal: 20 hours
+                    percentage={(stats.totalHours / 20) * 100}
                 />
             </div>
         </div>
@@ -116,3 +147,4 @@ const DashboardStats = ({ journal, currentCalendarDate }) => {
 };
 
 export default DashboardStats;
+

@@ -17,11 +17,25 @@ const BakingCalendar = ({
     const year = currentDate.getFullYear();
 
     const bakedDaysMap = useMemo(() => {
-        // ... (logic is unchanged)
+        const map = new Map();
+        if (journal) {
+            journal.forEach(entry => {
+                const date = entry.bakingDate.toDate ? entry.bakingDate.toDate() : new Date(entry.bakingDate);
+                map.set(date.toDateString(), entry);
+            });
+        }
+        return map;
     }, [journal]);
 
     const upcomingBakeDaysMap = useMemo(() => {
-        // ... (logic is unchanged)
+        const map = new Map();
+        if (upcomingBakes) {
+            upcomingBakes.forEach(bake => {
+                const date = bake.bakeDate.toDate ? bake.bakeDate.toDate() : new Date(bake.bakeDate);
+                map.set(date.toDateString(), bake);
+            });
+        }
+        return map;
     }, [upcomingBakes]);
 
     const handlePrevMonth = () => {
@@ -33,7 +47,16 @@ const BakingCalendar = ({
     };
 
     const handleDayClick = (day) => {
-        // ... (logic is unchanged)
+        const fullDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), day);
+        const dateString = fullDate.toDateString();
+        const pastBake = bakedDaysMap.get(dateString);
+        const upcomingBake = upcomingBakeDaysMap.get(dateString);
+
+        if (pastBake) {
+            onViewBake({ past: pastBake, upcoming: upcomingBake });
+        } else if (upcomingBake) {
+            onViewUpcomingBake(upcomingBake);
+        }
     };
     
     const firstDayOfMonth = new Date(year, currentDate.getMonth(), 1).getDay();
@@ -76,7 +99,6 @@ const BakingCalendar = ({
                             dayClass += " cursor-pointer";
                         }
                         
-                        // --- UPDATED COLORS ---
                         if (isToday) {
                             dayClass += " bg-[var(--progress-highlight)] text-white";
                         } else if (hasPastBake && !hasUpcomingBake) {
@@ -107,3 +129,4 @@ const BakingCalendar = ({
 };
 
 export default BakingCalendar;
+
