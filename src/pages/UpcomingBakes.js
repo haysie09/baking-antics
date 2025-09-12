@@ -76,7 +76,7 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
                         <p className="text-text-secondary text-sm font-normal">Schedule your next bake to see it here.</p>
                         <button 
                             onClick={openScheduleModal}
-                            className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-primary-color text-white text-sm font-bold shadow-md hover:bg-opacity-90 transition-all"
+                            className="flex min-w-[84px] cursor-pointer items-center justify-center rounded-full h-10 px-6 bg-[#577316] text-white text-sm font-bold shadow-md hover:opacity-90 transition-all"
                         >
                             Schedule Bake
                         </button>
