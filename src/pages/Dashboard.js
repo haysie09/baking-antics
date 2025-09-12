@@ -102,7 +102,6 @@ const Dashboard = ({
                 openScheduleModal={openScheduleModal}
             />
 
-            {/* Main content area with top rounded corners */}
             <div className="p-4 pt-6 space-y-8 bg-[var(--background-color)] -mt-4 rounded-t-2xl relative z-10">
                 <section>
                     <h2 className="text-[var(--text-primary)] text-2xl font-bold mb-4">What Should I Bake?</h2>
@@ -140,35 +139,39 @@ const Dashboard = ({
                         )}
                     </div>
                 </section>
-            </div>
-            
-            <section className="bg-[var(--progress-bg)] p-4 pt-6 pb-8">
-                 <div className="flex justify-between items-start">
-                    <h2 className="text-white text-2xl font-bold">Your Progress</h2>
-                    <img src="/icon-brand-green.svg" alt="Baking Progress Icon" className="w-20 h-20 -mt-10" />
-                </div>
-            </section>
-            
-            <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl relative z-10 space-y-8">
-                 <section className="-mt-2">
-                    <DashboardStats 
-                        journal={journal} 
-                        currentCalendarDate={currentCalendarDate} 
-                    />
-                </section>
                 
-                <section>
-                    <BakingCalendar 
-                        journal={journal} 
-                        upcomingBakes={upcomingBakes} 
-                        setView={setView} 
-                        setDateFilter={setDateFilter}
-                        onViewBake={setBakeToView}
-                        onViewUpcomingBake={setUpcomingBakeToView}
-                        currentDate={currentCalendarDate}
-                        setCurrentDate={setCurrentCalendarDate}
-                    />
-                </section>
+                {/* --- This container adds the top padding/gap --- */}
+                <div className="pt-4">
+                    <section className="bg-[var(--progress-bg)] p-4 pt-8 pb-8 rounded-t-2xl">
+                         <div className="flex justify-between items-start">
+                            <h2 className="text-white text-2xl font-bold">Your Progress</h2>
+                            <img src="/icon-brand-green.svg" alt="Baking Progress Icon" className="w-20 h-20 -mt-12" />
+                        </div>
+                    </section>
+                    
+                    {/* --- This container adds the bottom padding/gap --- */}
+                    <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl space-y-8 pb-12">
+                         <section className="-mt-2">
+                            <DashboardStats 
+                                journal={journal} 
+                                currentCalendarDate={currentCalendarDate} 
+                            />
+                        </section>
+                        
+                        <section>
+                            <BakingCalendar 
+                                journal={journal} 
+                                upcomingBakes={upcomingBakes} 
+                                setView={setView} 
+                                setDateFilter={setDateFilter}
+                                onViewBake={setBakeToView}
+                                onViewUpcomingBake={setUpcomingBakeToView}
+                                currentDate={currentCalendarDate}
+                                setCurrentDate={setCurrentCalendarDate}
+                            />
+                        </section>
+                    </div>
+                </div>
             </div>
         </div>
     );
