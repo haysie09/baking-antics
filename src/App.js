@@ -66,8 +66,6 @@ const MainApp = ({ user }) => {
     const [isAddRecipeChoiceModalOpen, setIsAddRecipeChoiceModalOpen] = useState(false);
     const [isAddFromURLModalOpen, setIsAddFromURLModalOpen] = useState(false);
     const [recipeToEdit, setRecipeToEdit] = useState(null); 
-    
-    // --- NEW STATE for scheduling from an idea ---
     const [ideaToSchedule, setIdeaToSchedule] = useState(null);
 
     const handleSignOut = () => signOut(auth);
@@ -117,16 +115,14 @@ const MainApp = ({ user }) => {
         setRecipeToEdit(null);
     };
     
-    // --- NEW HANDLER for scheduling from an idea ---
     const handleScheduleBakeFromIdea = (idea) => {
-        setIdeaToSchedule(idea); // This triggers the modal to open with the idea's data
+        setIdeaToSchedule(idea);
     };
 
-    // --- NEW HANDLER for saving the scheduled bake and deleting the original idea ---
     const handleSaveScheduleFromIdea = async (bakeData) => {
-        await addUpcomingBake(bakeData); // Save the new bake
-        await deleteIdea(ideaToSchedule.id); // Delete the original idea
-        setIdeaToSchedule(null); // Close the modal
+        await addUpcomingBake(bakeData);
+        await deleteIdea(ideaToSchedule.id);
+        setIdeaToSchedule(null);
     };
     
     const handleUpdateJournalAndClose = async (id, data) => { await updateJournalEntry(id, data); setEntryToEdit(null); };
@@ -144,7 +140,7 @@ const MainApp = ({ user }) => {
                     ideas={ideaPad} 
                     addIdea={addIdea} 
                     deleteIdea={deleteIdea} 
-                    onScheduleBake={handleScheduleBakeFromIdea} // Pass the new handler
+                    onScheduleBake={handleScheduleBakeFromIdea}
                 />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': 
@@ -159,7 +155,13 @@ const MainApp = ({ user }) => {
                     onAddRecipe={openAddRecipeFlow}
                     onEditRecipe={handleEditRecipe}
                 />;
-            case 'account': return <MyAccount user={user} userProfile={userProfile} updateUserProfile={updateUserProfile} />;
+            case 'account': 
+                return <MyAccount 
+                    user={user} 
+                    userProfile={userProfile} 
+                    updateUserProfile={updateUserProfile}
+                    onSignOut={handleSignOut} // <-- Pass sign out function
+                />;
             default:
                 return <Dashboard 
                     setView={setView} 
@@ -200,20 +202,24 @@ const MainApp = ({ user }) => {
                     <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
                         
                         {view === 'dashboard' && (
-                            <header className="sticky top-0 z-10 flex items-center bg-[var(--upcoming-bg)] p-4 pb-2 justify-between border-b border-pink-200/50">
-                                <div className="flex-1"></div>
-                                <h1 className="text-white text-lg font-bold">Baking Antics</h1>
-                                <div className="flex-1 text-right">
+                            // --- HEADER UPDATED ---
+                            // No longer sticky, layout is rearranged
+                            <header className="z-10 flex items-center bg-[var(--upcoming-bg)] p-4 pb-2 justify-between border-b border-pink-200/50">
+                                <div className="flex-1">
                                     <button onClick={() => navigate('account')} className="cursor-pointer text-white hover:bg-white/20 p-2 rounded-full transition-colors">
                                         <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
                                     </button>
+                                </div>
+                                <h1 className="text-white text-lg font-bold">Baking Antics</h1>
+                                <div className="flex-1 text-right">
+                                    <img src="/icon-brand.png" alt="Baking Antics Icon" className="w-8 h-8 inline-block" />
                                 </div>
                             </header>
                         )}
                         
                         <main className="flex-grow overflow-y-auto bg-[var(--background-color)] pb-24">{renderView()}</main>
 
-                        {/* --- ALL MODALS RENDERED HERE --- */}
+                        {/* --- MODALS --- */}
                         {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                         {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                         {isAddRecipeModalOpen && <CookbookForm isNew={!recipeToEdit} initialData={recipeToEdit} collections={collections} onSave={handleSaveRecipe} onCancel={() => { setIsAddRecipeModalOpen(false); setRecipeToEdit(null); }} />}
@@ -227,18 +233,16 @@ const MainApp = ({ user }) => {
                         {isAddRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onManual={handleOpenManualRecipeForm} onImport={handleOpenURLImportModal} onCancel={() => setIsAddRecipeChoiceModalOpen(false)} /> )}
                         {isAddFromURLModalOpen && ( <AddFromURLModal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
                         
-                        {/* --- NEW MODAL RENDER LOGIC --- */}
                         {ideaToSchedule && (() => {
-                            // Transform the idea data into the format the bake form expects
                             const bakeData = {
                                 bakeName: ideaToSchedule.ideaName || '',
                                 link: ideaToSchedule.sourceURL || '',
                                 notes: ideaToSchedule.notes || '',
-                                bakeDate: new Date().toISOString().split('T')[0] // Default to today
+                                bakeDate: new Date().toISOString().split('T')[0]
                             };
                             return (
                                 <UpcomingBakeForm 
-                                    bakeToEdit={bakeData} // Pass the transformed data
+                                    bakeToEdit={bakeData}
                                     onSave={handleSaveScheduleFromIdea}
                                     onCancel={() => setIdeaToSchedule(null)}
                                     cookbook={cookbook}

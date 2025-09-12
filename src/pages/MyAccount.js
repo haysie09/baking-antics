@@ -2,17 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { updateProfile, updatePassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
-const MyAccount = ({ user, userProfile, updateUserProfile }) => {
-    // State for the profile form
+const MyAccount = ({ user, userProfile, updateUserProfile, onSignOut }) => { // <-- Accept onSignOut prop
     const [displayName, setDisplayName] = useState('');
     const [profileMessage, setProfileMessage] = useState('');
-
-    // State for the password form
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [passwordMessage, setPasswordMessage] = useState('');
 
-    // All logic is preserved
     useEffect(() => {
         if (userProfile?.displayName) {
             setDisplayName(userProfile.displayName);
@@ -61,13 +57,13 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
     };
 
     return (
-        <div className="p-4 bg-[#fcf8f9] min-h-full font-sans">
-            <h1 className="text-3xl font-bold text-[#1b0d10] mb-6">My Account</h1>
+        <div className="p-4 bg-[var(--background-color)] min-h-full font-sans">
+            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-6">My Account</h1>
 
             <div className="space-y-8">
                 {/* --- Profile Settings Section --- */}
                 <section className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
-                    <h2 className="text-xl font-bold text-[#1b0d10] mb-4">Profile Settings</h2>
+                    <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">Profile Settings</h2>
                     <form onSubmit={handleProfileUpdate} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Login Email</label>
@@ -81,17 +77,17 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                                 type="text"
                                 value={displayName}
                                 onChange={(e) => setDisplayName(e.target.value)}
-                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
+                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[var(--primary-color)] focus:outline-none"
                             />
                         </div>
-                        <button type="submit" className="w-full h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-base hover:opacity-90">Save Name</button>
+                        <button type="submit" className="w-full h-12 flex items-center justify-center rounded-full bg-[var(--primary-color)] text-white font-bold text-base hover:opacity-90">Save Name</button>
                         {profileMessage && <p className="text-center text-sm mt-2 text-gray-600">{profileMessage}</p>}
                     </form>
                 </section>
 
                 {/* --- Security Settings Section --- */}
                 <section className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
-                    <h2 className="text-xl font-bold text-[#1b0d10] mb-4">Change Password</h2>
+                    <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">Change Password</h2>
                     <form onSubmit={handlePasswordUpdate} className="space-y-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">New Password</label>
@@ -99,7 +95,7 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                                 type="password"
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
+                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[var(--primary-color)] focus:outline-none"
                             />
                         </div>
                          <div>
@@ -108,12 +104,22 @@ const MyAccount = ({ user, userProfile, updateUserProfile }) => {
                                 type="password"
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
-                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[#f0425f] focus:outline-none"
+                                className="w-full h-12 px-4 rounded-full border border-gray-300 focus:ring-2 focus:ring-[var(--primary-color)] focus:outline-none"
                             />
                         </div>
-                        <button type="submit" className="w-full h-12 flex items-center justify-center rounded-full bg-[#f0425f] text-white font-bold text-base hover:opacity-90">Update Password</button>
+                        <button type="submit" className="w-full h-12 flex items-center justify-center rounded-full bg-[var(--primary-color)] text-white font-bold text-base hover:opacity-90">Update Password</button>
                         {passwordMessage && <p className="text-center text-sm mt-2 text-gray-600">{passwordMessage}</p>}
                     </form>
+                </section>
+
+                {/* --- NEW SIGN OUT BUTTON --- */}
+                <section>
+                     <button 
+                        onClick={onSignOut} 
+                        className="w-full h-12 flex items-center justify-center rounded-full bg-white text-[var(--primary-color)] font-bold text-base border-2 border-[var(--primary-color)] hover:bg-red-50"
+                    >
+                        Sign Out
+                    </button>
                 </section>
             </div>
         </div>
