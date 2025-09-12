@@ -66,6 +66,9 @@ const MainApp = ({ user }) => {
     const [isAddRecipeChoiceModalOpen, setIsAddRecipeChoiceModalOpen] = useState(false);
     const [isAddFromURLModalOpen, setIsAddFromURLModalOpen] = useState(false);
     const [recipeToEdit, setRecipeToEdit] = useState(null); 
+    
+    // --- NEW STATE for scheduling from an idea ---
+    const [ideaToSchedule, setIdeaToSchedule] = useState(null);
 
     const handleSignOut = () => signOut(auth);
     const navigate = (newView) => setView(newView);
@@ -114,6 +117,18 @@ const MainApp = ({ user }) => {
         setRecipeToEdit(null);
     };
     
+    // --- NEW HANDLER for scheduling from an idea ---
+    const handleScheduleBakeFromIdea = (idea) => {
+        setIdeaToSchedule(idea); // This triggers the modal to open with the idea's data
+    };
+
+    // --- NEW HANDLER for saving the scheduled bake and deleting the original idea ---
+    const handleSaveScheduleFromIdea = async (bakeData) => {
+        await addUpcomingBake(bakeData); // Save the new bake
+        await deleteIdea(ideaToSchedule.id); // Delete the original idea
+        setIdeaToSchedule(null); // Close the modal
+    };
+    
     const handleUpdateJournalAndClose = async (id, data) => { await updateJournalEntry(id, data); setEntryToEdit(null); };
     const handleDeleteInitiate = (bake) => { setBakeToDelete(bake); };
     const handleDeleteConfirm = async () => { if (bakeToDelete) { await deleteUpcomingBake(bakeToDelete.id); setBakeToDelete(null); setUpcomingBakeToView(null); } };
@@ -124,7 +139,13 @@ const MainApp = ({ user }) => {
 
     const renderView = () => {
         switch (view) {
-            case 'ideapad': return <IdeaPad ideas={ideaPad} addIdea={addIdea} deleteIdea={deleteIdea} addJournalEntry={addJournalEntry} />;
+            case 'ideapad': 
+                return <IdeaPad 
+                    ideas={ideaPad} 
+                    addIdea={addIdea} 
+                    deleteIdea={deleteIdea} 
+                    onScheduleBake={handleScheduleBakeFromIdea} // Pass the new handler
+                />;
             case 'journal': return <BakingJournal journal={journal} addJournalEntry={addJournalEntry} updateJournalEntry={updateJournalEntry} deleteJournalEntry={deleteJournalEntry} cookbook={cookbook} dateFilter={dateFilter} setDateFilter={setDateFilter} />;
             case 'cookbook': 
                 return <MyCookbook 
@@ -163,7 +184,6 @@ const MainApp = ({ user }) => {
 
     return (
         <>
-            {/* --- STYLE BLOCK ADDED --- */}
             <style>{`
                 :root {
                     --primary-color: #f0425f;
@@ -193,7 +213,7 @@ const MainApp = ({ user }) => {
                         
                         <main className="flex-grow overflow-y-auto bg-[var(--background-color)] pb-24">{renderView()}</main>
 
-                        {/* --- ALL MODALS (UNCHANGED) --- */}
+                        {/* --- ALL MODALS RENDERED HERE --- */}
                         {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
                         {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
                         {isAddRecipeModalOpen && <CookbookForm isNew={!recipeToEdit} initialData={recipeToEdit} collections={collections} onSave={handleSaveRecipe} onCancel={() => { setIsAddRecipeModalOpen(false); setRecipeToEdit(null); }} />}
@@ -206,6 +226,26 @@ const MainApp = ({ user }) => {
                         {bakeToJournal && (() => { const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate); const journalEntryData = { entryTitle: bakeToJournal.bakeName || '', bakingDate: bakeDateObject.toISOString().split('T')[0], personalNotes: bakeToJournal.personalNotes || '', sourceURL: bakeToJournal.link || '', tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: bakeToJournal.categories || [], }; return ( <JournalEntryForm entry={journalEntryData} onSave={handleSaveBakeToJournal} onCancel={() => setBakeToJournal(null)} cookbook={cookbook} isNew={true} /> ); })()}
                         {isAddRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onManual={handleOpenManualRecipeForm} onImport={handleOpenURLImportModal} onCancel={() => setIsAddRecipeChoiceModalOpen(false)} /> )}
                         {isAddFromURLModalOpen && ( <AddFromURLModal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
+                        
+                        {/* --- NEW MODAL RENDER LOGIC --- */}
+                        {ideaToSchedule && (() => {
+                            // Transform the idea data into the format the bake form expects
+                            const bakeData = {
+                                bakeName: ideaToSchedule.ideaName || '',
+                                link: ideaToSchedule.sourceURL || '',
+                                notes: ideaToSchedule.notes || '',
+                                bakeDate: new Date().toISOString().split('T')[0] // Default to today
+                            };
+                            return (
+                                <UpcomingBakeForm 
+                                    bakeToEdit={bakeData} // Pass the transformed data
+                                    onSave={handleSaveScheduleFromIdea}
+                                    onCancel={() => setIdeaToSchedule(null)}
+                                    cookbook={cookbook}
+                                />
+                            );
+                        })()}
+
                         {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openAddRecipeFlow} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
                         
                         <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
@@ -215,3 +255,4 @@ const MainApp = ({ user }) => {
         </>
     );
 }
+
