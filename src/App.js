@@ -36,8 +36,27 @@ import { useCollections } from './hooks/useCollections';
 
 export default function App() {
     const { user, isAuthReady } = useAuth();
+
     if (!isAuthReady) return <LoadingSpinner />;
-    return <>{user ? <MainApp user={user} /> : <AuthPage />}</>;
+
+    return (
+        <>
+            {/* --- STYLE BLOCK MOVED HERE --- */}
+            {/* Now the styles are global and will apply to the AuthPage */}
+            <style>{`
+                :root {
+                    --primary-color: #f0425f;
+                    --secondary-color: #f3e7e9;
+                    --text-primary: #1b0d10;
+                    --text-secondary: #9a4c59;
+                    --background-color: #fcf8f9;
+                    --upcoming-bg: #f8b4c0;
+                    --upcoming-card-bg: #fde0e5;
+                }
+            `}</style>
+            {user ? <MainApp user={user} /> : <AuthPage />}
+        </>
+    );
 }
 
 
@@ -185,73 +204,57 @@ const MainApp = ({ user }) => {
     };
 
     return (
-        <>
-            <style>{`
-                :root {
-                    --primary-color: #f0425f;
-                    --secondary-color: #f3e7e9;
-                    --text-primary: #1b0d10;
-                    --text-secondary: #9a4c59;
-                    --background-color: #fcf8f9;
-                    --upcoming-bg: #f8b4c0;
-                    --upcoming-card-bg: #fde0e5;
-                }
-            `}</style>
-            <div className="bg-app-white text-app-grey">
-                <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
-                    <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
-                        
-                        {/* --- HEADER UPDATED --- */}
-                        {view === 'dashboard' && (
-                            // The header is now an overlay with no background, sitting on top of the content
-                            <header className="absolute top-0 left-0 right-0 z-20 flex items-center p-4 justify-start">
-                                <button onClick={() => navigate('account')} className="cursor-pointer text-white hover:bg-white/20 p-2 rounded-full transition-colors">
-                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
-                                </button>
-                            </header>
-                        )}
-                        
-                        {/* Main content now acts as the base layer */}
-                        <main className="flex-grow overflow-y-auto bg-[var(--background-color)] pb-24">{renderView()}</main>
+        <div className="bg-app-white text-app-grey">
+            <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
+                <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
+                    
+                    {view === 'dashboard' && (
+                        <header className="absolute top-0 left-0 right-0 z-20 flex items-center p-4 justify-start">
+                            <button onClick={() => navigate('account')} className="cursor-pointer text-white hover:bg-white/20 p-2 rounded-full transition-colors">
+                                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
+                            </button>
+                        </header>
+                    )}
+                    
+                    <main className="flex-grow overflow-y-auto bg-[var(--background-color)] pb-24">{renderView()}</main>
 
-                        {/* --- MODALS --- */}
-                        {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
-                        {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
-                        {isAddRecipeModalOpen && <CookbookForm isNew={!recipeToEdit} initialData={recipeToEdit} collections={collections} onSave={handleSaveRecipe} onCancel={() => { setIsAddRecipeModalOpen(false); setRecipeToEdit(null); }} />}
-                        {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
-                        {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
-                        {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={(bake, isUpcoming) => { if (isUpcoming) { setUpcomingBakeToEdit(bake); } else { setEntryToEdit(bake); } setBakeToView(null); }} onDeleteUpcoming={(bakeId) => { deleteUpcomingBake(bakeId); setBakeToView(null); }} onMoveToJournal={(bake) => { handleMoveToJournalInitiate(bake); setBakeToView(null); }} /> )}
-                        {upcomingBakeToView && ( <ViewUpcomingBakeModal  bake={upcomingBakeToView} onClose={() => setUpcomingBakeToView(null)} onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }} onDelete={() => handleDeleteInitiate(upcomingBakeToView)} onMoveToJournal={() => handleMoveToJournalInitiate(upcomingBakeToView)} /> )}
-                        {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
-                        {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
-                        {bakeToJournal && (() => { const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate); const journalEntryData = { entryTitle: bakeToJournal.bakeName || '', bakingDate: bakeDateObject.toISOString().split('T')[0], personalNotes: bakeToJournal.personalNotes || '', sourceURL: bakeToJournal.link || '', tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: bakeToJournal.categories || [], }; return ( <JournalEntryForm entry={journalEntryData} onSave={handleSaveBakeToJournal} onCancel={() => setBakeToJournal(null)} cookbook={cookbook} isNew={true} /> ); })()}
-                        {isAddRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onManual={handleOpenManualRecipeForm} onImport={handleOpenURLImportModal} onCancel={() => setIsAddRecipeChoiceModalOpen(false)} /> )}
-                        {isAddFromURLModalOpen && ( <AddFromURLModal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
-                        
-                        {ideaToSchedule && (() => {
-                            const bakeData = {
-                                bakeName: ideaToSchedule.ideaName || '',
-                                link: ideaToSchedule.sourceURL || '',
-                                notes: ideaToSchedule.notes || '',
-                                bakeDate: new Date().toISOString().split('T')[0]
-                            };
-                            return (
-                                <UpcomingBakeForm 
-                                    bakeToEdit={bakeData}
-                                    onSave={handleSaveScheduleFromIdea}
-                                    onCancel={() => setIdeaToSchedule(null)}
-                                    cookbook={cookbook}
-                                />
-                            );
-                        })()}
+                    {/* --- MODALS --- */}
+                    {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
+                    {isAddIdeaModalOpen && <IdeaForm onSave={async (data) => { await addIdea(data); setIsAddIdeaModalOpen(false); }} onCancel={() => setIsAddIdeaModalOpen(false)} />}
+                    {isAddRecipeModalOpen && <CookbookForm isNew={!recipeToEdit} initialData={recipeToEdit} collections={collections} onSave={handleSaveRecipe} onCancel={() => { setIsAddRecipeModalOpen(false); setRecipeToEdit(null); }} />}
+                    {isAddUpcomingBakeModalOpen && <UpcomingBakeForm onSave={async (data) => {await addUpcomingBake(data); setIsAddUpcomingBakeModalOpen(false);}} onCancel={() => setIsAddUpcomingBakeModalOpen(false)} cookbook={cookbook} />}
+                    {upcomingBakeToEdit && <UpcomingBakeForm bakeToEdit={upcomingBakeToEdit} onSave={async (data) => {await updateUpcomingBake(upcomingBakeToEdit.id, data); setUpcomingBakeToEdit(null);}} onCancel={() => setUpcomingBakeToEdit(null)} cookbook={cookbook} />}
+                    {bakeToView && ( <ViewBakeModal bake={bakeToView.past} upcomingBake={bakeToView.upcoming} onClose={() => setBakeToView(null)} onEdit={(bake, isUpcoming) => { if (isUpcoming) { setUpcomingBakeToEdit(bake); } else { setEntryToEdit(bake); } setBakeToView(null); }} onDeleteUpcoming={(bakeId) => { deleteUpcomingBake(bakeId); setBakeToView(null); }} onMoveToJournal={(bake) => { handleMoveToJournalInitiate(bake); setBakeToView(null); }} /> )}
+                    {upcomingBakeToView && ( <ViewUpcomingBakeModal  bake={upcomingBakeToView} onClose={() => setUpcomingBakeToView(null)} onEdit={() => { setUpcomingBakeToEdit(upcomingBakeToView); setUpcomingBakeToView(null); }} onDelete={() => handleDeleteInitiate(upcomingBakeToView)} onMoveToJournal={() => handleMoveToJournalInitiate(upcomingBakeToView)} /> )}
+                    {entryToEdit && ( <JournalEntryForm entry={entryToEdit} onSave={(data) => handleUpdateJournalAndClose(entryToEdit.id, data)} onCancel={() => setEntryToEdit(null)} cookbook={cookbook} /> )}
+                    {bakeToDelete && ( <ConfirmationModal message={`Delete "${bakeToDelete.bakeName}"?`} onConfirm={handleDeleteConfirm} onCancel={handleDeleteCancel} /> )}
+                    {bakeToJournal && (() => { const bakeDateObject = bakeToJournal.bakeDate?.toDate ? bakeToJournal.bakeDate.toDate() : new Date(bakeToJournal.bakeDate); const journalEntryData = { entryTitle: bakeToJournal.bakeName || '', bakingDate: bakeDateObject.toISOString().split('T')[0], personalNotes: bakeToJournal.personalNotes || '', sourceURL: bakeToJournal.link || '', tasteRating: 0, difficultyRating: 0, photoURLs: [], categories: bakeToJournal.categories || [], }; return ( <JournalEntryForm entry={journalEntryData} onSave={handleSaveBakeToJournal} onCancel={() => setBakeToJournal(null)} cookbook={cookbook} isNew={true} /> ); })()}
+                    {isAddRecipeChoiceModalOpen && ( <AddRecipeChoiceModal onManual={handleOpenManualRecipeForm} onImport={handleOpenURLImportModal} onCancel={() => setIsAddRecipeChoiceModalOpen(false)} /> )}
+                    {isAddFromURLModalOpen && ( <AddFromURLModal onSave={handleSaveFromURL} onCancel={() => setIsAddFromURLModalOpen(false)} /> )}
+                    
+                    {ideaToSchedule && (() => {
+                        const bakeData = {
+                            bakeName: ideaToSchedule.ideaName || '',
+                            link: ideaToSchedule.sourceURL || '',
+                            notes: ideaToSchedule.notes || '',
+                            bakeDate: new Date().toISOString().split('T')[0]
+                        };
+                        return (
+                            <UpcomingBakeForm 
+                                bakeToEdit={bakeData}
+                                onSave={handleSaveScheduleFromIdea}
+                                onCancel={() => setIdeaToSchedule(null)}
+                                cookbook={cookbook}
+                            />
+                        );
+                    })()}
 
-                        {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openAddRecipeFlow} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
-                        
-                        <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
-                    </div>
+                    {isCreateModalOpen && <CreateNewModal onClose={() => setIsCreateModalOpen(false)} onAddRecipe={openAddRecipeFlow} onAddIdea={openIdeaModal} onAddBake={openBakeModal} onScheduleBake={openScheduleModal} />}
+                    
+                    <BottomNav currentView={view} navigate={navigate} onOpenCreateModal={() => setIsCreateModalOpen(true)} />
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
