@@ -203,16 +203,16 @@ const MainApp = ({ user }) => {
                         
                         {/* --- HEADER UPDATED --- */}
                         {view === 'dashboard' && (
-                            // The header is now z-0, putting it on a lower layer
-                            <header className="relative z-0 flex items-center bg-[var(--upcoming-bg)] p-4 pb-2 justify-start border-b border-pink-200/50">
+                            // The header is now an overlay with no background, sitting on top of the content
+                            <header className="absolute top-0 left-0 right-0 z-20 flex items-center p-4 justify-start">
                                 <button onClick={() => navigate('account')} className="cursor-pointer text-white hover:bg-white/20 p-2 rounded-full transition-colors">
                                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
                                 </button>
                             </header>
                         )}
                         
-                        {/* The main content is now z-10, bringing it to the front */}
-                        <main className="relative z-10 flex-grow overflow-y-auto bg-[var(--background-color)] pb-24">{renderView()}</main>
+                        {/* Main content now acts as the base layer */}
+                        <main className="flex-grow overflow-y-auto bg-[var(--background-color)] pb-24">{renderView()}</main>
 
                         {/* --- MODALS --- */}
                         {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}
