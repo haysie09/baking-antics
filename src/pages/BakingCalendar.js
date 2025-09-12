@@ -68,15 +68,15 @@ const BakingCalendar = ({
         <section>
             <div className="bg-[var(--progress-card-bg)] p-4 rounded-xl shadow-sm border border-green-200">
                 <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-bold text-[var(--text-primary)]">My Baking Calendar</h2>
+                    <h2 className="text-lg font-bold text-[#577316]">My Baking Calendar</h2>
                 </div>
 
                 <div className="flex items-center justify-between mb-4">
-                    <button onClick={handlePrevMonth} className="p-1 rounded-full hover:bg-green-100 transition-colors">
+                    <button onClick={handlePrevMonth} className="p-1 rounded-full hover:bg-[var(--secondary-color)] transition-colors">
                         <svg className="w-6 h-6 text-[var(--progress-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                     </button>
-                    <span className="text-sm font-semibold text-[var(--text-primary)] w-24 text-center uppercase">{monthName} {year}</span>
-                    <button onClick={handleNextMonth} className="p-1 rounded-full hover:bg-green-100 transition-colors">
+                    <span className="text-sm font-semibold text-[#577316] w-24 text-center uppercase">{monthName} {year}</span>
+                    <button onClick={handleNextMonth} className="p-1 rounded-full hover:bg-[var(--secondary-color)] transition-colors">
                         <svg className="w-6 h-6 text-[var(--progress-text)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
                     </button>
                 </div>
@@ -101,7 +101,7 @@ const BakingCalendar = ({
                         
                         // --- UPDATED COLORS ---
                         if (isToday) {
-                            dayClass += " bg-[var(--progress-highlight)] text-white";
+                            dayClass += " bg-[#577316] text-white";
                         } else if (hasPastBake && !hasUpcomingBake) {
                             dayClass += " bg-[var(--progress-past-bake)] text-white hover:opacity-80";
                         } else if (hasUpcomingBake) {
