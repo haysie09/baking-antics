@@ -48,12 +48,11 @@ const UpcomingBakes = ({ upcomingBakes, openScheduleModal, onViewDetails }) => {
     const displayedBakes = isListExpanded ? sortedBakes : sortedBakes.slice(0, 3);
 
     return (
-        // --- LAYOUT UPDATED ---
-        // The negative margins are removed as App.js now handles the spacing
-        <section className="bg-[var(--upcoming-bg)] p-4 pt-0 pb-8">
-            <div className="flex justify-between items-center">
+        <section className="bg-[var(--upcoming-bg)] p-4 pt-0 pb-8 relative">
+            {/* --- HEADER UPDATED --- */}
+            <div className="flex justify-between items-start">
                 <h2 className="text-white text-2xl font-bold">Upcoming Bakes</h2>
-                <img src="/icon-brand.png" alt="Baking Antics Icon" className="w-16 h-16" />
+                <img src="/icon-brand.png" alt="Baking Antics Icon" className="w-20 h-20 -mt-6 z-20" />
             </div>
             
             <div className="mt-4">
