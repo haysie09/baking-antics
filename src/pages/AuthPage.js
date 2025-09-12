@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
-const AuthPage = () => {
+const AuthPage = ({ onSignOut }) => { // Added onSignOut prop
     const [view, setView] = useState('welcome'); 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -95,7 +95,8 @@ const AuthPage = () => {
     // --- WELCOME VIEW (Default) ---
     return (
         <div className="min-h-screen bg-[var(--upcoming-bg)] flex flex-col justify-center items-center p-8 text-center font-sans">
-            <img src="/icon-brand.png" alt="Baking Antics Icon" className="w-32 h-32" />
+            {/* --- THIS LINE IS UPDATED --- */}
+            <img src="/icon-brand.svg" alt="Baking Antics Icon" className="w-32 h-32" />
             <h1 className="text-white tracking-tight text-4xl font-bold mt-4">Baking Antics</h1>
             <p className="text-white/80 text-lg mt-2">Your personal baking assistant</p>
             <div className="w-full max-w-sm mt-12 space-y-4">
@@ -111,3 +112,4 @@ const AuthPage = () => {
 };
 
 export default AuthPage;
+
