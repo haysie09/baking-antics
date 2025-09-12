@@ -34,7 +34,7 @@ const BottomNav = ({ currentView, navigate, onOpenCreateModal }) => {
                 <div className="flex justify-around items-center h-full max-w-lg mx-auto">
                     {/* UPDATED: "Dashboard" label is removed */}
                     <NavButton
-                        label="" 
+                        label="Home" 
                         onClick={() => navigate('dashboard')}
                         icon={icons.dashboard}
                         isActive={currentView === 'dashboard'}
