@@ -75,11 +75,14 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                         </svg>
                     </button>
                 </div>
-                <JournalFilterBar 
-                    categories={journalCategories}
-                    activeCategory={activeCategory}
-                    onCategorySelect={setActiveCategory}
-                />
+                {/* --- PADDING ADDED HERE --- */}
+                <div className="py-2">
+                    <JournalFilterBar 
+                        categories={journalCategories}
+                        activeCategory={activeCategory}
+                        onCategorySelect={setActiveCategory}
+                    />
+                </div>
             </div>
 
             {/* --- MAIN CONTENT SECTION --- */}
@@ -147,3 +150,4 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
 };
 
 export default BakingJournal;
+
