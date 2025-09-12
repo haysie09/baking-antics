@@ -160,7 +160,7 @@ const MainApp = ({ user }) => {
                     user={user} 
                     userProfile={userProfile} 
                     updateUserProfile={updateUserProfile}
-                    onSignOut={handleSignOut} // <-- Pass sign out function
+                    onSignOut={handleSignOut}
                 />;
             default:
                 return <Dashboard 
@@ -201,19 +201,12 @@ const MainApp = ({ user }) => {
                 <div className="min-h-screen flex flex-col md:items-center md:justify-center md:py-8 bg-gray-100">
                     <div className="w-full md:max-w-md md:shadow-2xl md:overflow-hidden bg-app-white flex flex-col flex-grow relative">
                         
+                        {/* --- HEADER UPDATED --- */}
                         {view === 'dashboard' && (
-                            // --- HEADER UPDATED ---
-                            // No longer sticky, layout is rearranged
-                            <header className="z-10 flex items-center bg-[var(--upcoming-bg)] p-4 pb-2 justify-between border-b border-pink-200/50">
-                                <div className="flex-1">
-                                    <button onClick={() => navigate('account')} className="cursor-pointer text-white hover:bg-white/20 p-2 rounded-full transition-colors">
-                                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
-                                    </button>
-                                </div>
-                                <h1 className="text-white text-lg font-bold">Baking Antics</h1>
-                                <div className="flex-1 text-right">
-                                    <img src="/icon-brand.png" alt="Baking Antics Icon" className="w-8 h-8 inline-block" />
-                                </div>
+                            <header className="z-10 flex items-center bg-[var(--upcoming-bg)] p-4 pb-2 justify-start border-b border-pink-200/50">
+                                <button onClick={() => navigate('account')} className="cursor-pointer text-white hover:bg-white/20 p-2 rounded-full transition-colors">
+                                    <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"></path></svg>
+                                </button>
                             </header>
                         )}
                         
