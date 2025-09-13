@@ -220,7 +220,7 @@ const MainApp = ({ user }) => {
                         </header>
                     )}
                     
-                    <main className="flex-grow overflow-y-auto bg-[var(--background-color)]">{renderView()}</main>
+                    <main className="flex-grow overflow-y-auto bg-[var(--background-color)] pb-28">{renderView()}</main>
 
                     {/* --- MODALS --- */}
                     {isAddJournalModalOpen && <JournalEntryForm isNew={true} cookbook={cookbook} onSave={async (data) => { await addJournalEntry(data); setIsAddJournalModalOpen(false); }} onCancel={() => setIsAddJournalModalOpen(false)} />}

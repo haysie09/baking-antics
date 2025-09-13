@@ -150,7 +150,7 @@ const Dashboard = ({
                     </section>
                     
                     {/* --- This container adds the bottom padding/gap --- */}
-                    <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl space-y-8 pb-12">
+                    <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl space-y-8">
                          <section className="-mt-2">
                             <DashboardStats 
                                 journal={journal} 
