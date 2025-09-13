@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { updateProfile, updatePassword } from 'firebase/auth';
 import { auth } from '../firebase/config';
 
-const MyAccount = ({ user, userProfile, updateUserProfile, onSignOut }) => { // <-- Accept onSignOut prop
+const MyAccount = ({ user, userProfile, updateUserProfile, onSignOut }) => {
     const [displayName, setDisplayName] = useState('');
     const [profileMessage, setProfileMessage] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -57,10 +57,14 @@ const MyAccount = ({ user, userProfile, updateUserProfile, onSignOut }) => { // 
     };
 
     return (
-        <div className="p-4 bg-[var(--background-color)] min-h-full font-sans">
-            <h1 className="text-3xl font-bold text-[var(--text-primary)] mb-6">My Account</h1>
+        <div className="bg-[var(--background-color)] min-h-full font-sans">
+            {/* --- NEW HEADER SECTION --- */}
+            <div className="bg-[var(--upcoming-bg)] p-4 pb-8">
+                <h1 className="text-3xl font-bold text-white text-center">My Account</h1>
+            </div>
 
-            <div className="space-y-8">
+            {/* --- MAIN CONTENT SECTION --- */}
+            <div className="p-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl space-y-8">
                 {/* --- Profile Settings Section --- */}
                 <section className="bg-white p-4 rounded-xl shadow-sm border border-pink-100">
                     <h2 className="text-xl font-bold text-[var(--text-primary)] mb-4">Profile Settings</h2>
@@ -127,3 +131,4 @@ const MyAccount = ({ user, userProfile, updateUserProfile, onSignOut }) => { // 
 };
 
 export default MyAccount;
+
