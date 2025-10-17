@@ -57,7 +57,10 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
     const handleAddToCalendar = (e, entry) => {
         e.stopPropagation(); // Prevent the card from collapsing
         const url = generateGoogleCalendarLink(entry);
-        window.open(url, '_blank', 'noopener,noreferrer');
+        // Only try to open the window if a valid URL was returned
+        if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
     };
 
     return (

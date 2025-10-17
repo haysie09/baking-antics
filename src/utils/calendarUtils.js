@@ -3,7 +3,7 @@
 /**
  * Generates a Google Calendar link for a given bake event.
  * @param {object} bake - The bake object (from upcoming bakes or journal).
- * @returns {string} The generated Google Calendar URL.
+ * @returns {string|null} The generated Google Calendar URL, or null if the date is invalid.
  */
 export const generateGoogleCalendarLink = (bake) => {
     // Helper to format a date as YYYYMMDD, required for all-day events
@@ -11,9 +11,23 @@ export const generateGoogleCalendarLink = (bake) => {
         return date.toISOString().slice(0, 10).replace(/-/g, '');
     };
 
-    const bakeDate = new Date(
-        bake.bakeDate?.toDate ? bake.bakeDate.toDate() : (bake.bakingDate?.toDate ? bake.bakingDate.toDate() : bake.bakeDate)
-    );
+    // --- Defensive Date Handling ---
+    const rawDate = bake.bakeDate || bake.bakingDate;
+    if (!rawDate) {
+        console.error("Error: The bake object is missing a date property.", bake);
+        alert("Sorry, cannot add to calendar because this entry is missing a date.");
+        return null;
+    }
+
+    const bakeDate = new Date(rawDate.toDate ? rawDate.toDate() : rawDate);
+
+    // Check if the resulting date is valid
+    if (isNaN(bakeDate.getTime())) {
+        console.error("Error: Invalid date created from the bake object.", bake);
+        alert("Sorry, cannot add to calendar due to an invalid date in the entry.");
+        return null;
+    }
+    // --- End of Defensive Code ---
 
     // For an all-day event, the end date is the day after the start date
     const nextDay = new Date(bakeDate);
@@ -22,10 +36,8 @@ export const generateGoogleCalendarLink = (bake) => {
     const startDate = formatDate(bakeDate);
     const endDate = formatDate(nextDay);
 
-    // Use the appropriate title field
     const title = `Bake: ${bake.bakeName || bake.entryTitle}`;
 
-    // Build a detailed description for the calendar event
     let description = '';
     if (bake.personalNotes) {
         description += `Notes:\n${bake.personalNotes}\n\n`;
@@ -35,14 +47,11 @@ export const generateGoogleCalendarLink = (bake) => {
         description += `Recipe Link: ${sourceLink}`;
     }
 
-    // Construct the URL with encoded components
     const baseUrl = 'https://www.google.com/calendar/render?action=TEMPLATE';
     const params = new URLSearchParams({
         text: title,
-        dates: `${startDate}/${endDate}`, // Format for an all-day event
+        dates: `${startDate}/${endDate}`,
         details: description.trim(),
-        // You could add a location if you had that data
-        // location: 'My Kitchen' 
     });
 
     return `${baseUrl}&${params.toString()}`;
