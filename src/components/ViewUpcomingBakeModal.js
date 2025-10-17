@@ -2,16 +2,23 @@
 
 import React from 'react';
 import Modal from './Modal';
+import { generateGoogleCalendarLink } from '../utils/calendarUtils'; // <-- IMPORT
 
-// ICONS for buttons
+// ICONS
 const LinkIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>;
 const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg>;
 const DeleteIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>;
 const JournalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>;
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
 
 
 const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJournal, onViewRecipe }) => {
     if (!bake) return null;
+
+    const handleAddToCalendar = () => {
+        const url = generateGoogleCalendarLink(bake);
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
 
     const safeGetDate = (entryDate) => {
         if (!entryDate) return '';
@@ -57,21 +64,21 @@ const ViewUpcomingBakeModal = ({ bake, onEdit, onClose, onDelete, onMoveToJourna
                         )}
                     </div>
                     
-                    {/* --- CHANGE: Simplified Action Buttons --- */}
                     <div className="flex items-center space-x-2">
+                        <button onClick={handleAddToCalendar} title="Add to Google Calendar" className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600">
+                            <CalendarIcon />
+                        </button>
+                        
                         {isPastOrToday ? (
-                            // Show 'Move to Journal' for past or today's bakes
                             <button onClick={onMoveToJournal} title="Move to Journal" className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-green-100 hover:text-green-600">
                                 <JournalIcon />
                             </button>
                         ) : (
-                            // Show 'Edit' for future bakes
                             <button onClick={onEdit} title="Edit Upcoming Bake" className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200">
                                 <EditIcon />
                             </button>
                         )}
                         
-                        {/* --- CHANGE: Delete button is now always visible --- */}
                         <button onClick={onDelete} title="Delete Bake" className="h-10 w-10 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-red-100 hover:text-red-600">
                             <DeleteIcon />
                         </button>

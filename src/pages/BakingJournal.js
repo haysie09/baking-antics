@@ -1,8 +1,13 @@
+// Filename: src/pages/BakingJournal.js
+
 import React, { useState, useMemo, useEffect } from 'react';
 import JournalEntryForm from './JournalEntryForm';
 import ConfirmationModal from '../components/ConfirmationModal';
 import StarRating from '../components/StarRating';
-import JournalFilterBar from '../components/JournalFilterBar'; // <-- IMPORT the new filter
+import JournalFilterBar from '../components/JournalFilterBar';
+import { generateGoogleCalendarLink } from '../utils/calendarUtils'; // <-- IMPORT
+
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>;
 
 const journalCategories = ["Bread", "Cake", "Cupcake", "Cookie", "No-Bake", "Cheesecake", "Pastry", "Slice", "Tart"];
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -12,38 +17,29 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
     const [isCreatingNew, setIsCreatingNew] = useState(false);
     const [showConfirmModal, setShowConfirmModal] = useState(null);
     const [expandedJournalId, setExpandedJournalId] = useState(null);
-    
-    // --- STATE SIMPLIFIED ---
-    // The complex filter state is replaced by a single string for the active category
     const [activeCategory, setActiveCategory] = useState('All');
-    
     const [expandedMonths, setExpandedMonths] = useState({});
-
+ 
     const handleSave = async (entryData) => { if (isCreatingNew) await addJournalEntry({ ...entryData, createdAt: new Date() }); else await updateJournalEntry(editingEntry.id, entryData); setEditingEntry(null); setIsCreatingNew(false); };
     const toggleMonth = (year, month) => { const key = `${year}-${month}`; setExpandedMonths(prev => ({ ...prev, [key]: !prev[key] })); };
-    
+     
     useEffect(() => { return () => { setDateFilter(null); } }, [setDateFilter]);
-
+ 
     const safeGetDate = (entryDate) => {
         return new Date(entryDate.toDate ? entryDate.toDate() : entryDate);
     };
-
-    // --- FILTERING LOGIC SIMPLIFIED ---
+ 
     const filteredJournal = useMemo(() => {
         let entries = journal || [];
         if (dateFilter) {
             return entries.filter(entry => entry.bakingDate === dateFilter);
         }
-        
         if (activeCategory === 'All') {
-            return entries; // If 'All' is selected, return everything
+            return entries;
         }
-        
-        // Otherwise, filter by the selected category
         return entries.filter(entry => entry.categories?.includes(activeCategory));
-        
     }, [journal, activeCategory, dateFilter]);
-
+ 
     const groupedJournal = useMemo(() => {
         const groups = {};
         [...filteredJournal].sort((a, b) => safeGetDate(b.bakingDate) - safeGetDate(a.bakingDate))
@@ -58,12 +54,17 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
         return groups;
     }, [filteredJournal]);
 
+    const handleAddToCalendar = (e, entry) => {
+        e.stopPropagation(); // Prevent the card from collapsing
+        const url = generateGoogleCalendarLink(entry);
+        window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
     return (
         <div className="bg-[var(--background-color)] min-h-full font-sans">
-            {/* --- NEW HEADER SECTION --- */}
             <div className="bg-[var(--upcoming-bg)]">
                 <div className="p-4 pb-0 flex justify-between items-center">
-                    <div className="w-10"></div> {/* Spacer */}
+                    <div className="w-10"></div>
                     <h1 className="text-3xl font-bold text-white text-center">Journal</h1>
                     <button 
                         onClick={() => setIsCreatingNew(true)} 
@@ -75,7 +76,6 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                         </svg>
                     </button>
                 </div>
-                {/* --- PADDING ADDED HERE --- */}
                 <div className="py-2">
                     <JournalFilterBar 
                         categories={journalCategories}
@@ -85,9 +85,8 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                 </div>
             </div>
 
-            {/* --- MAIN CONTENT SECTION --- */}
             <div className="p-4 space-y-4 bg-[var(--background-color)] -mt-4 rounded-t-2xl">
-                {Object.keys(groupedJournal).length === 0 ? (
+                { Object.keys(groupedJournal).length === 0 ? (
                     <div className="text-center py-16 bg-white rounded-xl border border-pink-100 shadow-sm">
                         <p className="text-gray-500">{journal && journal.length > 0 ? "No entries match your filter" : "Start your Baking Journal"}</p>
                     </div>
@@ -124,6 +123,11 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
                                                                     </div>
                                                                     <div className="flex space-x-3 text-[var(--text-secondary)]">
                                                                         {entry.sourceURL && <a href={entry.sourceURL} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--primary-color)]"><svg className="h-5 w-5" fill="none" viewBox="0 0 20 20" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg></a>}
+                                                                        
+                                                                        <button onClick={(e) => handleAddToCalendar(e, entry)} title="Add to Google Calendar" className="hover:text-[var(--primary-color)]">
+                                                                            <CalendarIcon />
+                                                                        </button>
+                                                                        
                                                                         <button onClick={(e) => { e.stopPropagation(); setEditingEntry(entry) }} className="hover:text-[var(--primary-color)]"><svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fillRule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clipRule="evenodd" /></svg></button>
                                                                         <button onClick={(e) => { e.stopPropagation(); setShowConfirmModal(entry.id) }} className="hover:text-[var(--primary-color)]"><svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg></button>
                                                                     </div>
@@ -150,4 +154,3 @@ const BakingJournal = ({ journal, addJournalEntry, updateJournalEntry, deleteJou
 };
 
 export default BakingJournal;
-
